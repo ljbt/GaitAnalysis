@@ -50,3 +50,9 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+*.bmp
+
+learning_videos/courbe0rythme0boite0-1/courbe0rythme0boite0-1\.mp4
+
+*.mp4
