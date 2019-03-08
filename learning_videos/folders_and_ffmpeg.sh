@@ -42,7 +42,7 @@ do
 					#extension="${filename##*.}"	
 					filename_wo_extension="${filename%.*}"
 					#echo "video $filename_wo_extension wo extension $extension"
-					ffmpeg -i $filename -vf scale=500:-1 -r 8 $filename_wo_extension_%02d.bmp
+					ffmpeg -i $filename -vf scale=500:-1 -r 8 %02d.bmp
 
 				fi
 			fi
