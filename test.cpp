@@ -1,93 +1,101 @@
 #include "opencv2/opencv.hpp"
 #include <iostream>
+#include <string>
  
 using namespace std;
 using namespace cv;
- 
 
 
-int main(){
- 
-  // Create a VideoCapture object and open the input file
-  // If the input is the web camera, pass 0 instead of the video file name
-   VideoCapture cap("./test.mp4"); 
+int main(void)
+{
+    Mat image, hsv, mask;
+    std::string image_name;
+    int image_num = 0;
+
+/*  // Red mask
+    int Hmin = 0, Hmax = 10;
+    int Smin = 100, Smax = 255;
+    int Vmin = 100, Vmax = 255;  */
+
+    // Green mask
+    int Hmin = 70, Hmax = 90;
+    int Smin = 100, Smax = 255;
+    int Vmin = 30, Vmax = 255;  
+
+    int l_h ,u_h, l_s ,u_s ,l_v, u_v ;
+
+    //trackbars for H, S and V
+    namedWindow("Trackbars");
+    createTrackbar("L - H", "Trackbars",&Hmin,Hmax); // trackbar at 0, can go to 179
+    createTrackbar("U - H", "Trackbars",&Hmax,Hmax); // trackbar at 179, can go to 179
+    createTrackbar("L - S", "Trackbars",&Smin,Smax); 
+    createTrackbar("U - S", "Trackbars",&Smax,Smax);
+    createTrackbar("L - V", "Trackbars",&Vmin,Vmax); 
+    createTrackbar("U - V", "Trackbars",&Vmax,Vmax); 
+
+    enum {Play, Pause} mode = Play; 
+
+    while(1)
+    {
+        if(mode == Play)
+            image_num++;
+
+        image_name = std::to_string(image_num);
+        if(image_num < 10)
+            image_name = "./test/0" + image_name + ".bmp";
+        else image_name = "./test/" + image_name + ".bmp";
+        //printf("image name = %s\n", image_name.c_str());
+        image = imread(image_name, CV_LOAD_IMAGE_COLOR);
+
+        // Check if image loaded successfully
+        if( ! image.data ){
+            cout << "Error loading image " + image_name << endl;
+            return -1;
+        } 
+
+        cvtColor(image, hsv ,COLOR_BGR2HSV);
+       
+        l_h = getTrackbarPos("L - H","Trackbars");
+        u_h = getTrackbarPos("U - H","Trackbars");
+        l_s = getTrackbarPos("L - S","Trackbars");
+        u_s = getTrackbarPos("U - S","Trackbars");
+        l_v = getTrackbarPos("L - V","Trackbars");
+        u_v = getTrackbarPos("U - V","Trackbars");
+
+        inRange(hsv, Scalar(l_h,l_s,l_v), Scalar(u_h,u_s,u_v), mask);
+        
+        imshow("Mask", mask);
+        
+        char c=(char)waitKey(125); // waits 125ms to get a key value
+        if(c==27) // echap
+            break;
+        else if(c == ' ') // space
+        {
+            if(mode == Play)
+            {
+                printf("pause\n");
+                mode = Pause;
+            }
+            else if(mode == Pause)
+            {
+                printf("play\n");
+                mode = Play;
+            }   
+        }
+        else if(c == 'Q') // left arroy
+        {
+            mode = Pause;
+            image_num--;
+        }
+        else if(c == 'S') // right arroy
+        {        
+            mode = Pause;
+            image_num++;
+        }
+    }
+
     
-  // Check if camera opened successfully
-  if(!cap.isOpened()){
-    cout << "Error opening video stream or file" << endl;
-    return -1;
-  } 
+    destroyAllWindows();
 
-/*   Mat image = imread("25.bmp", CV_LOAD_IMAGE_COLOR);
-  // Check if image loaded successfully
-  if( ! image.data ){
-    cout << "Error loading image" << endl;
-    return -1;
-  } 
-
-  imshow("image",image); */
-
-/*  int Hmin = 0, Hmax = 179;
-  int Smin = 0, Smax = 255;
-  int Vmin = 0, Vmax = 255; */
-  int Hmin = 0, Hmax = 10;
-  int Smin = 100, Smax = 255;
-  int Vmin = 100, Vmax = 255; 
-
-  //trackbars for H, S and V
-  namedWindow("Trackbars");
-  createTrackbar("L - H", "Trackbars",&Hmin,Hmax); // trackbar at 0, can go to 179
-  createTrackbar("U - H", "Trackbars",&Hmax,Hmax); // trackbar at 179, can go to 179
-  createTrackbar("L - S", "Trackbars",&Smin,Smax); 
-  createTrackbar("U - S", "Trackbars",&Smax,Smax);
-  createTrackbar("L - V", "Trackbars",&Vmin,Vmax); 
-  createTrackbar("U - V", "Trackbars",&Vmax,Vmax); 
-
-  
-
-  while(1){
- 
-     Mat frame;
-    // Capture frame-by-frame
-    cap >> frame;
-  
-    // If the frame is empty, break immediately
-    if (frame.empty())
-      break;
-
-    Mat hsv;
-    cvtColor(frame, hsv ,COLOR_BGR2HSV);
-/*     Mat hsv;
-    cvtColor(image, hsv ,COLOR_BGR2HSV);   */
-    int l_h = getTrackbarPos("L - H","Trackbars");
-    int u_h = getTrackbarPos("U - H","Trackbars");
-    int l_s = getTrackbarPos("L - S","Trackbars");
-    int u_s = getTrackbarPos("U - S","Trackbars");
-    int l_v = getTrackbarPos("L - V","Trackbars");
-    int u_v = getTrackbarPos("U - V","Trackbars");
-
-    Mat mask;
-    inRange(hsv, Scalar(l_h,l_s,l_v), Scalar(u_h,u_s,u_v), mask);
-    imshow("mask", mask);
-    
-    // Display the resulting frame
-    //imshow( "Frame",  frame);
-
-/*     vector<Mat> channels;
-    split(hsv, channels);   
-    imshow( "Hue",  channels[0]); */
-
-    // Press  ESC on keyboard to exit
-    char c=(char)waitKey(25);
-    if(c==27)
-      break;
+    return 0;
   }
-  
-  // When everything done, release the video capture object
-  cap.release();
- 
-  // Closes all the frames
-  destroyAllWindows();
-     
-  return 0;
-}
