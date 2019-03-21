@@ -42,8 +42,8 @@ int main(void)
 
         image_name = std::to_string(image_num);
         if(image_num < 10)
-            image_name = "./test/0" + image_name + ".bmp";
-        else image_name = "./test/" + image_name + ".bmp";
+            image_name = "./learning_videos/courbe0rythme0boite0-1/0" + image_name + ".bmp";
+        else image_name = "./learning_videos/courbe0rythme0boite0-1/" + image_name + ".bmp";
         //printf("image name = %s\n", image_name.c_str());
         image = imread(image_name, CV_LOAD_IMAGE_COLOR);
 
