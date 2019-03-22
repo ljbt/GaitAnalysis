@@ -12,16 +12,16 @@ int main(void)
     std::string image_name;
     int image_num = 0;
 
-/*  // Red mask
+  // Red mask
     int Hmin = 0, Hmax = 10;
     int Smin = 100, Smax = 255;
-    int Vmin = 100, Vmax = 255;  */
+    int Vmin = 100, Vmax = 255;  
 
-    // Green mask
+/*     // Green mask
     int Hmin = 70, Hmax = 90;
     int Smin = 100, Smax = 255;
     int Vmin = 30, Vmax = 255;  
-
+ */
     int l_h ,u_h, l_s ,u_s ,l_v, u_v ;
 
     //trackbars for H, S and V
