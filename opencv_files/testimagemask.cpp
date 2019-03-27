@@ -27,7 +27,7 @@ int main(void)
     while(1)
     {
 
-        image = imread("./test/38.bmp", CV_LOAD_IMAGE_COLOR);
+        image = imread("./test/38.bmp");
 
         // Check if image loaded successfully
         if( ! image.data ){
