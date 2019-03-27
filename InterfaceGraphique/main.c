@@ -14,7 +14,7 @@
 
 #include "definitions.h"
 #include "IHM.h"
-#include "Mat_Im_Recadrage.h"
+#include "fonctionsTraitementImage.h"
 
 static char *titre = "Gait Analysis";
 
@@ -63,7 +63,12 @@ void gestionEvenement(EvenementGfx evenement)
 			retour = lisBMPRGB("retour.bmp");
 			home = lisBMPRGB("home.bmp");
 			croix = lisBMPRGB("croix.bmp");
-			
+			if(retour == NULL || home == NULL || croix == NULL)
+			{
+				perror("problem reading images");
+				free(retour); free(home); free(croix);
+				exit(EXIT_FAILURE);
+			}
 			initZones(&zQuit,&zHome,&zRetour,&zTitre, retour,home,croix, LargeurFenetre,HauteurFenetre, titre);
 			break;
 

@@ -11,7 +11,7 @@
 
 #include "definitions.h"
 #include "IHM.h"
-#include "Mat_Im_Recadrage.h"
+#include "fonctionsTraitementImage.h"
 
 //Fonctions de la page principal de l'interface
 

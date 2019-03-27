@@ -1,3 +1,4 @@
+#define AFFICHAGE true
 
 typedef struct zone {
 	int longueur, hauteur; //sert à determiner les coordonnees, ou inversement
