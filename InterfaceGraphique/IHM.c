@@ -82,18 +82,17 @@ void redimensionneZones(zone *zQuit, zone *zHome, zone *zRetour, zone *zTitre, D
 
 void monIHM(zone zQuit, zone zHome, zone zRetour, int numpage, int LargeurFenetre)
 {
-	DonneesImageRGB /* *fond,*/ *retour, *logo, *croix, *home;
-	//fond = lisBMPRGB("retine.bmp");
+	int ecart_bord = 10;
+	DonneesImageRGB *retour, *logo, *croix, *home;
+	effaceFenetre(0,102,204);
 	logo = lisBMPRGB("logo.bmp");
 	croix = lisBMPRGB("croix.bmp");
 	home = lisBMPRGB("home.bmp");
 	retour = lisBMPRGB("retour.bmp");
-	//ecrisImage(0,0,800,600,fond->donneesRGB); //affiche fond ecran
-	ecrisImage(LargeurFenetre - logo->largeurImage, 0, logo->largeurImage, logo->hauteurImage, logo->donneesRGB); //affiche logo
+
+	ecrisImage(LargeurFenetre - logo->largeurImage - ecart_bord, ecart_bord, logo->largeurImage, logo->hauteurImage, logo->donneesRGB); //affiche logo
 	afficheImage(zQuit,croix);
 	
-	
-	//if (numpage == 2 || numpage == 3 || numpage == 4)
 	if(numpage > 1)
 	{
 		afficheImage(zHome,home);

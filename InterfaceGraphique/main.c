@@ -5,6 +5,7 @@
 #include <math.h>		// Pour pouvoir utiliser les librairies mathematiques
 #include <complex.h>
 #include <unistd.h>
+#include <time.h>
 
 #include "GfxLib.h"		// Seul cet include est necessaire pour faire du graphique
 #include "ESLib.h"	
@@ -55,11 +56,12 @@ void gestionEvenement(EvenementGfx evenement)
 
 	static zone zQuit, zRetour, zHome, zTitre;
 
-
+	static time_t start_time, actual_time;
 
 	switch (evenement)
 	{
 		case Initialisation:
+			demandeTemporisation(20);
 			retour = lisBMPRGB("retour.bmp");
 			home = lisBMPRGB("home.bmp");
 			croix = lisBMPRGB("croix.bmp");
@@ -70,9 +72,19 @@ void gestionEvenement(EvenementGfx evenement)
 				exit(EXIT_FAILURE);
 			}
 			initZones(&zQuit,&zHome,&zRetour,&zTitre, retour,home,croix, LargeurFenetre,HauteurFenetre, titre);
+			start_time = time(NULL); // gets system time
 			break;
 
 		case Temporisation:
+
+			if(numPage == 1)
+			{
+				// ecran d'acceuil avec delai
+				actual_time = time(NULL);
+				if(difftime(actual_time, start_time) > DELAY_SCREEN)
+					numPage = 2;
+			}
+
 			// A chaque mise a jour il faut redessiner la fenetre :
 			rafraichisFenetre();
 			break;
@@ -86,6 +98,7 @@ void gestionEvenement(EvenementGfx evenement)
 				case 1:
 					monIHM(zQuit,zHome,zRetour,numPage, LargeurFenetre);
 					afficheTitre(zTitre);
+					
 					break;
 				
 				case 2:
@@ -94,7 +107,6 @@ void gestionEvenement(EvenementGfx evenement)
 					
 
 			}
-
 			break;
 
 		case Clavier:

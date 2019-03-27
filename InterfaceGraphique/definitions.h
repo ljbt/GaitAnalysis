@@ -1,4 +1,5 @@
 #define AFFICHAGE true
+#define DELAY_SCREEN 3
 
 typedef struct zone {
 	int longueur, hauteur; //sert à determiner les coordonnees, ou inversement
