@@ -104,14 +104,25 @@ void monIHM(zone zQuit, zone zHome, zone zRetour, int numpage, int LargeurFenetr
 
 void afficheTitre(zone zTitre)
 {
-	couleurCourante(0,100,255);
-	rectangle(zTitre.xmin, zTitre.ymin, zTitre.xmax, zTitre.ymax);
+/* 	couleurCourante(0,100,255);
+	rectangle(zTitre.xmin, zTitre.ymin, zTitre.xmax, zTitre.ymax); */
 	
 	epaisseurDeTrait(3);
-	couleurCourante(0,0,250); // Choix de la couleur 
+	couleurCourante(204,204,0); // Choix de la couleur 
 	afficheChaine(zTitre.texte, 40, zTitre.xmin + (zTitre.longueur/4) + 50 , zTitre.ymin+10);
 }
 
+void afficheAcceuil(zone zTitre)
+{
+	int yTitre = hauteurFenetre()/2;
+/* 
+	couleurCourante(0,100,255);
+	rectangle(zTitre.xmin, yTitre, zTitre.xmax, yTitre+( zTitre.ymax- zTitre.ymin)); */
+	
+	epaisseurDeTrait(3);
+	couleurCourante(204,204,0); // Choix de la couleur 
+	afficheChaine(zTitre.texte, 70, zTitre.xmin + (zTitre.longueur/6) , yTitre+10);
+}
 
 void afficheMenu(zone zP1)
 { 

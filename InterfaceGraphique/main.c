@@ -97,12 +97,13 @@ void gestionEvenement(EvenementGfx evenement)
 			{
 				case 1:
 					monIHM(zQuit,zHome,zRetour,numPage, LargeurFenetre);
-					afficheTitre(zTitre);
+					afficheAcceuil(zTitre);
 					
 					break;
 				
 				case 2:
 					monIHM(zQuit,zHome,zRetour,numPage, LargeurFenetre);
+					afficheTitre(zTitre);
 					break;
 					
 
