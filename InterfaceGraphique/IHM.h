@@ -1,6 +1,12 @@
+int longueurChaineEnPixels(char *chaine, int hauteur_chaine);
+int xminChaineCentree(char *chaine, int hauteur_chaine);
 
-void initZones(zone *zQuit, zone *zHome, zone *zRetour, zone *zTitre, DonneesImageRGB *retour, DonneesImageRGB *home, DonneesImageRGB *croix, int LargeurFenetre, int HauteurFenetre, char *titre);
-void redimensionneZones(zone *zQuit, zone *zHome, zone *zRetour, zone *zTitre, DonneesImageRGB *retour, DonneesImageRGB *home, DonneesImageRGB *croix, int LargeurFenetre, int HauteurFenetre);
+void changeTitre(zone *zTitre, char *titre);
+void initZoneTitre(zone *zTitre, char *titre);
+void initZones(zone *zQuit, zone *zHome, zone *zRetour, DonneesImageRGB *retour, DonneesImageRGB *home, DonneesImageRGB *croix);
+void redimensionneZones(zone *zQuit, zone *zHome, zone *zRetour, DonneesImageRGB *retour, DonneesImageRGB *home, DonneesImageRGB *croix);
+void changeZoneTitre(zone *zTitre,int numPage);
+void redimmensionneZoneTitre(zone *zTitre);
 
 void monIHM(zone zQuit, zone zHome, zone zRetour, int numpage, int LargeurFenetre); //affiche éléments principaux de l'IHM (boutons quitter retour home, logo)
 

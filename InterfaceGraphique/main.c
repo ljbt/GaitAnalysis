@@ -17,7 +17,7 @@
 #include "IHM.h"
 #include "fonctionsTraitementImage.h"
 
-static char *titre = "Gait Analysis";
+static char titre [] = "Gait Analysis";
 
 // Largeur et hauteur par defaut d'une image correspondant a nos criteres
 static int LargeurFenetre = 800;
@@ -68,23 +68,32 @@ void gestionEvenement(EvenementGfx evenement)
 			if(retour == NULL || home == NULL || croix == NULL)
 			{
 				perror("problem reading images");
-				free(retour); free(home); free(croix);
+				libereDonneesImageRGB(&retour); libereDonneesImageRGB(&home); libereDonneesImageRGB(&croix);
 				exit(EXIT_FAILURE);
 			}
-			initZones(&zQuit,&zHome,&zRetour,&zTitre, retour,home,croix, LargeurFenetre,HauteurFenetre, titre);
+			initZones(&zQuit,&zHome,&zRetour, retour,home,croix);
+			initZoneTitre(&zTitre,titre);
 			start_time = time(NULL); // gets system time
 			break;
 
 		case Temporisation:
-
-			if(numPage == 1)
+			switch(numPage)
 			{
-				// ecran d'acceuil avec delai
-				actual_time = time(NULL);
-				if(difftime(actual_time, start_time) > DELAY_SCREEN)
-					numPage = 2;
-			}
+				case 1: // page d'acceuil avec delai
+					actual_time = time(NULL);
+					if(difftime(actual_time, start_time) > DELAY_SCREEN)
+						numPage = 2;
+					break;
 
+				case 2: // page choix patient
+					changeTitre(&zTitre,"Patient");
+					break;
+
+
+				default:
+					break;
+			}
+			changeZoneTitre(&zTitre,numPage);
 			// A chaque mise a jour il faut redessiner la fenetre :
 			rafraichisFenetre();
 			break;
@@ -135,19 +144,16 @@ void gestionEvenement(EvenementGfx evenement)
 
 
 				//bouton HOME
-				if ((zHome.xmin<abscisseSouris() && abscisseSouris()<zHome.xmax && zHome.ymin<ordonneeSouris() && ordonneeSouris()<zHome.ymax) && (numPage>1))
+				if ((numPage>2) && (zHome.xmin<abscisseSouris() && abscisseSouris()<zHome.xmax && zHome.ymin<ordonneeSouris() && ordonneeSouris()<zHome.ymax))
 				{	
-					numPage=1;  //reviens à la premiere page (accueil)
+					numPage=2;  //reviens à la page d'accueil
 					rafraichisFenetre();	
 				}
 
 				//bouton RETOUR 				
-				if ((zRetour.xmin<abscisseSouris() && abscisseSouris()<zRetour.xmax && zRetour.ymin<ordonneeSouris() && ordonneeSouris()<zRetour.ymax) && (numPage>1))
+				if ((numPage>2) && (zRetour.xmin<abscisseSouris() && abscisseSouris()<zRetour.xmax && zRetour.ymin<ordonneeSouris() && ordonneeSouris()<zRetour.ymax))
 				{	
-					if(numPage > 1) numPage=1;
-					//if(numPage == 2 || numPage == 3 || numPage == 4) numPage=1;
-
-					//else if(numPage == 21 || numPage == 211 || numPage == 212 || numPage == 213) numPage=3; 
+					if(numPage > 2) numPage=2;
 
 					rafraichisFenetre();	
 				}
@@ -163,9 +169,8 @@ void gestionEvenement(EvenementGfx evenement)
 
 		case Redimensionnement: // La taille de la fenetre a ete modifie ou on est passe en plein ecran
 			// Donc le systeme nous en informe
-			LargeurFenetre = varLargeurFenetre;
-			HauteurFenetre = varHauteurFenetre;
-			redimensionneZones(&zQuit,&zHome,&zRetour,&zTitre,retour,home,croix, LargeurFenetre,HauteurFenetre);
+			redimensionneZones(&zQuit,&zHome,&zRetour,retour,home,croix);
+			redimmensionneZoneTitre(&zTitre);
 			rafraichisFenetre();
 			
 			break;
