@@ -62,16 +62,7 @@ void gestionEvenement(EvenementGfx evenement)
 	{
 		case Initialisation:
 			demandeTemporisation(20);
-			retour = lisBMPRGB("retour.bmp");
-			home = lisBMPRGB("home.bmp");
-			croix = lisBMPRGB("croix.bmp");
-			if(retour == NULL || home == NULL || croix == NULL)
-			{
-				perror("problem reading images");
-				libereDonneesImageRGB(&retour); libereDonneesImageRGB(&home); libereDonneesImageRGB(&croix);
-				exit(EXIT_FAILURE);
-			}
-			initZones(&zQuit,&zHome,&zRetour, retour,home,croix);
+			initZones(&zQuit,&zHome,&zRetour);
 			initZoneTitre(&zTitre,titre);
 			start_time = time(NULL); // gets system time
 			break;
@@ -86,7 +77,7 @@ void gestionEvenement(EvenementGfx evenement)
 					break;
 
 				case 2: // page choix patient
-					changeTitre(&zTitre,"Patient");
+					changeTitre(&zTitre,"Choose patient");
 					break;
 
 
@@ -105,14 +96,14 @@ void gestionEvenement(EvenementGfx evenement)
 			switch(numPage)
 			{
 				case 1:
-					monIHM(zQuit,zHome,zRetour,numPage, LargeurFenetre);
+					monIHM(zQuit,zHome,zRetour,numPage);
 					afficheAcceuil(zTitre);
 					
 					break;
 				
 				case 2:
-					monIHM(zQuit,zHome,zRetour,numPage, LargeurFenetre);
-					afficheTitre(zTitre);
+					monIHM(zQuit,zHome,zRetour,numPage);
+					afficheTitre(zTitre,3);
 					break;
 					
 

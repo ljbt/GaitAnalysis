@@ -15,8 +15,18 @@
 
 //Fonctions de la page principal de l'interface
 
-void initZones(zone *zQuit, zone *zHome, zone *zRetour, DonneesImageRGB *retour, DonneesImageRGB *home, DonneesImageRGB *croix)
+void initZones(zone *zQuit, zone *zHome, zone *zRetour)
 {
+	DonneesImageRGB *retour = lisBMPRGB("retour.bmp");
+	DonneesImageRGB *home = lisBMPRGB("home.bmp");
+	DonneesImageRGB *croix = lisBMPRGB("croix.bmp");
+	if(retour == NULL || home == NULL || croix == NULL)
+	{
+		perror("problem reading images");
+		libereDonneesImageRGB(&retour); libereDonneesImageRGB(&home); libereDonneesImageRGB(&croix);
+		exit(EXIT_FAILURE);
+	}
+
 	// initialisation de la zone zQuit			
 	zQuit->xmax = largeurFenetre() - 4 ; 
 	zQuit->xmin = zQuit->xmax - croix->largeurImage;
@@ -35,6 +45,7 @@ void initZones(zone *zQuit, zone *zHome, zone *zRetour, DonneesImageRGB *retour,
 	zRetour->ymax = hauteurFenetre()-2 ;
 	zRetour->ymin = zRetour->ymax - retour->hauteurImage;
 
+	libereDonneesImageRGB(&retour); libereDonneesImageRGB(&home); libereDonneesImageRGB(&croix);
 
 }
 
@@ -120,20 +131,28 @@ void redimmensionneZoneTitre(zone *zTitre)
 
 }
 
-void monIHM(zone zQuit, zone zHome, zone zRetour, int numpage, int LargeurFenetre)
+void monIHM(zone zQuit, zone zHome, zone zRetour, int numpage)
 {
 	int ecart_bord = 10;
 	DonneesImageRGB *retour, *logo, *croix, *home;
 	effaceFenetre(0,102,204);
-	logo = lisBMPRGB("logo.bmp");
-	croix = lisBMPRGB("croix.bmp");
-	home = lisBMPRGB("home.bmp");
+
 	retour = lisBMPRGB("retour.bmp");
-	
+	home = lisBMPRGB("home.bmp");
+	croix = lisBMPRGB("croix.bmp");
+	logo = lisBMPRGB("logo.bmp");
+
+	if(retour == NULL || home == NULL || croix == NULL || logo == NULL)
+	{
+		perror("problem reading images");
+		libereDonneesImageRGB(&retour); libereDonneesImageRGB(&home); libereDonneesImageRGB(&croix); libereDonneesImageRGB(&logo);
+		exit(EXIT_FAILURE);
+	}
+
 	afficheImage(zQuit,croix);
 	
 	if(numpage == 1)
-		ecrisImage(LargeurFenetre - logo->largeurImage - ecart_bord, ecart_bord, logo->largeurImage, logo->hauteurImage, logo->donneesRGB); //affiche logo
+		ecrisImage(largeurFenetre() - logo->largeurImage - ecart_bord, ecart_bord, logo->largeurImage, logo->hauteurImage, logo->donneesRGB); //affiche logo
 	
 	
 	if(numpage > 2) // 2 est la page d'acceuil
@@ -143,18 +162,18 @@ void monIHM(zone zQuit, zone zHome, zone zRetour, int numpage, int LargeurFenetr
 	}
 }
 
-void afficheTitre(zone zTitre)
+void afficheTitre(zone zTitre, int epaisseur_trait)
 {
 	couleurCourante(250,255,250);
 	rectangle(zTitre.xmin,zTitre.ymin,zTitre.xmax,zTitre.ymax );
-	epaisseurDeTrait(5);
+	epaisseurDeTrait(epaisseur_trait);
 	couleurCourante(204,204,0); // Choix de la couleur 
 	afficheChaine(zTitre.texte, zTitre.hauteur, zTitre.xmin , zTitre.ymin+10);
 }
 
 void afficheAcceuil(zone zTitre)
 {
-	afficheTitre(zTitre);
+	afficheTitre(zTitre,5);
 
 	epaisseurDeTrait(1);
 	char chaine [] = "Developed by Laura JUBERT and Raphael ROY";
