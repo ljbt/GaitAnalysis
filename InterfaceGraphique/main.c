@@ -52,7 +52,7 @@ void gestionEvenement(EvenementGfx evenement)
 {
 	static int numPage = 1;
 
-	static DonneesImageRGB *retour, *home, *croix; 
+	static DonneesImageRGB *retour, *home, *croix, *logo; 
 
 	static zone zQuit, zRetour, zHome, zTitre;
 
@@ -61,8 +61,20 @@ void gestionEvenement(EvenementGfx evenement)
 	switch (evenement)
 	{
 		case Initialisation:
+			retour = lisBMPRGB("retour.bmp");
+			home = lisBMPRGB("home.bmp");
+			croix = lisBMPRGB("croix.bmp");
+			logo = lisBMPRGB("logo.bmp");
+
+			if(retour == NULL || home == NULL || croix == NULL || logo == NULL)
+			{
+				perror("problem reading images");
+				libereDonneesImageRGB(&retour); libereDonneesImageRGB(&home); libereDonneesImageRGB(&croix); libereDonneesImageRGB(&logo);
+				exit(EXIT_FAILURE);
+			}
+
 			demandeTemporisation(20);
-			initZones(&zQuit,&zHome,&zRetour);
+			initZones(&zQuit,&zHome,&zRetour,retour,home,croix);
 			initZoneTitre(&zTitre,titre);
 			start_time = time(NULL); // gets system time
 			break;
@@ -96,13 +108,13 @@ void gestionEvenement(EvenementGfx evenement)
 			switch(numPage)
 			{
 				case 1:
-					monIHM(zQuit,zHome,zRetour,numPage);
+					monIHM(zQuit,zHome,zRetour,retour,home,croix,logo, numPage);
 					afficheAcceuil(zTitre);
 					
 					break;
 				
 				case 2:
-					monIHM(zQuit,zHome,zRetour,numPage);
+					monIHM(zQuit,zHome,zRetour,retour,home,croix,logo,numPage);
 					afficheTitre(zTitre,3);
 					break;
 					
