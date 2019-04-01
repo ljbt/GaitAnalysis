@@ -13,9 +13,48 @@
 #include "IHM.h"
 #include "fonctionsTraitementImage.h"
 
-//Fonctions de la page principal de l'interface
+
+// retourne la longueur en pixels de la chaine à partir de sa hauteur ( et de son nombre de caractères )
+int longueurChaineEnPixels(char *chaine, int hauteur_chaine)
+{
+	int nb_caractere = strlen(chaine); 
+	int longueur_chaine = 1320./274. * nb_caractere + ((255-41.*(1320./274.))/10.) * hauteur_chaine ; // formule pour calculer la longueur en pixels de la chaine
+	return longueur_chaine;
+}
+
+// retourne le xmin de la chaine à centrer dans la fenêtre à partir de sa hauteur
+int xminChaineCentree(char *chaine, int hauteur_chaine)
+{
+	return (largeurFenetre() - tailleChaine(chaine,hauteur_chaine)/* longueurChaineEnPixels(chaine,hauteur_chaine) */) / 2. ;
+}
+
+void afficheImage(zone zITest, DonneesImageRGB *image)
+{
+	ecrisImage(zITest.xmin, zITest.ymin, zITest.xmax-zITest.xmin, zITest.ymax-zITest.ymin, image->donneesRGB);
+}
+
 
 void initZones(zone *zQuit, zone *zHome, zone *zRetour, DonneesImageRGB *retour, DonneesImageRGB *home, DonneesImageRGB *croix)
+{
+	// initialisation de la zone zQuit			
+	zQuit->xmax = largeurFenetre() - 4 ; 
+	zQuit->xmin = zQuit->xmax - croix->largeurImage;
+	zQuit->ymax = hauteurFenetre() - 2 ;
+	zQuit->ymin = zQuit->ymax - croix->hauteurImage ; 
+
+	//initialisation du bouton accueil
+	zHome->xmax = zQuit->xmin-4;  //on part du bouton quitter pour placer le bouton home juste à côté
+	zHome->xmin = zHome->xmax - home->largeurImage ;
+	zHome->ymax = hauteurFenetre()-2;
+	zHome->ymin = zHome->ymax - home->hauteurImage ;
+
+	//initialisation du bouton retour
+	zRetour->xmax = zHome->xmin-4;//on part du bouton home pour placer le bouton retour juste à côté
+	zRetour->xmin = zRetour->xmax - retour->largeurImage ;
+	zRetour->ymax = hauteurFenetre()-2 ;
+	zRetour->ymin = zRetour->ymax - retour->hauteurImage;
+}
+void redimensionneZones( zone *zQuit, zone *zHome, zone *zRetour, DonneesImageRGB *retour, DonneesImageRGB *home, DonneesImageRGB *croix)
 {
 	// initialisation de la zone zQuit			
 	zQuit->xmax = largeurFenetre() - 4 ; 
@@ -42,7 +81,7 @@ void initZoneTitre(zone *zTitre, char *titre)
 	/* int longueur_chaine = strlen(titre); printf("longeur titre = %d\n", longueur_chaine);
 	zTitre->texte = (char*)malloc(sizeof(char) * longueur_chaine);
 	strcpy(zTitre->texte, titre); */
-	changeTitre(zTitre, titre);
+	changeTexteZone(zTitre, titre);
 
 	zTitre->hauteur = HAUTEUR_TITRE_ACCUEIL; 
 	zTitre->longueur = longueurChaineEnPixels(zTitre->texte,zTitre->hauteur);
@@ -57,34 +96,14 @@ void initZoneTitre(zone *zTitre, char *titre)
 	zTitre->espaceBas = 100;
  }
 
-void redimensionneZones( zone *zQuit, zone *zHome, zone *zRetour, DonneesImageRGB *retour, DonneesImageRGB *home, DonneesImageRGB *croix)
+
+// enregistre la chaine dans la zone 
+void changeTexteZone(zone *z, char *chaine)
 {
-	// initialisation de la zone zQuit			
-	zQuit->xmax = largeurFenetre() - 4 ; 
-	zQuit->xmin = zQuit->xmax - croix->largeurImage;
-	zQuit->ymax = hauteurFenetre() - 2 ;
-	zQuit->ymin = zQuit->ymax - croix->hauteurImage ; 
-
-	//initialisation du bouton accueil
-	zHome->xmax = zQuit->xmin-4;  //on part du bouton quitter pour placer le bouton home juste à côté
-	zHome->xmin = zHome->xmax - home->largeurImage ;
-	zHome->ymax = hauteurFenetre()-2;
-	zHome->ymin = zHome->ymax - home->hauteurImage ;
-
-	//initialisation du bouton retour
-	zRetour->xmax = zHome->xmin-4;//on part du bouton home pour placer le bouton retour juste à côté
-	zRetour->xmin = zRetour->xmax - retour->largeurImage ;
-	zRetour->ymax = hauteurFenetre()-2 ;
-	zRetour->ymin = zRetour->ymax - retour->hauteurImage;
-}
-
-// enregistre le titre dans la zone titre
-void changeTitre(zone *zTitre, char *titre)
-{
-	free(zTitre->texte); zTitre->texte = NULL; //libere la memoire allouee pour le titre précédent
-	int longueur_chaine = strlen(titre);
-	zTitre->texte = (char*)malloc(sizeof(char) * longueur_chaine);
-	strcpy(zTitre->texte, titre);
+	free(z->texte); z->texte = NULL; //libere la memoire allouee pour le titre précédent
+	int longueur_chaine = strlen(chaine);
+	z->texte = (char*)malloc(sizeof(char) * longueur_chaine);
+	strcpy(z->texte, chaine);
 }
 
 // change la zone d'affichage du titre en fonction du numéro de page
@@ -117,6 +136,101 @@ void redimmensionneZoneTitre(zone *zTitre)
 	zTitre->xmax = zTitre->xmin + zTitre->longueur;
 
 }
+// initialise la zone d'affichage du ptient actuel en fonction de la zone du titre (car se place juste en dessous)
+void initZonesPatientActuel(zone zTitre, zone *zPatientActuel, zone *zPrenomPatientActuel, zone *zNomPatientActuel, zone *zVoirFiche)
+ {
+	// contenant
+	zPatientActuel->espaceHaut = 50; 
+	zPatientActuel->espaceBas = 50;
+	zPatientActuel->espaceGauche = 50; 
+	zPatientActuel->espaceDroite = 50;
+	zPatientActuel->hauteur = HAUTEUR_TEXTE; 
+	changeTexteZone(zPatientActuel,"Patient actuel : ");
+	zPatientActuel->longueur = largeurFenetre() - zPatientActuel->espaceGauche - zPatientActuel->espaceDroite ;
+	zPatientActuel->xmin = zPatientActuel->espaceGauche;
+	zPatientActuel->xmax = zPatientActuel->xmin + zPatientActuel->longueur;
+	zPatientActuel->ymax = zTitre.ymin - zPatientActuel->espaceHaut; 
+	zPatientActuel->ymin = zPatientActuel->ymax - zPatientActuel->hauteur ;
+
+	// zones interieures
+	zVoirFiche->hauteur = HAUTEUR_TEXTE;
+	changeTexteZone(zVoirFiche,"Voir fiche");
+	zVoirFiche->espaceGauche = 50; 
+	zVoirFiche->espaceDroite = 50;
+	zVoirFiche->longueur = tailleChaine(zVoirFiche->texte,zVoirFiche->hauteur) + 10;
+	zVoirFiche->xmin = zPatientActuel->xmax - zVoirFiche->longueur - zVoirFiche->espaceDroite;
+	zVoirFiche->xmax = zVoirFiche->xmin + zVoirFiche->longueur;
+	zVoirFiche->ymax = zPatientActuel->ymax + 5; 
+	zVoirFiche->ymin = zPatientActuel->ymin - 5;
+
+	zPrenomPatientActuel->hauteur = HAUTEUR_TEXTE;
+	changeTexteZone(zPrenomPatientActuel,"Prenom : ");
+	zPrenomPatientActuel->espaceGauche = 50; 
+	zPrenomPatientActuel->espaceDroite = 50;
+	zPrenomPatientActuel->xmin = zPatientActuel->xmin + 10 + tailleChaine(zPrenomPatientActuel->texte, zPrenomPatientActuel->hauteur);
+	zPrenomPatientActuel->xmax = zPrenomPatientActuel->xmin + 10;
+	zPrenomPatientActuel->ymax = zPatientActuel->ymax; 
+	zPrenomPatientActuel->ymin = zPatientActuel->ymin;
+
+	zNomPatientActuel->hauteur = HAUTEUR_TEXTE;
+	changeTexteZone(zNomPatientActuel,"Nom : ");
+	zNomPatientActuel->espaceGauche = 50; 
+	zNomPatientActuel->espaceDroite = 50;
+	zNomPatientActuel->xmin = zPrenomPatientActuel->xmax + 10 + tailleChaine(zNomPatientActuel->texte, zNomPatientActuel->hauteur);
+	zNomPatientActuel->ymax = zPatientActuel->ymax;
+	zNomPatientActuel->ymin = zPatientActuel->ymin;
+ }
+
+void redimmensionneZonePatientActuel(zone *zPatientActuel, zone zTitre)
+ {
+	zPatientActuel->longueur = largeurFenetre() - zPatientActuel->espaceGauche - zPatientActuel->espaceDroite ;
+	zPatientActuel->xmin = zPatientActuel->espaceGauche;
+	zPatientActuel->xmax = zPatientActuel->xmin + zPatientActuel->longueur;
+	zPatientActuel->ymax = zTitre.ymin - zPatientActuel->espaceHaut; 
+	zPatientActuel->ymin = zPatientActuel->ymax - zPatientActuel->hauteur ;
+ }
+
+// recupere le prenom et le nom du patient et les enregistre dans des variables
+void gestionNomPrenomPatient(zone *zPrenom, zone *zNom, char **prenom, char **nom)
+{
+	char chaine [] = "Non renseigne";
+	if(*prenom == NULL || *nom == NULL)
+	{
+		int longueur_chaine = strlen(chaine);
+		*prenom = (char*)malloc(sizeof(char) * longueur_chaine);
+		*nom = (char*)malloc(sizeof(char) * longueur_chaine);
+		strcpy(*prenom, chaine);
+		strcpy(*nom, chaine);
+	}
+
+	// change la zone d'affichage en fonction des chaines de caractère
+	zPrenom->xmax = zPrenom->xmin + tailleChaine(*prenom, zPrenom->hauteur);
+	zNom->xmin = zPrenom->xmax + zPrenom->espaceDroite + tailleChaine(zNom->texte,zNom->hauteur) + 10;
+	zNom->xmax = zNom->xmin + tailleChaine(*nom, zNom->hauteur);
+}
+
+ void affichePatientActuel(zone zPatientActuel, zone zPrenom, char *prenom, zone zNom,char *nom, zone zVoirFiche)
+ {
+	rectangle(zPatientActuel.xmin,zPatientActuel.ymin,zPatientActuel.xmax,zPatientActuel.ymax);;
+	int longueur_chaine_pixel = tailleChaine(zPatientActuel.texte,zPatientActuel.hauteur);
+	couleurCourante(100,100,100);
+	rectangle(zPatientActuel.xmin, zPatientActuel.ymin, zPatientActuel.xmin + longueur_chaine_pixel, zPatientActuel.ymax);
+	couleurCourante(0,0,0);
+	epaisseurDeTrait(2);
+	afficheChaine(zPatientActuel.texte, zPatientActuel.hauteur, zPatientActuel.xmin,zPatientActuel.ymin);
+
+	afficheChaine(zPrenom.texte, zPrenom.hauteur, zPrenom.xmin - tailleChaine(zPrenom.texte, zPrenom.hauteur),zPrenom.ymin);
+	afficheChaine(prenom,zPrenom.hauteur, zPrenom.xmin,zPrenom.ymin);
+
+	afficheChaine(zNom.texte, zNom.hauteur, zNom.xmin - tailleChaine(zPrenom.texte, zNom.hauteur),zNom.ymin);
+	afficheChaine(zNom.texte, zNom.hauteur, zNom.xmin,zNom.ymin);
+
+	couleurCourante(100,100,100);
+	rectangle(zPatientActuel.xmin, zPatientActuel.ymin, zPatientActuel.xmin + longueur_chaine_pixel, zPatientActuel.ymax);
+	couleurCourante(0,0,0);
+	afficheChaine(zPatientActuel.texte, zPatientActuel.hauteur, zPatientActuel.xmin,zPatientActuel.ymin);
+ } 
+
 
 void monIHM(zone zQuit, zone zHome, zone zRetour, DonneesImageRGB *retour, DonneesImageRGB *home, DonneesImageRGB *croix, DonneesImageRGB *logo, int numpage)
 {
@@ -154,37 +268,5 @@ void afficheAcceuil(zone zTitre)
 	afficheChaine(chaine, hauteur_chaine, xminChaineCentree(chaine,hauteur_chaine),10);
 }
 
-// retourne la longueur en pixels de la chaine à partir de sa hauteur ( et de son nombre de caractères )
-int longueurChaineEnPixels(char *chaine, int hauteur_chaine)
-{
-	int nb_caractere = strlen(chaine); 
-	int longueur_chaine = 1320./274. * nb_caractere + ((255-41.*(1320./274.))/10.) * hauteur_chaine ; // formule pour calculer la longueur en pixels de la chaine
-	return longueur_chaine;
-}
-
-// retourne le xmin de la chaine à centrer dans la fenêtre à partir de sa hauteur
-int xminChaineCentree(char *chaine, int hauteur_chaine)
-{
-	return (largeurFenetre() - longueurChaineEnPixels(chaine,hauteur_chaine)) / 2. ;
-}
-
-void afficheMenu(zone zP1)
-{ 
-	
-	couleurCourante(0,100,255);
-	rectangle(zP1.xmin, zP1.ymin, zP1.xmax, zP1.ymax);
-	
-	epaisseurDeTrait(4);
-	couleurCourante(230,230,230);
-	afficheChaine("zone 1", 30, zP1.xmin+10 , zP1.ymin +10);
-	
-
-}
-
-
-void afficheImage(zone zITest, DonneesImageRGB *image)
-{
-	ecrisImage(zITest.xmin, zITest.ymin, zITest.xmax-zITest.xmin, zITest.ymax-zITest.ymin, image->donneesRGB);
-}
 
 

@@ -55,12 +55,17 @@ void gestionEvenement(EvenementGfx evenement)
 	static DonneesImageRGB *retour, *home, *croix, *logo; 
 
 	static zone zQuit, zRetour, zHome, zTitre;
+	static zone zPatientActuel, zPrenomPatientActuel, zNomPatientActuel, zVoirFiche;
+	static char *prenom, *nom;
 
 	static time_t start_time, actual_time;
 
 	switch (evenement)
 	{
 		case Initialisation:
+
+			prenom = nom = NULL;
+
 			retour = lisBMPRGB("retour.bmp");
 			home = lisBMPRGB("home.bmp");
 			croix = lisBMPRGB("croix.bmp");
@@ -76,6 +81,8 @@ void gestionEvenement(EvenementGfx evenement)
 			demandeTemporisation(20);
 			initZones(&zQuit,&zHome,&zRetour,retour,home,croix);
 			initZoneTitre(&zTitre,titre);
+			initZonesPatientActuel(zTitre,&zPatientActuel,&zPrenomPatientActuel,&zNomPatientActuel, &zVoirFiche);
+
 			start_time = time(NULL); // gets system time
 			break;
 
@@ -89,7 +96,9 @@ void gestionEvenement(EvenementGfx evenement)
 					break;
 
 				case 2: // page choix patient
-					changeTitre(&zTitre,"Choose patient");
+					changeTexteZone(&zTitre,"Choose patient");
+					gestionNomPrenomPatient(&zPrenomPatientActuel, &zNomPatientActuel,&prenom,&nom);
+					printf("prenom = %s nom = %s\n", prenom, nom);
 					break;
 
 
@@ -97,6 +106,8 @@ void gestionEvenement(EvenementGfx evenement)
 					break;
 			}
 			changeZoneTitre(&zTitre,numPage);
+			redimensionneFenetre(largeurFenetre(),hauteurFenetre());
+
 			// A chaque mise a jour il faut redessiner la fenetre :
 			rafraichisFenetre();
 			break;
@@ -116,6 +127,7 @@ void gestionEvenement(EvenementGfx evenement)
 				case 2:
 					monIHM(zQuit,zHome,zRetour,retour,home,croix,logo,numPage);
 					afficheTitre(zTitre,3);
+					affichePatientActuel(zPatientActuel,zPrenomPatientActuel,prenom, zNomPatientActuel,nom,zVoirFiche);
 					break;
 					
 
@@ -174,8 +186,8 @@ void gestionEvenement(EvenementGfx evenement)
 			// Donc le systeme nous en informe
 			redimensionneZones(&zQuit,&zHome,&zRetour,retour,home,croix);
 			redimmensionneZoneTitre(&zTitre);
+			redimmensionneZonePatientActuel(&zPatientActuel, zTitre);
 			rafraichisFenetre();
-			
 			break;
 	}
 }
