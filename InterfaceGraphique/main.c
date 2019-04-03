@@ -23,7 +23,7 @@ static char titre [] = "Gait Analysis";
 static int LargeurFenetre = 800;
 static int HauteurFenetre = 600;
 
-//sert à lier GfxLib.c et main.c pour modifier LargeurFenetre et HauteurFenetre  (Redimmensionnement)
+//sert à lier GfxLib.c et main.c pour modifier LargeurFenetre et HauteurFenetre  (redimensionnement)
 extern int varLargeurFenetre;
 extern int varHauteurFenetre;
 
@@ -53,10 +53,12 @@ void gestionEvenement(EvenementGfx evenement)
 	static int numPage = 1;
 
 	static DonneesImageRGB *retour, *home, *croix, *logo; 
-
 	static zone zQuit, zRetour, zHome, zTitre;
+
 	static zone zPatientActuel, zPrenomPatientActuel, zNomPatientActuel, zVoirFiche;
 	static char *prenom, *nom;
+	static zone zChargerPatient,zPrenomChargerPatient,zNomChargerPatient,zCharger;
+	static char *nouveau_prenom,*nouveau_nom;
 
 	static time_t start_time, actual_time;
 
@@ -64,7 +66,7 @@ void gestionEvenement(EvenementGfx evenement)
 	{
 		case Initialisation:
 
-			prenom = nom = NULL;
+			prenom = nom = nouveau_prenom = nouveau_nom = NULL;
 
 			retour = lisBMPRGB("retour.bmp");
 			home = lisBMPRGB("home.bmp");
@@ -82,6 +84,7 @@ void gestionEvenement(EvenementGfx evenement)
 			initZones(&zQuit,&zHome,&zRetour,retour,home,croix);
 			initZoneTitre(&zTitre,titre);
 			initZonesPatientActuel(zTitre,&zPatientActuel,&zPrenomPatientActuel,&zNomPatientActuel, &zVoirFiche);
+			initZonesChargerPatient(zPatientActuel,&zChargerPatient,&zPrenomChargerPatient,&zNomChargerPatient,&zCharger);
 
 			start_time = time(NULL); // gets system time
 			break;
@@ -98,9 +101,11 @@ void gestionEvenement(EvenementGfx evenement)
 				case 2: // page choix patient
 					changeTexteZone(&zTitre,"Choose patient");
 					gestionNomPrenomPatient(&zPrenomPatientActuel, &zNomPatientActuel,&prenom,&nom);
-					printf("prenom = %s nom = %s\n", prenom, nom);
 					break;
 
+					case 21: // page fiche patient
+						changeTexteZone(&zTitre,"Fiche patient");
+						break;
 
 				default:
 					break;
@@ -118,61 +123,89 @@ void gestionEvenement(EvenementGfx evenement)
 
 			switch(numPage)
 			{
-				case 1:
+				case 1: // page delai accueil
 					monIHM(zQuit,zHome,zRetour,retour,home,croix,logo, numPage);
 					afficheAcceuil(zTitre);
-					
 					break;
 				
-				case 2:
+				case 2: // page choix patient
 					monIHM(zQuit,zHome,zRetour,retour,home,croix,logo,numPage);
 					afficheTitre(zTitre,3);
 					affichePatientActuel(zPatientActuel,zPrenomPatientActuel,prenom, zNomPatientActuel,nom,zVoirFiche);
+					afficheChargerPatient(zChargerPatient,zPrenomChargerPatient,nouveau_prenom,zNomChargerPatient,nouveau_nom,zCharger);
+
 					break;
 					
+					case 21: // page fiche patient
+						monIHM(zQuit,zHome,zRetour,retour,home,croix,logo,numPage);
+						afficheTitre(zTitre,3);
+						break;
 
 			}
 			break;
 
 		case Clavier:
-
-			switch (caractereClavier())
+			if(zPrenomChargerPatient.saisie)
 			{
-				case 'q':
-				case 'Q':
-					exit(0);
-					break;
+				recupereTexte(&nouveau_prenom);
 			}
+			else{
+				switch (caractereClavier())
+				{
+					case 'q':
+					case 'Q':
+						termineBoucleEvenements();
+						break;
+				}
+			}
+			rafraichisFenetre();
+			
 			break;
 
 		case ClavierSpecial:
-			//printf("ASCII %d\n", toucheClavier());
 			break;
 
 		case BoutonSouris:
 			if (etatBoutonSouris() == GaucheAppuye) 
 			{
 				if (zQuit.xmin<abscisseSouris() && abscisseSouris()<zQuit.xmax && zQuit.ymin<ordonneeSouris() && ordonneeSouris()<zQuit.ymax)
-				{
-					exit(0);
-				}
-
+					termineBoucleEvenements();
 
 				//bouton HOME
-				if ((numPage>2) && (zHome.xmin<abscisseSouris() && abscisseSouris()<zHome.xmax && zHome.ymin<ordonneeSouris() && ordonneeSouris()<zHome.ymax))
-				{	
+				else if ((numPage>2) && (zHome.xmin<abscisseSouris() && abscisseSouris()<zHome.xmax && zHome.ymin<ordonneeSouris() && ordonneeSouris()<zHome.ymax))
+				{
+					arreteSaisiesTexte(&zPrenomChargerPatient, &zNomChargerPatient);
 					numPage=2;  //reviens à la page d'accueil
-					rafraichisFenetre();	
 				}
 
 				//bouton RETOUR 				
-				if ((numPage>2) && (zRetour.xmin<abscisseSouris() && abscisseSouris()<zRetour.xmax && zRetour.ymin<ordonneeSouris() && ordonneeSouris()<zRetour.ymax))
-				{	
-					if(numPage > 2) numPage=2;
-
-					rafraichisFenetre();	
+				else if ((numPage>2) && (zRetour.xmin<abscisseSouris() && abscisseSouris()<zRetour.xmax && zRetour.ymin<ordonneeSouris() && ordonneeSouris()<zRetour.ymax))
+				{
+					arreteSaisiesTexte(&zPrenomChargerPatient, &zNomChargerPatient);
+					if(numPage > 2) 
+						numPage=2;
+				}
+				
+				// bouton voir fiche patient
+				else if(prenom != NULL && nom != NULL && numPage >=2 && zVoirFiche.xmin<abscisseSouris() && abscisseSouris()<zVoirFiche.xmax && zVoirFiche.ymin<ordonneeSouris() && ordonneeSouris()<zVoirFiche.ymax)
+				{
+					arreteSaisiesTexte(&zPrenomChargerPatient, &zNomChargerPatient);
+					numPage = 21;
 				}
 
+				else if(numPage == 2 && zPrenomChargerPatient.xmin<abscisseSouris() && abscisseSouris()<zPrenomChargerPatient.xmax && zPrenomChargerPatient.ymin<ordonneeSouris() && ordonneeSouris()<zPrenomChargerPatient.ymax)
+				{
+					// désactive  toutes les zones de saisie et active celle en question
+					arreteSaisiesTexte(&zPrenomChargerPatient, &zNomChargerPatient);
+					zPrenomChargerPatient.saisie = true;
+				}
+				else // clic sur toute autre zone de l'ihm
+				{
+					arreteSaisiesTexte(&zPrenomChargerPatient, &zNomChargerPatient);
+				}
+				
+
+				rafraichisFenetre();
 			}
 			break;
 
@@ -185,8 +218,19 @@ void gestionEvenement(EvenementGfx evenement)
 		case Redimensionnement: // La taille de la fenetre a ete modifie ou on est passe en plein ecran
 			// Donc le systeme nous en informe
 			redimensionneZones(&zQuit,&zHome,&zRetour,retour,home,croix);
-			redimmensionneZoneTitre(&zTitre);
-			redimmensionneZonePatientActuel(&zPatientActuel, zTitre);
+			redimensionneZoneTitre(&zTitre);
+			switch(numPage)
+			{
+				case 2:		
+					redimensionneZonePatientActuel(zTitre, &zPatientActuel, &zVoirFiche, &zPrenomPatientActuel, &zNomPatientActuel);
+					redimensionneZoneChargerPatient(zPatientActuel,&zChargerPatient,&zPrenomChargerPatient,&zNomChargerPatient,&zCharger);
+					break;
+				default:
+					break;
+			}
+			
+
+
 			rafraichisFenetre();
 			break;
 	}

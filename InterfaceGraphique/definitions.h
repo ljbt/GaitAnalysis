@@ -10,7 +10,7 @@ typedef struct zone {
 	int espaceGauche, espaceDroite; 
 	int xmin, ymin, xmax, ymax;
 	char *texte;
-		
+	bool saisie;
 	}zone; 
 
 
