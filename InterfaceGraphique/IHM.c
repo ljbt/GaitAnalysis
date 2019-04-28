@@ -360,7 +360,7 @@ void redimensionneZoneChargerPatient(zone zPatientActuel,zone *zChargerPatient,z
 	zChargerPatient->longueur = largeurFenetre() - zChargerPatient->espaceGauche - zChargerPatient->espaceDroite ;
 	zChargerPatient->xmin = zChargerPatient->espaceGauche;
 	zChargerPatient->xmax = zChargerPatient->xmin + zChargerPatient->longueur;
-	zChargerPatient->ymax = zPatientActuel.ymin - zChargerPatient->espaceHaut; 
+	zChargerPatient->ymax = zPatientActuel.ymin - zChargerPatient->espaceHaut;
 	zChargerPatient->ymin = zChargerPatient->ymax - zChargerPatient->hauteur ;
 
 	// zones interieures
@@ -374,6 +374,161 @@ void redimensionneZoneChargerPatient(zone zPatientActuel,zone *zChargerPatient,z
 	zCharger->ymin = zChargerPatient->ymin - 5;
 }
 
+// fonction qui place les zones de la partie patient à créer en dessous de la zone patient à charger
+void initZonesNouveauPatient(zone zChargerPatient, zone *zNouveauPatient, zone *zPrenom, zone *zNom, zone *zTaille, zone *zPoids, zone *zCreerPatient)
+{
+	// contenant
+	zNouveauPatient->espaceHaut = 50; 
+	zNouveauPatient->espaceBas = 50;
+	zNouveauPatient->espaceGauche = 50; 
+	zNouveauPatient->espaceDroite = 50;
+	zNouveauPatient->hauteur = HAUTEUR_TEXTE; 
+	changeTexteZone(zNouveauPatient,"Creer patient : ");
+	zNouveauPatient->longueur = largeurFenetre() - zNouveauPatient->espaceGauche - zNouveauPatient->espaceDroite ;
+	zNouveauPatient->xmin = zNouveauPatient->espaceGauche;
+	zNouveauPatient->xmax = zNouveauPatient->xmin + zNouveauPatient->longueur;
+	zNouveauPatient->ymax = zChargerPatient.ymin - zNouveauPatient->espaceHaut; 
+	zNouveauPatient->ymin = zNouveauPatient->ymax - 2*zNouveauPatient->hauteur -zNouveauPatient->espaceBas ;
+
+	// zones interieures
+
+	zPrenom->hauteur = HAUTEUR_TEXTE;
+	changeTexteZone(zPrenom,"Prenom : ");
+	zPrenom->espaceGauche = 10; 
+	zPrenom->espaceDroite = 10;
+	zPrenom->espaceBas = 10;
+	zPrenom->xmin = zNouveauPatient->xmin + tailleChaine(zNouveauPatient->texte,zNouveauPatient->hauteur) + 10 + tailleChaine(zPrenom->texte, zPrenom->hauteur);
+	zPrenom->xmax = zPrenom->xmin + 150;
+	zPrenom->ymax = zNouveauPatient->ymax; 
+	zPrenom->ymin = zNouveauPatient->ymax - zNouveauPatient->hauteur;
+	zPrenom->saisie = false;
+
+	zNom->hauteur = HAUTEUR_TEXTE;
+	changeTexteZone(zNom,"Nom : ");
+	zNom->espaceGauche = 10; 
+	zNom->espaceDroite = 10;
+	zNom->espaceBas = 10;
+	zNom->xmin = zPrenom->xmax + zPrenom->espaceDroite + zNom->espaceGauche +  tailleChaine(zNom->texte, zNom->hauteur);
+	zNom->xmax = zNom->xmin + 150;
+	zNom->ymax = zNouveauPatient->ymax;
+	zNom->ymin = zNouveauPatient->ymax - zNouveauPatient->hauteur;
+	zNom->saisie = false;
+
+
+	zTaille->hauteur = HAUTEUR_TEXTE;
+	changeTexteZone(zTaille,"Taille : ");
+	zTaille->espaceGauche = 10; 
+	zTaille->espaceDroite = 10;
+	zTaille->espaceHaut = 10;
+	zTaille->xmin = zNouveauPatient->xmin + tailleChaine(zNouveauPatient->texte,zNouveauPatient->hauteur) + 10 + tailleChaine(zTaille->texte, zTaille->hauteur);
+	zTaille->xmax = zTaille->xmin + 150;
+	zTaille->ymax = zPrenom->ymin - zPrenom->espaceBas - zTaille->espaceHaut;
+	zTaille->ymin = zTaille->ymax - zTaille->hauteur;
+	zTaille->saisie = false;	
+
+ 	zPoids->hauteur = HAUTEUR_TEXTE;
+	changeTexteZone(zPoids,"Poids : ");
+	zPoids->espaceGauche = 10; 
+	zPoids->espaceDroite = 10;
+	zPoids->espaceHaut = 10;
+	zPoids->xmin = zTaille->xmax + zTaille->espaceDroite + zPoids->espaceGauche +  tailleChaine(zPoids->texte, zPoids->hauteur);
+	zPoids->xmax = zPoids->xmin + 150;
+	zPoids->ymax = zPrenom->ymin - zPrenom->espaceBas - zPoids->espaceHaut;
+	zPoids->ymin = zPoids->ymax - zPoids->hauteur;
+	zPoids->saisie = false; 
+
+
+	zCreerPatient->hauteur = HAUTEUR_TEXTE;
+	changeTexteZone(zCreerPatient,"Creer patient");
+	zCreerPatient->espaceGauche = 20; 
+	zCreerPatient->espaceDroite = 5;
+	zCreerPatient->longueur = tailleChaine(zCreerPatient->texte,zCreerPatient->hauteur);
+	zCreerPatient->xmin = zNom->xmax + zNom->espaceDroite + zCreerPatient->espaceGauche;
+	zCreerPatient->xmax = zCreerPatient->xmin + zCreerPatient->longueur;
+	zCreerPatient->ymax = zNouveauPatient->ymax + 5; 
+	zCreerPatient->ymin = zTaille->ymin - 5;
+
+}
+
+void afficheNouveauPatient(zone zNouveauPatient, zone zPrenom, char *prenom, zone zNom, char *nom, zone zTaille, char *taille, zone zPoids, char *poids, zone zCreerPatient)
+{
+	couleurCourante(0,0,0);
+	epaisseurDeTrait(2);
+	afficheChaine(zNouveauPatient.texte, zNouveauPatient.hauteur, zNouveauPatient.xmin,zNouveauPatient.ymax - zNouveauPatient.hauteur);
+
+	afficheChaine(zPrenom.texte, zPrenom.hauteur, zPrenom.xmin - tailleChaine(zPrenom.texte,zPrenom.hauteur),zPrenom.ymin);
+	afficheChaine(zNom.texte, zNom.hauteur, zNom.xmin - tailleChaine(zNom.texte,zNom.hauteur),zNom.ymin);
+	afficheChaine(zTaille.texte, zTaille.hauteur, zTaille.xmin - tailleChaine(zTaille.texte,zTaille.hauteur),zTaille.ymin);
+	afficheChaine(zPoids.texte, zPoids.hauteur, zPoids.xmin - tailleChaine(zPoids.texte,zPoids.hauteur),zPoids.ymin);
+	
+	if(zPrenom.saisie) couleurCourante(255,255,255);
+	else couleurCourante(204,204,0);
+	rectangle(zPrenom.xmin, zPrenom.ymin-5, zPrenom.xmax+10, zPrenom.ymax+5);
+
+	if(zNom.saisie) couleurCourante(255,255,255);
+	else couleurCourante(204,204,0);
+	rectangle(zNom.xmin, zNom.ymin-5, zNom.xmax+10, zNom.ymax+5);
+
+	if(zTaille.saisie) couleurCourante(255,255,255);
+	else couleurCourante(204,204,0);
+	rectangle(zTaille.xmin, zTaille.ymin-5, zTaille.xmax+10, zTaille.ymax+5);
+
+	if(zPoids.saisie) couleurCourante(255,255,255);
+	else couleurCourante(204,204,0);
+	rectangle(zPoids.xmin, zPoids.ymin-5, zPoids.xmax+10, zPoids.ymax+5);
+
+
+	couleurCourante(0,0,0);
+	if(prenom != NULL)
+		afficheChaine(prenom,zPrenom.hauteur, zPrenom.xmin+5,zPrenom.ymin+5);
+	if(nom != NULL)
+		afficheChaine(nom, zNom.hauteur, zNom.xmin+5,zNom.ymin+5);
+	if(taille != NULL)
+	{
+		afficheChaine(taille, zTaille.hauteur, zTaille.xmin+5,zTaille.ymin+5);
+	}
+	if(poids != NULL)
+	{
+		afficheChaine(poids, zPoids.hauteur, zPoids.xmin+5,zPoids.ymin+5);
+	}
+
+	if(prenom != NULL && nom != NULL && taille != NULL && poids != NULL)
+	{	
+		couleurCourante(204,204,0);
+		rectangle(zCreerPatient.xmin, zCreerPatient.ymin, zCreerPatient.xmax+20, zCreerPatient.ymax);
+		couleurCourante(0,0,0);
+		afficheChaine(zCreerPatient.texte, zCreerPatient.hauteur, zCreerPatient.xmin+10,zCreerPatient.ymin+25);
+	}		
+}
+
+void redimensionneZoneNouveauPatient(zone zChargerPatient,zone *zNouveauPatient,zone *zPrenom,zone *zNom, zone *zTaille,zone *zPoids,zone *zCreerPatient)
+{
+	// contenant
+	zNouveauPatient->longueur = largeurFenetre() - zNouveauPatient->espaceGauche - zNouveauPatient->espaceDroite ;
+	zNouveauPatient->xmin = zNouveauPatient->espaceGauche;
+	zNouveauPatient->xmax = zNouveauPatient->xmin + zNouveauPatient->longueur;
+	zNouveauPatient->ymax = zChargerPatient.ymin - zNouveauPatient->espaceHaut; 
+	zNouveauPatient->ymin = zNouveauPatient->ymax - 2*zNouveauPatient->hauteur -zNouveauPatient->espaceBas ;
+
+	// zones interieures
+	zPrenom->ymax = zNouveauPatient->ymax; 
+	zPrenom->ymin = zNouveauPatient->ymax - zNouveauPatient->hauteur;
+
+	zNom->ymax = zNouveauPatient->ymax;
+	zNom->ymin = zNouveauPatient->ymax - zNouveauPatient->hauteur;
+
+	zTaille->ymax = zPrenom->ymin - zPrenom->espaceBas - zTaille->espaceHaut;
+	zTaille->ymin = zTaille->ymax - zTaille->hauteur;
+
+	zPoids->ymax = zPrenom->ymin - zPrenom->espaceBas - zPoids->espaceHaut;
+	zPoids->ymin = zPoids->ymax - zPoids->hauteur;
+
+	zCreerPatient->ymax = zNouveauPatient->ymax + 5; 
+	zCreerPatient->ymin = zTaille->ymin - 5;
+}
+
+
+
 // entre les caractères tapés au clavier dans la chaine
 void recupereTexte(char **chaine)
 {
@@ -384,7 +539,7 @@ void recupereTexte(char **chaine)
 	}
 	int longueur_chaine = strlen(*chaine);
 	char caractere = '\0';
-	caractere = caractereClavier();
+	caractere = caractereClavier(); //recupere caractere tapé par utilisateur
 	if(caractere != '\0')
 	{
 		if((int)caractere == 8 && longueur_chaine > 0) // touche effacer
@@ -403,7 +558,30 @@ void recupereTexte(char **chaine)
 	}
 }
 
-void arreteSaisiesTexte(zone *zSaisie1, zone *zSaisie2)
+void recupereTexteEntiers(char **chaine)
 {
-	zSaisie1->saisie = zSaisie2->saisie = false;
+	if(*chaine == NULL)
+	{
+		*chaine = (char *)malloc(sizeof(char));
+		(*chaine)[0] = '\0';
+	}
+	int longueur_chaine = strlen(*chaine);
+	char caractere = '\0';
+	caractere = caractereClavier(); //recupere caractere tapé par utilisateur 
+	if(caractere != '\0' && ((caractere>=48 && caractere <= 57) || caractere == 8)) // on verifie que le caractere entré est un chiffre
+	{
+		if((int)caractere == 8 && longueur_chaine > 0) // touche effacer
+		{
+			if(longueur_chaine == 1)
+				*chaine = (char *)realloc(*chaine, sizeof(char));
+			else *chaine = (char *)realloc(*chaine, sizeof(char) * longueur_chaine-1);
+			(*chaine)[longueur_chaine-1] = '\0';			
+		}
+		else
+		{
+			*chaine = (char *)realloc(*chaine, sizeof(char) * longueur_chaine+1);
+			(*chaine)[longueur_chaine] = caractere;
+			(*chaine)[longueur_chaine+1] = '\0';			
+		}
+	}
 }

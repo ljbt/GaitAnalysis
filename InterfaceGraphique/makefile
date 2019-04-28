@@ -5,19 +5,21 @@ LDFLAGS = -lm -lglut -lGL -lX11
 
 TARGET = gait_analysis
 
-$(TARGET): main.o IHM.o fonctionsTraitementImage.o libisentlib.a
+$(TARGET): main.o IHM.o fonctionsTraitementImage.o donneesPatients.o libisentlib.a
 	$(CC) -o $@ $(FLAGS) $^ $(LDFLAGS)
 
 
 main.o: main.c GfxLib.h BmpLib.h ESLib.h definitions.h IHM.h fonctionsTraitementImage.h 
-	$(CC) $(CFLAGS) main.c
+	$(CC) $(CFLAGS) $<
 	
 IHM.o: IHM.c GfxLib.h ESLib.h BmpLib.h definitions.h IHM.h fonctionsTraitementImage.h
-	$(CC) $(CFLAGS) IHM.c
+	$(CC) $(CFLAGS) $<
 	
 fonctionsTraitementImage.o: fonctionsTraitementImage.c definitions.h BmpLib.h fonctionsTraitementImage.h
-	$(CC) $(CFLAGS) fonctionsTraitementImage.c
+	$(CC) $(CFLAGS) $<
 
+donneesPatients.o: donneesPatients.c donneesPatients.h
+	$(CC) $(CFLAGS) $<
 
 #lib isen ------------------------------------------
 libisentlib.a: BmpLib.o ErreurLib.o ESLib.o GfxLib.o OutilsLib.o

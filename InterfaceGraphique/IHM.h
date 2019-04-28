@@ -26,5 +26,10 @@ void initZonesChargerPatient(zone zPatientActuel, zone *zChargerPatient, zone *z
 void afficheChargerPatient(zone zChargerPatient, zone zPrenom, char *prenom, zone zNom, char *nom, zone zCharger);
 void redimensionneZoneChargerPatient(zone zPatientActuel,zone *zChargerPatient,zone *zPrenom,zone *zNom,zone *zCharger);
 
+void initZonesNouveauPatient(zone zChargerPatient, zone *zNouveauPatient, zone *zPrenom, zone *zNom, zone *zTaille, zone *zPoids, zone *zCreerPatient);
+void afficheNouveauPatient(zone zNouveauPatient, zone zPrenom, char *prenom, zone zNom, char *nom, zone zTaille, char *taille, zone zPoids, char *poids, zone zCreerPatient);
+void redimensionneZoneNouveauPatient(zone zChargerPatient,zone *zNouveauPatient,zone *zPrenom,zone *zNom, zone *zTaille,zone *zPoids,zone *zCreerPatient);
+
+
 void recupereTexte(char **chaine);
-void arreteSaisiesTexte(zone *zSaisie1, zone *zSaisie2);
+void recupereTexteEntiers(char **chaine);
