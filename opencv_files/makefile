@@ -13,7 +13,7 @@ TARGET = program
 all: $(TARGET)
 
 $(TARGET): $(OBJS)
-	$(CXX) $(LDFLAGS) -o $(TARGET).exe $(OBJS) $(LDLIBS)
+	$(CXX) $(LDFLAGS) -o $(TARGET) $(OBJS) $(LDLIBS)
 
 $(TARGET).o: $(TARGET).o
 
@@ -21,4 +21,4 @@ clean:
 	$(RM) $(OBJS)
 
 deepclean: clean
-	$(RM) $(TARGET).exe
+	$(RM) $(TARGET)

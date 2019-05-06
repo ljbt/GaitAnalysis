@@ -1,4 +1,7 @@
-#include "opencv2/opencv.hpp"
+//#include "opencv2/opencv.hpp"
+#include "opencv2/imgcodecs.hpp"
+#include "opencv2/highgui.hpp"
+#include "opencv2/imgproc.hpp"
 #include <iostream>
 #include <string>
  
@@ -6,10 +9,11 @@ using namespace std;
 using namespace cv;
 
 
+
 int main(void)
 {
     Mat image, hsv, mask;
-    std::string image_name;
+    string image_name;
     int image_num = 0;
 
   // Red mask
@@ -35,12 +39,17 @@ int main(void)
 
     enum {Play, Pause} mode = Play; 
 
+    const int max_thresh = 255;
+    int thresh = 100;
+    RNG rng(12345);
+    const char* source_window = "Mask";
+    
     while(1)
     {
         if(mode == Play)
             image_num++;
 
-        image_name = std::to_string(image_num);
+        image_name = to_string(image_num);
         if(image_num < 10)
             image_name = "./learning_videos/courbe0rythme0boite0-1/0" + image_name + ".bmp";
         else image_name = "./learning_videos/courbe0rythme0boite0-1/" + image_name + ".bmp";
@@ -62,10 +71,42 @@ int main(void)
         l_v = getTrackbarPos("L - V","Trackbars");
         u_v = getTrackbarPos("U - V","Trackbars");
 
-        inRange(hsv, Scalar(l_h,l_s,l_v), Scalar(u_h,u_s,u_v), mask);
+        inRange(hsv, Scalar(l_h,l_s,l_v), Scalar(u_h,u_s,u_v), mask); 
+        blur( mask, mask, Size(3,3) );       
         
-        imshow("Mask", mask);
         
+        namedWindow( source_window );
+        imshow(source_window, mask);
+
+
+
+        createTrackbar( "Canny thresh:", source_window, &thresh, max_thresh);
+        Mat canny_output;
+        Canny( mask, canny_output, thresh, thresh*2 );
+
+        /// Find contours
+        vector<vector<Point> > contours;
+        vector<Vec4i> hierarchy;
+        findContours( canny_output, contours, hierarchy, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE ); //EXTERNAL pour un contour exterieur
+
+        /// Draw contours
+        Mat drawing = Mat::zeros( canny_output.size(), CV_8UC3 );
+        for( size_t i = 0; i< contours.size(); i++ )
+        {
+            Moments m = moments(contours[i]);
+            Point2d center = Point2d(m.m10/m.m00, m.m01/m.m00);
+            circle(drawing, center,2, Scalar(255,255,255), -1);
+
+            Scalar color = Scalar( rng.uniform(0, 256), rng.uniform(0,256), rng.uniform(0,256) );
+            Rect box = boundingRect(contours[i]); 
+            rectangle(drawing, box, color);
+            //drawContours( drawing, contours, (int)i, color, 2, LINE_8, hierarchy, 0 );
+        }
+
+        /// Show in a window
+        imshow( "Contours", drawing );
+
+         
         char c=(char)waitKey(125); // waits 125ms to get a key value
         if(c==27) // echap
             break;
@@ -99,3 +140,5 @@ int main(void)
 
     return 0;
   }
+
+ 
