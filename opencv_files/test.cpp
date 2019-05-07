@@ -39,8 +39,7 @@ int main(void)
 
     enum {Play, Pause} mode = Play; 
 
-    const int max_thresh = 255;
-    int thresh = 100;
+
     RNG rng(12345);
     const char* source_window = "Mask";
     
@@ -72,35 +71,87 @@ int main(void)
         u_v = getTrackbarPos("U - V","Trackbars");
 
         inRange(hsv, Scalar(l_h,l_s,l_v), Scalar(u_h,u_s,u_v), mask); 
-        blur( mask, mask, Size(3,3) );       
-        
+        blur( mask, mask, Size(3,3) );       // ou GaussianBlur(mask,mask,Size(5,5),0); on peut aussichanger la taille de la fenetre de floutage
         
         namedWindow( source_window );
         imshow(source_window, mask);
 
 
 
-        createTrackbar( "Canny thresh:", source_window, &thresh, max_thresh);
+        //createTrackbar("Aire box" , "Contours", &thresh_area, 1000);
         Mat canny_output;
-        Canny( mask, canny_output, thresh, thresh*2 );
+        Canny( mask, canny_output, 100, 100*2 );
 
         /// Find contours
         vector<vector<Point> > contours;
         vector<Vec4i> hierarchy;
         findContours( canny_output, contours, hierarchy, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE ); //EXTERNAL pour un contour exterieur
 
-        /// Draw contours
-        Mat drawing = Mat::zeros( canny_output.size(), CV_8UC3 );
-        for( size_t i = 0; i< contours.size(); i++ )
+        vector<Point> centers;
+        for( size_t i = 0; i< contours.size(); i++ ) // on recupere les centres des contours
         {
             Moments m = moments(contours[i]);
-            Point2d center = Point2d(m.m10/m.m00, m.m01/m.m00);
-            circle(drawing, center,2, Scalar(255,255,255), -1);
+            centers.push_back( Point(m.m10/m.m00, m.m01/m.m00) );
+        }
 
-            Scalar color = Scalar( rng.uniform(0, 256), rng.uniform(0,256), rng.uniform(0,256) );
-            Rect box = boundingRect(contours[i]); 
-            rectangle(drawing, box, color);
-            //drawContours( drawing, contours, (int)i, color, 2, LINE_8, hierarchy, 0 );
+        Mat drawing = Mat::zeros( canny_output.size(), CV_8UC3 );
+
+        vector<Rect> boitesEnglobantes;
+        // il faut verifier que les centres ne sont pas trop proches, ce qui signifierait une pastille segmentée
+        for (size_t i = 0; i < centers.size(); i++)
+        {
+            int cote = 20;
+            Rect zone = Rect(centers[i].x - cote/2, centers[i].y - cote/2, cote, cote);
+            rectangle(drawing, zone, Scalar(255,0,255));
+
+            vector<Point> centresProches;
+            vector<Rect> boites;
+            boites.push_back(boundingRect(contours[i])); // calcule et enregistre la boite englobante du contour actuel
+
+            bool pastilleFractionnee = false;
+            for (size_t j = 0; j < centers.size(); j++)
+            {
+                 if(j != i)
+                {
+                    if( zone.contains(centers[j]) ) // si la zone contient un autre centre c'est que la pastille est segmentee
+                    {
+                        pastilleFractionnee = true;
+                        boites.push_back(boundingRect(contours[j])); // enregistre les boites englobantes des autres fractions de la pastille
+                        centresProches.push_back(centers[j]); 
+                        centers.erase( centers.begin()+j); // on supprime l'autre centre 
+                    }
+                }
+            }
+            if(pastilleFractionnee) // on doit calculer le centre des centres, et la boite englobant tous les contours
+            {
+                for (size_t l = 0; l < centresProches.size(); l++)
+                {
+                    centers[i] += centresProches[l];
+                    //centers[i].y += centresProches[l].y;
+                }
+                centers[i].x /= centresProches.size()+1;
+                centers[i].y /= centresProches.size()+1;
+
+                Rect grosseBoite;
+                for (size_t k = 0; k < boites.size(); k++)
+                {
+                    grosseBoite |= boites[k]; 
+                }
+                boitesEnglobantes.push_back(grosseBoite);
+            }
+            else boitesEnglobantes.push_back(boites[0]);
+        }
+        
+
+        /// Draw contours
+/*         for( size_t i = 0; i< centers.size(); i++ )
+        {   
+
+            circle(drawing, centers[i] ,2, Scalar(255,255,255), -1);
+        } */
+        for( size_t i = 0; i< boitesEnglobantes.size(); i++ )
+        {   
+            rectangle(drawing, boitesEnglobantes[i], Scalar(0,0,255));
         }
 
         /// Show in a window
