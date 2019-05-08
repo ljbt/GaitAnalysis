@@ -16,16 +16,21 @@ int main(void)
     string image_name;
     int image_num = 0;
 
-  // Red mask
+/*   // Red mask
     int Hmin = 0, Hmax = 10;
     int Smin = 100, Smax = 255;
-    int Vmin = 100, Vmax = 255;  
+    int Vmin = 100, Vmax = 255;   */
 
 /*     // Green mask
     int Hmin = 70, Hmax = 90;
     int Smin = 100, Smax = 255;
     int Vmin = 30, Vmax = 255;  
  */
+    // Blue mask
+    int Hmin = 95, Hmax = 125;
+    int Smin = 173, Smax = 255;
+    int Vmin = 40, Vmax = 255;  
+
     int l_h ,u_h, l_s ,u_s ,l_v, u_v ;
 
     //trackbars for H, S and V
@@ -40,8 +45,8 @@ int main(void)
     enum {Play, Pause} mode = Play; 
 
 
-    RNG rng(12345);
-    const char* source_window = "Mask";
+    //RNG rng(12345);
+    const char* source_window = "Contours";
     
     while(1)
     {
@@ -50,10 +55,16 @@ int main(void)
 
         image_name = to_string(image_num);
         if(image_num < 10)
-            image_name = "./learning_videos/courbe0rythme0boite0-1/0" + image_name + ".bmp";
-        else image_name = "./learning_videos/courbe0rythme0boite0-1/" + image_name + ".bmp";
+            image_name = "./learning_videos/courbe0rythme0boited-1/0" + image_name + ".bmp";
+        else image_name = "./learning_videos/courbe0rythme0boited-1/" + image_name + ".bmp";
         //printf("image name = %s\n", image_name.c_str());
         image = imread(image_name);
+        if( ! image.data )
+        {
+            cout << "Error loading image " << endl;
+            return -1;
+        } 
+        imshow("Original", image);
 
         // Check if image loaded successfully
         if( ! image.data ){
@@ -73,90 +84,75 @@ int main(void)
         inRange(hsv, Scalar(l_h,l_s,l_v), Scalar(u_h,u_s,u_v), mask); 
         blur( mask, mask, Size(3,3) );       // ou GaussianBlur(mask,mask,Size(5,5),0); on peut aussichanger la taille de la fenetre de floutage
         
-        namedWindow( source_window );
-        imshow(source_window, mask);
-
-
-
-        //createTrackbar("Aire box" , "Contours", &thresh_area, 1000);
         Mat canny_output;
         Canny( mask, canny_output, 100, 100*2 );
+
+        namedWindow( source_window );
+        imshow(source_window, canny_output);
+
 
         /// Find contours
         vector<vector<Point> > contours;
         vector<Vec4i> hierarchy;
         findContours( canny_output, contours, hierarchy, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE ); //EXTERNAL pour un contour exterieur
 
-        vector<Point> centers;
+        vector<Point> centres;
+        Rect rect = Rect(0, 0, canny_output.size().width, canny_output.size().height);
         for( size_t i = 0; i< contours.size(); i++ ) // on recupere les centres des contours
         {
             Moments m = moments(contours[i]);
-            centers.push_back( Point(m.m10/m.m00, m.m01/m.m00) );
+            Point p = Point(m.m10/m.m00, m.m01/m.m00);
+            // on verifie que le centre calculé est bien dans l'image
+            if( rect.contains(p) )
+                centres.push_back(p);
         }
 
         Mat drawing = Mat::zeros( canny_output.size(), CV_8UC3 );
+        for (size_t i = 0; i < centres.size(); i++)
+            circle(drawing, centres[i] ,2, Scalar(255,255,255), -1);
+         
+        imshow( "Centres pas corrigés", drawing );
 
-        vector<Rect> boitesEnglobantes;
-        // il faut verifier que les centres ne sont pas trop proches, ce qui signifierait une pastille segmentée
-        for (size_t i = 0; i < centers.size(); i++)
+
+// ici on a les centres des contours, mais il peut y avoir deux contours pour une meme pastille, donc 2 centres tres proches
+// on veut obtenir un tableau de centres rectifié
+
+        vector<Point> bons_centres;
+        for (size_t i = 0; i < centres.size(); i++)
         {
             int cote = 20;
-            Rect zone = Rect(centers[i].x - cote/2, centers[i].y - cote/2, cote, cote);
-            rectangle(drawing, zone, Scalar(255,0,255));
+            Rect zone = Rect(centres[i].x - cote/2, centres[i].y - cote/2, cote, cote);
 
-            vector<Point> centresProches;
-            vector<Rect> boites;
-            boites.push_back(boundingRect(contours[i])); // calcule et enregistre la boite englobante du contour actuel
-
-            bool pastilleFractionnee = false;
-            for (size_t j = 0; j < centers.size(); j++)
+            // on doit verifier que la zone ne contient pas d'autres centres
+            // si il y a un autre centre on le supprime
+            vector<Point> centres_proches;
+            for (size_t j = 0; j < centres.size(); j++)
             {
-                 if(j != i)
+                if(j != i)
                 {
-                    if( zone.contains(centers[j]) ) // si la zone contient un autre centre c'est que la pastille est segmentee
+                    if( zone.contains(centres[j]) )
                     {
-                        pastilleFractionnee = true;
-                        boites.push_back(boundingRect(contours[j])); // enregistre les boites englobantes des autres fractions de la pastille
-                        centresProches.push_back(centers[j]); 
-                        centers.erase( centers.begin()+j); // on supprime l'autre centre 
+                        centres_proches.push_back(centres[j]);
+                        centres.erase(centres.begin()+j);
                     }
                 }
             }
-            if(pastilleFractionnee) // on doit calculer le centre des centres, et la boite englobant tous les contours
+            if( !centres_proches.empty() )
             {
-                for (size_t l = 0; l < centresProches.size(); l++)
-                {
-                    centers[i] += centresProches[l];
-                    //centers[i].y += centresProches[l].y;
-                }
-                centers[i].x /= centresProches.size()+1;
-                centers[i].y /= centresProches.size()+1;
-
-                Rect grosseBoite;
-                for (size_t k = 0; k < boites.size(); k++)
-                {
-                    grosseBoite |= boites[k]; 
-                }
-                boitesEnglobantes.push_back(grosseBoite);
+                for (size_t l = 0; l < centres_proches.size(); l++)
+                    centres[i] += centres_proches[l];
+                
+                centres[i].x /= centres_proches.size()+1;
+                centres[i].y /= centres_proches.size()+1;
             }
-            else boitesEnglobantes.push_back(boites[0]);
         }
         
-
-        /// Draw contours
-/*         for( size_t i = 0; i< centers.size(); i++ )
-        {   
-
-            circle(drawing, centers[i] ,2, Scalar(255,255,255), -1);
-        } */
-        for( size_t i = 0; i< boitesEnglobantes.size(); i++ )
-        {   
-            rectangle(drawing, boitesEnglobantes[i], Scalar(0,0,255));
-        }
-
-        /// Show in a window
-        imshow( "Contours", drawing );
-
+        Mat drawing2 = Mat::zeros( canny_output.size(), CV_8UC3 );
+        for (size_t i = 0; i < centres.size(); i++)
+            circle(drawing2, centres[i] ,2, Scalar(255,255,255), -1);
+        imshow( "Bons centres", drawing2 );
+        
+// ici on a les bons centres des pastilles
          
         char c=(char)waitKey(125); // waits 125ms to get a key value
         if(c==27) // echap
@@ -164,15 +160,10 @@ int main(void)
         else if(c == ' ') // space
         {
             if(mode == Play)
-            {
-                printf("pause\n");
                 mode = Pause;
-            }
+            
             else if(mode == Pause)
-            {
-                printf("play\n");
-                mode = Play;
-            }   
+                mode = Play; 
         }
         else if(c == 'Q') // left arroy
         {
@@ -184,6 +175,7 @@ int main(void)
             mode = Pause;
             image_num++;
         }
+
     }
 
     
