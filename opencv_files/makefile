@@ -1,24 +1,29 @@
-CC = gcc
 CXX = g++
 RM = rm -f
-CPPFLAGS = -Wall -g 
-LDFLAGS = -g 
+FLAGS = -Wall -O2 -g
+CFLAGS = -Wall -O2 -g -c
 LDLIBS = -lopencv_imgcodecs -lopencv_imgproc -lopencv_core -lopencv_highgui -lopencv_videoio
 
-SRCS = test.cpp
-OBJS = $(subst .cpp,.o,$(SRCS))
 
 TARGET = program
 
 all: $(TARGET)
 
-$(TARGET): $(OBJS)
-	$(CXX) $(LDFLAGS) -o $(TARGET) $(OBJS) $(LDLIBS)
+$(TARGET): main.o Mask.o imageProcessing.o
+	$(CXX) -o $@ $(FLAGS) $^ $(LDLIBS)
 
-$(TARGET).o: $(TARGET).o
+
+main.o: main.cpp Mask.h
+	$(CXX) $(CFLAGS) $<
+
+Mask.o: Mask.cpp Mask.h
+	$(CXX) $(CFLAGS) $<
+
+imageProcessing.o: imageProcessing.cpp imageProcessing.h
+	$(CXX) $(CFLAGS) $<
 
 clean:
-	$(RM) $(OBJS)
+	$(RM) *~ *.o
 
 deepclean: clean
 	$(RM) $(TARGET)
