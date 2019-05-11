@@ -275,8 +275,7 @@ int main(void)
                         istringstream iss(chaine);
                         iss >> x >> y;
                         cout << "x = "<<x<<" y = "<<y<<endl;
-                        Point p(x,y);
-                        if ( p == centresPastillesBleues[i])
+                        if ( x == centresPastillesBleues[i].x && y == centresPastillesBleues[i].y )
                         {
                             cout << "point déjà enregstré"<<endl;
                             break;
