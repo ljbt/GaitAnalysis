@@ -6,6 +6,12 @@
 #include <string.h>
 #include <time.h>
 
+#include <iostream>
+#include <string>
+#include <fstream>
+#include <sstream>
+using namespace std;
+
 #include "NNdefinitions.h"
 #include "fonctions.h"
 
@@ -16,10 +22,10 @@ int main(void)
     
     int choix;
     do{
-        printf("-----MENU-----\n");
-        printf("-> 1 pour apprentissage pastilles rouges\n");
-        printf("-> 2 pour apprentissage pastilles bleues\n");
-        scanf("%d",&choix);
+        cout <<"-----MENU-----"<<endl;
+        cout <<"-> 1 pour apprentissage pastilles rouges"<<endl;
+        cout <<"-> 2 pour apprentissage pastilles bleues"<<endl;
+        cin >> choix;
     }while(choix <1 || choix>2);
 
     int nb_sorties;
@@ -34,8 +40,27 @@ int main(void)
     init_poids_alea_Reseau(&reseau);
     init_biais_Reseau(&reseau);
 
-
+ 
     // creation du tableau contenant tous les modeles
+    string nomFichier = "footRed.txt";
+    ifstream myfiletoread (nomFichier);
+    if (myfiletoread.is_open())
+    {
+    string chaine;
+    int x,y;
+    do{
+        getline(myfiletoread,chaine);
+        istringstream iss(chaine);
+        iss >> x >> y;
+        cout << "x = "<<x<<" y = "<<y<<endl;
+
+    }while ( !myfiletoread.eof() );
+
+    myfiletoread.close();
+    }
+    else cout << "Unable to open file "<<nomFichier<< " to read"; 
+
+
 
 
     // boucle d'aprentissage

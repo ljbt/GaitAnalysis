@@ -6,6 +6,10 @@
 #include <math.h>
 #include <string.h>
 
+#include <iostream>
+#include <string>
+using namespace std;
+
 #include "NNdefinitions.h"
 #include "fonctions.h"
 
@@ -376,8 +380,7 @@ char* demande_utilisateur_image_a_test(void)
 	char nom[10];
 
 	printf("Entrez le nom de l'image(sans l'extension): ");
-	scanf("%s", nom);
-	getchar();
+	cin>>nom;
 	sprintf(cheminImageTest, "./img_learn_bmp/%s.bmp",nom);
 	printf("Chemin de l'image à tester: %s\n", cheminImageTest);
 
@@ -593,8 +596,8 @@ void enregistrement_biais_et_poids_reseau(RESEAU reseau)
 {
 	int i,j,k;
 	FILE *fichier_poids;
-	char * nom_fichier = "./fichier_poids.txt";
-	fichier_poids = fopen(nom_fichier, "wt");
+	string nom_fichier = "./fichier_poids.txt";
+	fichier_poids = fopen(nom_fichier.c_str(), "wt");
 	if(fichier_poids == NULL)
 	{
 		perror("Ouverture fichier poids");
@@ -602,7 +605,7 @@ void enregistrement_biais_et_poids_reseau(RESEAU reseau)
 	}
 	
 	//ecrit le poids de chaque entree de chaque neurone de chaque couche du reseau
-	printf("Enregistrement des biais et des poids du reseau dans %s\n", nom_fichier);
+	cout << "Enregistrement des biais et des poids du reseau dans "<< nom_fichier<<endl;
 	for(i = 0; i < reseau.nb_couches; i++)
 	{
 		for (j = 0; j < reseau.couches[i].nb_neurones ; j++)
@@ -622,8 +625,8 @@ void recupere_biais_et_poids_enregistres (RESEAU *reseau)
 {
 	int i,j,k;
 	FILE *fichier_poids;
-	char * nom_fichier = "./fichier_poids.txt";
-	fichier_poids = fopen(nom_fichier, "rt");
+	string nom_fichier = "./fichier_poids.txt";
+	fichier_poids = fopen(nom_fichier.c_str(), "rt");
 	if(fichier_poids == NULL)
 	{
 		perror("Ouverture fichier poids");
@@ -631,15 +634,18 @@ void recupere_biais_et_poids_enregistres (RESEAU *reseau)
 	}
 	
 	//lit le poids dans le fichier texte et le rentre dans son entree associee
-	printf("Recuperation des biais et des poids du reseau dans %s\n", nom_fichier);
+	cout <<"Recuperation des biais et des poids du reseau dans "<< nom_fichier<<endl;
 	for(i = 0; i < reseau->nb_couches; i++)
 	{
 		for (j = 0; j < reseau->couches[i].nb_neurones ; j++)
 		{
-			fscanf(fichier_poids, "%lf ", &(reseau->couches[i].neurones[j].biais));
+			if ( fscanf(fichier_poids, "%lf ", &(reseau->couches[i].neurones[j].biais)) <= 0)
+				cout << "error fscanf fichier_poids"<<endl;
+
 			for (k = 0; k < reseau->couches[i].neurones[j].nb_entrees; k++)
 			{
-				fscanf(fichier_poids, "%lf ", &(reseau->couches[i].neurones[j].entrees[k].poids));
+				if ( fscanf(fichier_poids, "%lf ", &(reseau->couches[i].neurones[j].entrees[k].poids)) )
+					cout << "error fscanf fichier_poids"<<endl;
 			}
 			
 		}
@@ -647,7 +653,7 @@ void recupere_biais_et_poids_enregistres (RESEAU *reseau)
 }
 
 
-int menu (void)
+/* int menu (void)
 {
 	int choix;
 	char s [10] = {0};
@@ -677,7 +683,7 @@ int get_entree(void)
 	}while(endPtr == s || entree > 1);
 	
 	return entree;
-}
+} */
 
 // A MODIIFFFF--------------------------------------------------
 // fonction qui exectute une boucle, doit etre exécutée plsrs fois

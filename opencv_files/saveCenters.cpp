@@ -221,7 +221,7 @@ int main(void)
                         iss >> x >> y;
                         cout << "x = "<<x<<" y = "<<y<<endl;
                         Point p(x,y);
-                        if ( p == centresPastillesRouges[i])
+                        if (  x == centresPastillesRouges[i].x && y == centresPastillesRouges[i].y)
                         {
                             cout << "point déjà enregstré"<<endl;
                             break;
