@@ -592,11 +592,10 @@ bool erreurs_reseau_insignifiantes (RESEAU reseau)
 }
 
 
-void enregistrement_biais_et_poids_reseau(RESEAU reseau)
+void enregistrement_biais_et_poids_reseau(RESEAU reseau, string nom_fichier)
 {
 	int i,j,k;
 	FILE *fichier_poids;
-	string nom_fichier = "./fichier_poids.txt";
 	fichier_poids = fopen(nom_fichier.c_str(), "wt");
 	if(fichier_poids == NULL)
 	{
@@ -621,11 +620,10 @@ void enregistrement_biais_et_poids_reseau(RESEAU reseau)
 }
 
 //recupere les poids enregistrés et les rentre dans le reseau
-void recupere_biais_et_poids_enregistres (RESEAU *reseau)
+void recupere_biais_et_poids_enregistres (RESEAU *reseau, string nom_fichier)
 {
 	int i,j,k;
 	FILE *fichier_poids;
-	string nom_fichier = "./fichier_poids.txt";
 	fichier_poids = fopen(nom_fichier.c_str(), "rt");
 	if(fichier_poids == NULL)
 	{

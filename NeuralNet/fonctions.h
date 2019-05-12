@@ -42,8 +42,8 @@ void retropropagation (RESEAU *reseau);
 bool erreur_insignifiante ( double erreur_globale);
 bool erreurs_reseau_insignifiantes (RESEAU reseau);
 
-void enregistrement_biais_et_poids_reseau(RESEAU reseau);
-void recupere_biais_et_poids_enregistres (RESEAU *reseau);
+void enregistrement_biais_et_poids_reseau(RESEAU reseau, string nom_fichier);
+void recupere_biais_et_poids_enregistres (RESEAU *reseau, string nom_fichier);
 
 int menu (void);
 int get_entree(void);

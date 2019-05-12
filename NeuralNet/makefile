@@ -9,15 +9,17 @@ TARGET = reconnaissance_pastille
 
 all: $(TARGET)
 
-$(TARGET): main.o fonctions.o 
+$(TARGET): main.o fonctions.o gestionModeles.o
 	$(CXX) -o $@ $(FLAGS) $^ $(LIBS)
 
-main.o: main.cpp NNdefinitions.h fonctions.h 
+main.o: main.cpp 
 	$(CXX) $(CFLAGS) $<
 
-fonctions.o: fonctions.cpp NNdefinitions.h fonctions.h
+fonctions.o: fonctions.cpp 
 	$(CXX) $(CFLAGS) $<
 
+gestionModeles.o: gestionModeles.cpp 
+	$(CXX) $(CFLAGS) $<
 
 zip:
 	tar -cvzf $(TARGET).tgz *.[ch] *.pdf makefile
