@@ -13,6 +13,9 @@ using namespace std;
 using namespace cv;
 
 
+// Ce programme sert UNIQUEMENT à entrer les coordonnees des centres des pastilles dans des fichiers texte
+// ces fichiers sont utilisés pour l'apprentissage des differents RNA qui reconnaissent les pastilles
+
 int main(void)
 {
     Mat image, hsv, mask;
@@ -198,15 +201,15 @@ int main(void)
                     cout << "1 pour epaule, 2 pour coude, 3 pour main, 4 pour genou, 5 pour pied"<<endl;
                     cin >> choix;
                     if(choix == 1)
-                        nomFichier = "shoulderRed.txt";
+                        nomFichier = "./textFiles/shoulderRed.txt";
                     else if(choix == 2)
-                        nomFichier = "elbowRed.txt";
+                        nomFichier = "./textFiles/elbowRed.txt";
                     else if(choix == 3)
-                        nomFichier = "handRed.txt";
+                        nomFichier = "./textFiles/handRed.txt";
                     else if(choix == 4)
-                        nomFichier = "kneeRed.txt";
+                        nomFichier = "./textFiles/kneeRed.txt";
                     else if(choix == 5)
-                        nomFichier = "footRed.txt";
+                        nomFichier = "./textFiles/footRed.txt";
                 }while (choix <1 || choix >5);
                 
                 // on verifie que le point n'existe pas deja dans le fichier ou on veut l'enregistrer
@@ -255,13 +258,13 @@ int main(void)
                     cout << "2 pour coude, 3 pour main, 4 pour genou, 5 pour pied"<<endl;
                     cin >> choix;
                     if(choix == 2)
-                        nomFichier = "elbowBlue.txt";
+                        nomFichier = "./textFiles/elbowBlue.txt";
                     else if(choix == 3)
-                        nomFichier = "handBlue.txt";
+                        nomFichier = "./textFiles/handBlue.txt";
                     else if(choix == 4)
-                        nomFichier = "kneeBlue.txt";
+                        nomFichier = "./textFiles/kneeBlue.txt";
                     else if(choix == 5)
-                        nomFichier = "footBlue.txt";
+                        nomFichier = "./textFiles/footBlue.txt";
                 }while (choix <2 || choix >5);
                 
                 // on verifie que le point n'existe pas deja dans le fichier ou on veut l'enregistrer
