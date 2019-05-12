@@ -3,13 +3,14 @@
 CXX = g++ 
 FLAGS = -Wall -O2 -g
 CFLAGS = -Wall -O2 -g -c
-LIBS = -lm 
+LIBS = -lm -lopencv_imgcodecs -lopencv_imgproc -lopencv_core -lopencv_highgui -lopencv_videoio
+
 
 TARGET = reconnaissance_pastille
 
 all: $(TARGET)
 
-$(TARGET): main.o fonctions.o gestionModeles.o
+$(TARGET): main.o fonctions.o gestionModeles.o Mask.o imageProcessing.o
 	$(CXX) -o $@ $(FLAGS) $^ $(LIBS)
 
 main.o: main.cpp 
@@ -19,6 +20,12 @@ fonctions.o: fonctions.cpp
 	$(CXX) $(CFLAGS) $<
 
 gestionModeles.o: gestionModeles.cpp 
+	$(CXX) $(CFLAGS) $<
+
+Mask.o: Mask.cpp Mask.h
+	$(CXX) $(CFLAGS) $<
+
+imageProcessing.o: imageProcessing.cpp imageProcessing.h
 	$(CXX) $(CFLAGS) $<
 
 zip:
