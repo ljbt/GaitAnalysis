@@ -345,7 +345,7 @@ void afficheChargerPatient(zone zChargerPatient, zone zPrenom, char *prenom, zon
 	if(nom != NULL)
 		afficheChaine(nom, zNom.hauteur, zNom.xmin+5,zNom.ymin+5);
 
-	if(prenom != NULL && nom != NULL)
+	if((prenom != NULL && nom != NULL) && (strlen(prenom) && strlen(nom))) // On test si non null et non vide 
 	{	
 		couleurCourante(204,204,0);
 		rectangle(zCharger.xmin, zCharger.ymin, zCharger.xmax+20, zCharger.ymax);
@@ -492,7 +492,7 @@ void afficheNouveauPatient(zone zNouveauPatient, zone zPrenom, char *prenom, zon
 		afficheChaine(poids, zPoids.hauteur, zPoids.xmin+5,zPoids.ymin+5);
 	}
 
-	if(prenom != NULL && nom != NULL && taille != NULL && poids != NULL)
+	if((prenom != NULL && nom != NULL && taille != NULL && poids != NULL) && (strlen(prenom) && strlen(nom) && strlen(taille) && strlen(poids))) // On test si non null et non vide 
 	{	
 		couleurCourante(204,204,0);
 		rectangle(zCreerPatient.xmin, zCreerPatient.ymin, zCreerPatient.xmax+20, zCreerPatient.ymax);

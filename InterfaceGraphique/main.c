@@ -16,6 +16,7 @@
 #include "definitions.h"
 #include "IHM.h"
 #include "fonctionsTraitementImage.h"
+#include "donneesPatients.h"
 
 static char titre [] = "Gait Analysis";
 
@@ -297,6 +298,52 @@ void gestionEvenement(EvenementGfx evenement)
 					zNomNouveauPatient.saisie = false;
 					zTailleNouveauPatient.saisie = false;
 					zPoidsNouveauPatient.saisie = true;
+				}
+				else if(numPage == 2 && zCreerPatient.xmin<abscisseSouris() && abscisseSouris()<zCreerPatient.xmax && zCreerPatient.ymin<ordonneeSouris() && ordonneeSouris()<zCreerPatient.ymax)
+				{
+					zPrenomChargerPatient.saisie = false;
+					zNomChargerPatient.saisie = false;
+					zPrenomNouveauPatient.saisie = false;
+					zNomNouveauPatient.saisie = false;
+					zTailleNouveauPatient.saisie = false;
+					zPoidsNouveauPatient.saisie = false;
+					int creationPatient = creeFichePatient(nouveau_nom, nouveau_prenom, chaine_taille_nouveau_patient, chaine_poids_nouveau_patient);
+					if (creationPatient == 1)
+					{
+						printf("\nCreation du patient reussie\n");
+						prenom = malloc(sizeof(char) * strlen(nouveau_prenom));
+						nom = malloc(sizeof(char) * strlen(nouveau_nom));
+						strcpy(prenom, nouveau_prenom);
+						strcpy(nom, nouveau_nom);
+					}
+					else
+					{
+						printf("\nCreation du patient impossible\n");
+					}
+				}
+				else if(numPage == 2 && zChargerPatient.xmin<abscisseSouris() && abscisseSouris()<zChargerPatient.xmax && zChargerPatient.ymin<ordonneeSouris() && ordonneeSouris()<zChargerPatient.ymax)
+				{
+					zPrenomChargerPatient.saisie = false;
+					zNomChargerPatient.saisie = false;
+					zPrenomNouveauPatient.saisie = false;
+					zNomNouveauPatient.saisie = false;
+					zTailleNouveauPatient.saisie = false;
+					zPoidsNouveauPatient.saisie = false;
+					char nomTemp[32];
+					char prenomTemp[32];
+					int chargementPatient = lisFichePatient(nom_a_charger, prenom_a_charger, nomTemp, prenomTemp);
+					if (chargementPatient == 1)
+					{
+						printf("\nChargement du patient reussi\n");
+						prenom = malloc(sizeof(char) * strlen(prenomTemp));
+						nom = malloc(sizeof(char) * strlen(nomTemp));
+						strcpy(prenom, prenomTemp);
+						strcpy(nom, nomTemp);
+					}
+					else
+					{
+						printf("\nChargement du patient impossible\n");
+					}
 				}
 
 				else // clic sur toute autre zone de l'ihm
