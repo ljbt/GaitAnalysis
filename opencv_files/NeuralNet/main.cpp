@@ -6,8 +6,8 @@
 #include <string>
 
 #include "Mask.h"
+//#include "NNdefinitions.h"
 #include "imageProcessing.h"
-#include "NNdefinitions.h"
 #include "fonctions.h"
  
 using namespace std;
@@ -36,7 +36,7 @@ int main(void)
     enum {Rouge,Vert,Bleu,Jaune} Masque = Rouge;
 
     // Variables pour les deux réseaux de neurones déterminant les articulations rouges et bleues
-    int nb_entrees = 2;
+    int nb_entrees = 1;
     int nb_sorties_rouge = 5, nb_sorties_bleu = 4;
 
     MODELE modeleRouge = init_modele(nb_entrees,nb_sorties_rouge);
@@ -46,6 +46,13 @@ int main(void)
     RESEAU reseauRouge = init_reseau(modeleRouge);
     RESEAU reseauBleu = init_reseau(modeleBleu);
     
+    recupere_biais_et_poids_enregistres(&reseauRouge, "../textFiles/paramsNNRed.txt");
+    affiche_reseau(reseauRouge);
+    //recupere_biais_et_poids_enregistres(&reseauBleu, "../textFiles/paramsNNBlue.txt");
+    //affiche_reseau(reseauBleu);
+
+    waitKey(0);
+
     while(1)
     {
         if(mode == Play)
@@ -174,14 +181,36 @@ int main(void)
             }
             
         } while (Masque != Rouge);
-        
 
-        
+
         Mat drawing2 = Mat::zeros( canny_output.size(), CV_8UC3 );
+        if(!centresPastillesRouges.empty())
+        {
+            for (size_t i = 0; i < centresPastillesRouges.size(); i++)
+            {
+                //enterPointintoNeuralNet(centresPastillesRouges[i], &reseauRouge);
+                enterFloatintoNeuralNet(centresPastillesRouges[i].y, &reseauRouge);
+                propagation_avant(&reseauRouge);
+                CLASSEMENT meilleur_ressemblance = cree_et_retourne_classement_ressemblance(reseauRouge); 
+                cout <<"Meilleure ressemblance: "<< meilleur_ressemblance.chiffre << " : "<< meilleur_ressemblance.pourcentage_ressemblance<<endl;
+                if(meilleur_ressemblance.chiffre == 0)
+                    writePointwithTexttoMat(centresPastillesRouges[i],"foot",&drawing2, Scalar(0,0,255));
+                else if(meilleur_ressemblance.chiffre == 1)
+                    writePointwithTexttoMat(centresPastillesRouges[i],"knee",&drawing2, Scalar(0,0,255));
+                else if(meilleur_ressemblance.chiffre == 2)
+                    writePointwithTexttoMat(centresPastillesRouges[i],"hand",&drawing2, Scalar(0,0,255));
+                else if(meilleur_ressemblance.chiffre == 3)
+                    writePointwithTexttoMat(centresPastillesRouges[i],"elbow",&drawing2, Scalar(0,0,255));
+                else if(meilleur_ressemblance.chiffre == 4)
+                    writePointwithTexttoMat(centresPastillesRouges[i],"shoulder",&drawing2, Scalar(0,0,255));
+            }
+        }
+
+/*         
         writePointstoMat(centresPastillesRouges,&drawing2, Scalar(0,0,255));
         writePointstoMat(centresPastillesBleues,&drawing2, Scalar(255,0,0));
         writePointstoMat(centrePastilleVerte,&drawing2, Scalar(0,255,0));
-        writePointstoMat(centrePastilleJaune,&drawing2, Scalar(0,255,255));
+        writePointstoMat(centrePastilleJaune,&drawing2, Scalar(0,255,255)); */
         imshow( "Centres", drawing2 ); 
 
         

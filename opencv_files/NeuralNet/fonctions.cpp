@@ -10,7 +10,10 @@
 #include <string>
 using namespace std;
 
-#include "NNdefinitions.h"
+#if !defined(NN_DEF) 
+    #define NN_DEF 
+    #include "NNdefinitions.h"
+#endif
 #include "fonctions.h"
 
 //fonction de creation du modele complet
@@ -54,7 +57,7 @@ void determine_sortieModeleAttendue(int chiffre, MODELE *modele)
 	modele->sorties_attendues[chiffre] = 1;
 }
 
-
+// et divise chaque entree par 1000 pour etre sur qu'elle est inferieure a 0
 void recopie_EntreesModele_dansEntreesReseau(MODELE modele, RESEAU *reseau)
 {
 	if(AFFICHAGE)
@@ -63,7 +66,7 @@ void recopie_EntreesModele_dansEntreesReseau(MODELE modele, RESEAU *reseau)
 	{
 		for(int j = 0; j < reseau->couches[0].neurones[i].nb_entrees; j++)
 		{
-			reseau->couches[0].neurones[i].entrees[j].x = modele.entrees[j].x;
+			reseau->couches[0].neurones[i].entrees[j].x = modele.entrees[j].x/1000.;
 		}
 	}
 }
@@ -265,6 +268,7 @@ void affiche_reseau(RESEAU reseau)
 		for(j = 0; j < reseau.couches[i].nb_neurones; j++)
 		{
 			printf("  neurone %d a %d entree(s)\n", j, reseau.couches[i].neurones[j].nb_entrees);
+			printf("  biais = %f\n",reseau.couches[i].neurones[j].biais);
 			for(k = 0; k < reseau.couches[i].neurones[j].nb_entrees; k++)
 			{	
 				printf("   entree = %f\n",reseau.couches[i].neurones[j].entrees[k].x);
@@ -430,10 +434,11 @@ void propagation_avant (RESEAU *reseau)
 // pour une image testée on affiche sa ressemblance avec chaque chiffre
 void cree_et_affiche_classement_ressemblance(RESEAU reseau)
 {
-	CLASSEMENT tab_classement [10];
+	int nb_sorties = 5;
+	CLASSEMENT tab_classement [nb_sorties];
 
 	//on recopie d'abord les sorties dans le tableau
-	for(int i = 0; i < 10; i++)
+	for(int i = 0; i < nb_sorties; i++)
 	{
 		tab_classement[i].chiffre = i;
 		tab_classement[i].pourcentage_ressemblance = reseau.couches[reseau.nb_couches-1].neurones[i].sortie * 100;
@@ -442,9 +447,9 @@ void cree_et_affiche_classement_ressemblance(RESEAU reseau)
 	// on trie
 	int i,j;
 	CLASSEMENT placeTemporaire;
-	for (i=0; i<10; i++)
+	for (i=0; i<nb_sorties; i++)
 	{
-		for(j=i; j<10; j++)
+		for(j=i; j<nb_sorties; j++)
 		{
 			if(tab_classement[j].pourcentage_ressemblance > tab_classement[i].pourcentage_ressemblance) 
 			{
@@ -456,11 +461,42 @@ void cree_et_affiche_classement_ressemblance(RESEAU reseau)
 	}
 	// on affiche
 	printf("\nClassement pourcentage ressemblance:\n");
-	for(int k = 0; k < 10; k++)
+	for(int k = 0; k < nb_sorties; k++)
 	{
 		printf("\t%d\t%f %%\n",tab_classement[k].chiffre, tab_classement[k].pourcentage_ressemblance);
 	}
 	
+}
+
+// fonction qui classe les sorties par ressemblance et retourne la meilleure ressemblance
+CLASSEMENT cree_et_retourne_classement_ressemblance(RESEAU reseau)
+{
+	int nb_sorties = 5;
+	CLASSEMENT tab_classement [nb_sorties];
+
+	//on recopie d'abord les sorties dans le tableau
+	for(int i = 0; i < nb_sorties; i++)
+	{
+		tab_classement[i].chiffre = i;
+		tab_classement[i].pourcentage_ressemblance = reseau.couches[reseau.nb_couches-1].neurones[i].sortie * 100;
+	}
+
+	// on trie
+	int i,j;
+	CLASSEMENT placeTemporaire;
+	for (i=0; i<nb_sorties; i++)
+	{
+		for(j=i; j<nb_sorties; j++)
+		{
+			if(tab_classement[j].pourcentage_ressemblance > tab_classement[i].pourcentage_ressemblance) 
+			{
+				placeTemporaire = tab_classement[i];
+				tab_classement[i] = tab_classement[j];
+				tab_classement[j] = placeTemporaire;
+			}
+		}
+	}
+	return tab_classement[0]; // meilleure ressemblance
 }
 
 //dans ce réseau le signal d'erreur global et local ne comprend qu'une valeur (car une seuile sortie)
@@ -642,7 +678,7 @@ void recupere_biais_et_poids_enregistres (RESEAU *reseau, string nom_fichier)
 
 			for (k = 0; k < reseau->couches[i].neurones[j].nb_entrees; k++)
 			{
-				if ( fscanf(fichier_poids, "%lf ", &(reseau->couches[i].neurones[j].entrees[k].poids)) )
+				if ( fscanf(fichier_poids, "%lf ", &(reseau->couches[i].neurones[j].entrees[k].poids)) <=0 )
 					cout << "error fscanf fichier_poids"<<endl;
 			}
 			

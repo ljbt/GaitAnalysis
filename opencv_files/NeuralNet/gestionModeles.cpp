@@ -7,7 +7,10 @@
 #include <random>
 using namespace std;
 
-#include "NNdefinitions.h"
+#if !defined(NN_DEF) 
+    #define NN_DEF 
+    #include "NNdefinitions.h"
+#endif
 #include "fonctions.h"
 
 // Entre successivement les points ecrits dans le fichier dans le tableau des modeles 
@@ -34,17 +37,19 @@ void litPointsFichier_remplitModeles(string nomFichier, const int nb_entrees, co
         if (myfiletoread.is_open())
         {
             string chaine;
-            int x,y;
-            do{
+            int y;
+            while ( !myfiletoread.eof() ){
                 getline(myfiletoread,chaine);
-                istringstream iss(chaine);
-                iss >> x >> y;
-                MODELE modele = init_modele(nb_entrees,nb_sorties);
-                modele.entrees[0].x = x;
-                modele.entrees[1].x = y;
-                determine_sortieModeleAttendue(idx,&modele); // pour le pied c'est 4
-                tabModeles->push_back(modele);
-            }while ( !myfiletoread.eof() );
+                if(!chaine.empty())
+                {
+                    istringstream iss(chaine);
+                    iss >> y;
+                    MODELE modele = init_modele(nb_entrees,nb_sorties);
+                    modele.entrees[0].x = y;
+                    determine_sortieModeleAttendue(idx,&modele); // pour le pied c'est 4
+                    tabModeles->push_back(modele);
+                }
+            }
 
             myfiletoread.close();
         }

@@ -10,13 +10,13 @@ TARGET = reconnaissance_pastille
 
 all: $(TARGET)
 
-$(TARGET): main.o fonctions.o gestionModeles.o Mask.o imageProcessing.o
+$(TARGET): mainLearning.o fonctions.o gestionModeles.o Mask.o imageProcessing.o
 	$(CXX) -o $@ $(FLAGS) $^ $(LIBS)
 
-main.o: main.cpp 
+mainLearning.o: mainLearning.cpp NNdefinitions.h
 	$(CXX) $(CFLAGS) $<
 
-fonctions.o: fonctions.cpp 
+fonctions.o: fonctions.cpp NNdefinitions.h
 	$(CXX) $(CFLAGS) $<
 
 gestionModeles.o: gestionModeles.cpp 
@@ -25,7 +25,7 @@ gestionModeles.o: gestionModeles.cpp
 Mask.o: Mask.cpp Mask.h
 	$(CXX) $(CFLAGS) $<
 
-imageProcessing.o: imageProcessing.cpp imageProcessing.h
+imageProcessing.o: imageProcessing.cpp imageProcessing.h NNdefinitions.h
 	$(CXX) $(CFLAGS) $<
 
 zip:

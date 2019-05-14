@@ -9,11 +9,11 @@ TARGET = program
 
 all: $(TARGET)
 
-$(TARGET): saveCenters.o Mask.o imageProcessing.o
+$(TARGET): main.o Mask.o imageProcessing.o
 	$(CXX) -o $@ $(FLAGS) $^ $(LDLIBS)
 
 
-saveCenters.o: saveCenters.cpp Mask.h
+main.o: main.cpp Mask.h
 	$(CXX) $(CFLAGS) $<
 
 Mask.o: Mask.cpp Mask.h

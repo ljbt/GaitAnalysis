@@ -34,15 +34,33 @@ int main(void)
     
     int l_h ,u_h, l_s ,u_s ,l_v, u_v ;
 
-
+    Point piedRougePrecedent(-1,-1), piedRouge;     Point piedBleuPrecedent(-1,-1), piedBleu;
+    Point genouRougePrecedent(-1,-1), genouRouge;   Point genouBleuPrecedent(-1,-1), genouBleu;
+    Point mainRougePrecedent(-1,-1), mainRouge;     Point mainBleuPrecedent(-1,-1), mainBleu;
+    Point coudeRougePrecedent(-1,-1), coudeRouge;   Point coudeBleuPrecedent(-1,-1), coudeBleu;
+    Point epauleRougePrecedent(-1,-1), epauleRouge;
+    
+    
+    int yminPiedRouge = 200, ymaxPiedRouge = 230;    int yminPiedBleu = 200, ymaxPiedBleu = 230; 
+    int yminGenouRouge = 170, ymaxGenouRouge = 200;  int yminGenouBleu = 160, ymaxGenouBleu = 190;
+    int yminMainRouge = 130, ymaxMainRouge = 170;    int yminMainBleu = 130, ymaxMainBleu = 160;
+    int yminCoudeRouge = 105, ymaxCoudeRouge = 130;  int yminCoudeBleu = 105, ymaxCoudeBleu = 130;
+    int yminEpauleRouge = 50, ymaxEpauleRouge = 105;
 
     enum {Play, Pause} mode = Play; 
     enum {Rouge,Vert,Bleu,Jaune} Masque = Rouge;
 
 
-    //RNG rng(12345);
-    const char* source_window = "Contours";
-    
+    image = imread("./learning_videos/courbe0rythme0boited-1/01.bmp");
+    if( ! image.data )
+    {
+        cout << "Error loading image " << endl;
+        return -1;
+    } 
+    Mat drawing2 = Mat::zeros( image.size(), CV_8UC3 );
+
+    vector<Point> centresPastillesRougesImagePrecedente;
+
     while(1)
     {
         if(mode == Play)
@@ -83,15 +101,9 @@ int main(void)
 
             inRange(hsv, Scalar(l_h,l_s,l_v), Scalar(u_h,u_s,u_v), mask); 
             blur( mask, mask, Size(3,3) );       // ou GaussianBlur(mask,mask,Size(5,5),0); en changeant la taille de la fenetre de floutage
-            
-            
-            Canny( mask, canny_output, 100, 100*2 );
-
-            namedWindow( source_window );
-            imshow(source_window, canny_output);
-
-
+       
             /// Find contours
+            Canny( mask, canny_output, 100, 100*2 );
             vector<vector<Point> > contours;
             vector<Vec4i> hierarchy;
             findContours( canny_output, contours, hierarchy, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE ); //EXTERNAL pour un contour exterieur
@@ -174,17 +186,59 @@ int main(void)
             }
             
         } while (Masque != Rouge);
-        
-        Mat drawing2 = Mat::zeros( canny_output.size(), CV_8UC3 );
-        writePointstoMat(centresPastillesRouges,&drawing2, Scalar(0,0,255));
-        writePointstoMat(centresPastillesBleues,&drawing2, Scalar(255,0,0));
-        writePointstoMat(centrePastilleVerte,&drawing2, Scalar(0,255,0));
-        writePointstoMat(centrePastilleJaune,&drawing2, Scalar(0,255,255));
-        imshow( "Centres", drawing2 ); 
 
+
+        // ici on a les bons centres des pastilles 
+
+        // on associe chaque centre à son articulation et on trace leur trajectoire
+        Scalar color(0,0,199);
+        identifyArticulationsfromRedPoints(centresPastillesRouges,yminPiedRouge,ymaxPiedRouge,&piedRouge,&piedRougePrecedent,yminGenouRouge,ymaxGenouRouge,&genouRouge,&genouRougePrecedent, yminMainRouge,ymaxMainRouge,&mainRouge,&mainRougePrecedent, yminCoudeRouge,ymaxCoudeRouge,&coudeRouge,&coudeRougePrecedent, yminEpauleRouge,ymaxEpauleRouge,&epauleRouge,&epauleRougePrecedent,&drawing2,color);
+
+
+
+        // Puis on affiche les articulations sur l'image
+
+        Mat drawing3 = drawing2.clone();
+        if(piedRouge.x != -1 && piedRouge.y != -1)
+            writePointwithTexttoMat(piedRouge,"pied",&drawing3,Scalar(0,0,255));
+
+        if(genouRouge.x != -1 && genouRouge.y != -1)
+            writePointwithTexttoMat(genouRouge,"genou",&drawing3,Scalar(0,0,255));
+
+        if(mainRouge.x != -1 && mainRouge.y != -1)
+            writePointwithTexttoMat(mainRouge,"main",&drawing3,Scalar(0,0,255));
         
-// ici on a les bons centres des pastilles
-         
+        if(coudeRouge.x != -1 && coudeRouge.y != -1)
+            writePointwithTexttoMat(coudeRouge,"coude",&drawing3,Scalar(0,0,255));
+
+        if(epauleRouge.x != -1 && epauleRouge.y != -1)
+            writePointwithTexttoMat(epauleRouge,"epaule",&drawing3,Scalar(0,0,255));
+
+        //imshow("Courbes pastilles rouges", drawing3);
+        
+
+        // on associe chaque centre à son articulation et on trace leur trajectoire
+        color = Scalar(199,0,0);
+        identifyArticulationsfromBluePoints(centresPastillesBleues,yminPiedBleu,ymaxPiedBleu,&piedBleu,&piedBleuPrecedent,yminGenouBleu,ymaxGenouBleu,&genouBleu,&genouBleuPrecedent, yminMainBleu,ymaxMainBleu,&mainBleu,&mainBleuPrecedent, yminCoudeBleu,ymaxCoudeBleu,&coudeBleu,&coudeBleuPrecedent,&drawing2,color);
+
+        // Puis on affiche les articulations sur l'image
+
+       // Mat drawing3 = drawing2.clone();
+        if(piedBleu.x != -1 && piedBleu.y != -1)
+            writePointwithTexttoMat(piedBleu,"pied",&drawing3,Scalar(255,0,0));
+
+        if(genouBleu.x != -1 && genouBleu.y != -1)
+            writePointwithTexttoMat(genouBleu,"genou",&drawing3,Scalar(255,0,0));
+
+        if(mainBleu.x != -1 && mainBleu.y != -1)
+            writePointwithTexttoMat(mainBleu,"main",&drawing3,Scalar(255,0,0));
+        
+        if(coudeBleu.x != -1 && coudeBleu.y != -1)
+            writePointwithTexttoMat(coudeBleu,"coude",&drawing3,Scalar(255,0,0));
+
+        imshow("Courbes pastilles bleues", drawing3);
+        
+        
         char c=(char)waitKey(125); // waits 125ms to get a key value
         if(c==27) // echap
             break;

@@ -27,6 +27,7 @@ void propagation_avant_selon_modele (RESEAU *reseau, double *sorties_attendues);
 char* demande_utilisateur_image_a_test(void);
 void propagation_avant (RESEAU *reseau);
 void cree_et_affiche_classement_ressemblance(RESEAU reseau);
+CLASSEMENT cree_et_retourne_classement_ressemblance(RESEAU reseau);
 int rand_a_b(int a, int b);
 int choix_modele(void);
 
