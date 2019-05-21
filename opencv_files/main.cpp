@@ -16,6 +16,7 @@ int main(void)
 {
     Mat image, hsv, mask;
     string image_name;
+	string image_name_save; // Ajout pour test ecriture dossier
     int image_num = 0;
 
     // Red mask - front side
@@ -237,6 +238,14 @@ int main(void)
             writePointwithTexttoMat(coudeBleu,"coude",&drawing3,Scalar(255,0,0));
 
         imshow("Courbes pastilles bleues", drawing3);
+		
+		// Ajout ecriture dossier test
+		image_name_save = to_string(image_num);
+		if(image_num < 10)
+            image_name_save = "./test/courbe0rythme0boited-1/0" + image_name_save + ".bmp";
+        else image_name_save = "./test/courbe0rythme0boited-1/" + image_name_save + ".bmp";
+		imwrite(image_name_save, drawing3);
+		// Fin de l'ajout
         
         
         char c=(char)waitKey(125); // waits 125ms to get a key value

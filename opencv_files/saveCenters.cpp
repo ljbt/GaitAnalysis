@@ -177,8 +177,8 @@ int main(void)
                 
             } while (Masque != Rouge);
             
- /*           Mat drawing2 = Mat::zeros( canny_output.size(), CV_8UC3 );
-             writePointstoMat(centresPastillesRouges,&drawing2, Scalar(0,0,255));
+ /*         Mat drawing2 = Mat::zeros( canny_output.size(), CV_8UC3 );
+            writePointstoMat(centresPastillesRouges,&drawing2, Scalar(0,0,255));
             writePointstoMat(centresPastillesBleues,&drawing2, Scalar(255,0,0));
             writePointstoMat(centrePastilleVerte,&drawing2, Scalar(0,255,0));
             writePointstoMat(centrePastilleJaune,&drawing2, Scalar(0,255,255));

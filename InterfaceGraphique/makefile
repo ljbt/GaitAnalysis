@@ -1,24 +1,25 @@
-CC = gcc 
+CC = g++
 FLAGS = -Wall -O2 -g
 CFLAGS = -Wall -O2 -g -c
 LDFLAGS = -lm -lglut -lGL -lX11
+LDLIBS = -lopencv_imgcodecs -lopencv_imgproc -lopencv_core -lopencv_highgui -lopencv_videoio
 
 TARGET = gait_analysis
 
-$(TARGET): main.o IHM.o fonctionsTraitementImage.o donneesPatients.o libisentlib.a
-	$(CC) -o $@ $(FLAGS) $^ $(LDFLAGS)
+$(TARGET): main.o IHM.o fonctionsTraitementImage.o donneesPatients.o Mask.o imageProcessing.o libisentlib.a 
+	$(CC) -o $@ $(FLAGS) $^ $(LDFLAGS) $(LDLIBS)
 
 
-main.o: main.c GfxLib.h BmpLib.h ESLib.h definitions.h IHM.h fonctionsTraitementImage.h 
+main.o: main.cpp GfxLib.h BmpLib.h ESLib.h definitions.h IHM.h fonctionsTraitementImage.h 
 	$(CC) $(CFLAGS) $<
 	
-IHM.o: IHM.c GfxLib.h ESLib.h BmpLib.h definitions.h IHM.h fonctionsTraitementImage.h
+IHM.o: IHM.cpp GfxLib.h ESLib.h BmpLib.h definitions.h IHM.h fonctionsTraitementImage.h
 	$(CC) $(CFLAGS) $<
 	
-fonctionsTraitementImage.o: fonctionsTraitementImage.c definitions.h BmpLib.h fonctionsTraitementImage.h
+fonctionsTraitementImage.o: fonctionsTraitementImage.cpp definitions.h BmpLib.h fonctionsTraitementImage.h
 	$(CC) $(CFLAGS) $<
 
-donneesPatients.o: donneesPatients.c donneesPatients.h
+donneesPatients.o: donneesPatients.cpp donneesPatients.h
 	$(CC) $(CFLAGS) $<
 
 #lib isen ------------------------------------------
@@ -43,6 +44,12 @@ GfxLib.o: GfxLib.c GfxLib.h ESLib.h
 
 OutilsLib.o: OutilsLib.c OutilsLib.h
 	$(CC) $(CFLAGS) OutilsLib.c
+	
+Mask.o: Mask.cpp Mask.h
+	$(CC) $(CFLAGS) $<
+
+imageProcessing.o: imageProcessing.cpp imageProcessing.h
+	$(CC) $(CFLAGS) $<
 
 #SocketLib.o: SocketLib.c SocketLib.h
 #	gcc -Wall -O2 -c SocketLib.c

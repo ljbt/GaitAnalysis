@@ -71,3 +71,5 @@ void identifyArticulationsfromRedPoints(vector<Point> redPoints, int yminFoot,in
         ifPointinRange_drawLine(redPoints[i],yminShoulder,ymaxShoulder,shoulder,previousshoulder,mat,color);
     }
 }
+
+
