@@ -84,11 +84,11 @@
 #include <stdlib.h>
 #include <math.h>
 
-extern "C"
-{
+//extern "C"
+//{
 	#include "GfxLib.h"
 	#include "ESLib.h" // Pour tempsReel
-}
+//}
 //#define DEBUG_MODE
 
 //#define ACTION_CLAVIER_MEMORISE_POSITION_SOURIS
