@@ -37,11 +37,11 @@ int main(void)
     Point hanchePrecedent(-1,-1), hanche(-1,-1);
     Point tetePrecedent(-1,-1), tete(-1,-1);
 
-    Point piedRougePrecedent(-1,-1), piedRouge(-1,-1);     Point piedBleuPrecedent(-1,-1), piedBleu(-1,-1);
-    Point genouRougePrecedent(-1,-1), genouRouge(-1,-1);   Point genouBleuPrecedent(-1,-1), genouBleu(-1,-1);
-    Point mainRougePrecedent(-1,-1), mainRouge(-1,-1);     Point mainBleuPrecedent(-1,-1), mainBleu(-1,-1);
-    Point coudeRougePrecedent(-1,-1), coudeRouge(-1,-1);   Point coudeBleuPrecedent(-1,-1), coudeBleu(-1,-1);
-    Point epauleRougePrecedent(-1,-1), epauleRouge(-1,-1);
+    Point piedRougePrecedent(-1,-1), piedRouge;     Point piedBleuPrecedent(-1,-1), piedBleu;
+    Point genouRougePrecedent(-1,-1), genouRouge;   Point genouBleuPrecedent(-1,-1), genouBleu;
+    Point mainRougePrecedent(-1,-1), mainRouge;     Point mainBleuPrecedent(-1,-1), mainBleu;
+    Point coudeRougePrecedent(-1,-1), coudeRouge;   Point coudeBleuPrecedent(-1,-1), coudeBleu;
+    Point epauleRougePrecedent(-1,-1), epauleRouge;
     
     
     int yminPiedRouge = 200, ymaxPiedRouge = 230;    int yminPiedBleu = 200, ymaxPiedBleu = 230; 
@@ -193,23 +193,23 @@ int main(void)
 
         // ici on a les bons centres des pastilles 
 
+        piedBleu = piedRouge = genouBleu = genouRouge = hanche = mainBleu = mainRouge = coudeBleu = coudeRouge = epauleRouge = tete = Point(-1,-1);
+
         // on associe chaque centre à son articulation et on trace leur trajectoire
         // on commence par la pastille verte
         Scalar color(0,199,0);
         if(!centrePastilleVerte.empty())
             ifPointinRange_drawLine(centrePastilleVerte[0],0,500,&hanche,&hanchePrecedent,&drawing2,color);
-
-        Mat drawing3 = drawing2.clone();
+        Mat dessinCourbes = drawing2.clone();
         if(hanche.x != -1 && hanche.y != -1)
-            writePointwithTexttoMat(hanche,"hanche",&drawing3,Scalar(0,255,0));
+            writePointwithTexttoMat(hanche,"hanche",&dessinCourbes,Scalar(0,255,0));
 
         // Puis la pastille jaune
         color = Scalar(0,199,199);
         if(!centrePastilleJaune.empty())
             ifPointinRange_drawLine(centrePastilleJaune[0],0,500,&tete,&tetePrecedent,&drawing2,color);
-
         if(tete.x != -1 && tete.y != -1)
-            writePointwithTexttoMat(tete,"tete",&drawing3,Scalar(0,255,255));
+            writePointwithTexttoMat(tete,"tete",&dessinCourbes,Scalar(0,255,255));
 
 
         //Puis les pastilles rouges
@@ -220,21 +220,21 @@ int main(void)
         // On affiche les articulations rouges sur l'image
 
         if(piedRouge.x != -1 && piedRouge.y != -1)
-            writePointwithTexttoMat(piedRouge,"pied",&drawing3,Scalar(0,0,255));
+            writePointwithTexttoMat(piedRouge,"pied",&dessinCourbes,Scalar(0,0,255));
 
         if(genouRouge.x != -1 && genouRouge.y != -1)
-            writePointwithTexttoMat(genouRouge,"genou",&drawing3,Scalar(0,0,255));
+            writePointwithTexttoMat(genouRouge,"genou",&dessinCourbes,Scalar(0,0,255));
 
         if(mainRouge.x != -1 && mainRouge.y != -1)
-            writePointwithTexttoMat(mainRouge,"main",&drawing3,Scalar(0,0,255));
+            writePointwithTexttoMat(mainRouge,"main",&dessinCourbes,Scalar(0,0,255));
         
         if(coudeRouge.x != -1 && coudeRouge.y != -1)
-            writePointwithTexttoMat(coudeRouge,"coude",&drawing3,Scalar(0,0,255));
+            writePointwithTexttoMat(coudeRouge,"coude",&dessinCourbes,Scalar(0,0,255));
 
         if(epauleRouge.x != -1 && epauleRouge.y != -1)
-            writePointwithTexttoMat(epauleRouge,"epaule",&drawing3,Scalar(0,0,255));
+            writePointwithTexttoMat(epauleRouge,"epaule",&dessinCourbes,Scalar(0,0,255));
 
-        //imshow("Courbes pastilles rouges", drawing3);
+        //imshow("Courbes pastilles rouges", dessinCourbes);
         
 
         // Puis les articulation correspondant aux pastilles bleues, et on trace leur trajectoire
@@ -244,21 +244,28 @@ int main(void)
 
         // Puis on affiche les articulations sur l'image
         
-       // Mat drawing3 = drawing2.clone();
+       // Mat dessinCourbes = drawing2.clone();
         if(piedBleu.x != -1 && piedBleu.y != -1)
-            writePointwithTexttoMat(piedBleu,"pied",&drawing3,Scalar(255,0,0));
+            writePointwithTexttoMat(piedBleu,"pied",&dessinCourbes,Scalar(255,0,0));
 
         if(genouBleu.x != -1 && genouBleu.y != -1)
-            writePointwithTexttoMat(genouBleu,"genou",&drawing3,Scalar(255,0,0));
+            writePointwithTexttoMat(genouBleu,"genou",&dessinCourbes,Scalar(255,0,0));
 
         if(mainBleu.x != -1 && mainBleu.y != -1)
-            writePointwithTexttoMat(mainBleu,"main",&drawing3,Scalar(255,0,0));
+            writePointwithTexttoMat(mainBleu,"main",&dessinCourbes,Scalar(255,0,0));
         
         if(coudeBleu.x != -1 && coudeBleu.y != -1)
-            writePointwithTexttoMat(coudeBleu,"coude",&drawing3,Scalar(255,0,0));
+            writePointwithTexttoMat(coudeBleu,"coude",&dessinCourbes,Scalar(255,0,0));
 
-        imshow("Courbes pastilles bleues", drawing3);
-        
+        imshow("Courbes pastilles bleues", dessinCourbes);
+
+
+        // Maintenant qu'on a toutes les articulations définies, on peut tracer le squelette
+
+        Mat dessinSquelette = Mat::zeros( image.size(), CV_8UC3 );
+        drawSqueletton(&dessinSquelette, piedRouge,piedBleu,genouRouge,genouBleu,hanche,mainRouge,mainBleu,coudeRouge,coudeBleu,epauleRouge,tete);
+        imshow("Squelette", dessinSquelette);
+
         
         char c=(char)waitKey(125); // waits 125ms to get a key value
         if(c==27) // echap
