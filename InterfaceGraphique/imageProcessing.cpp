@@ -72,4 +72,127 @@ void identifyArticulationsfromRedPoints(vector<Point> redPoints, int yminFoot,in
     }
 }
 
+// draw lines into mat between articulation points
+void drawSqueletton(Mat *mat, Point foot1, Point foot2, Point knee1, Point knee2, Point hip, Point hand1, Point hand2, Point elbow1, Point elbow2, Point shoulder, Point head)
+{
+    Scalar red(0,0,255);
+    Scalar blue(255,0,0);
+    Scalar green(0,255,0);
+    Scalar yellow(0,255,255);
+    Scalar white(255,255,255);
 
+
+    // bas du corps
+
+    if( (foot1.x != -1 && foot1.y != -1) || (knee1.x != -1 && knee1.y != -1) )
+    {
+        if( (foot1.x != -1 && foot1.y != -1) && (knee1.x != -1 && knee1.y != -1) )
+            line(*mat, foot1, knee1, white);
+
+        if(foot1.x != -1 && foot1.y != -1)
+            circle(*mat, foot1 ,2, red, -1);
+        if(knee1.x != -1 && knee1.y != -1)
+            circle(*mat, knee1 ,2, red, -1);
+    }
+
+    if( (knee1.x != -1 && knee1.y != -1) || (hip.x != -1 && hip.y != -1) )
+    {
+        if( (knee1.x != -1 && knee1.y != -1) && (hip.x != -1 && hip.y != -1) )
+            line(*mat, knee1, hip, white);
+
+        if(knee1.x != -1 && knee1.y != -1)
+            circle(*mat,knee1,2, red, -1);
+        if(hip.x != -1 && hip.y != -1) 
+            circle(*mat, hip ,2, green, -1);
+    }
+
+    if( (foot2.x != -1 && foot2.y != -1) || (knee2.x != -1 && knee2.y != -1) )
+    {
+        if( (foot2.x != -1 && foot2.y != -1) && (knee2.x != -1 && knee2.y != -1) )
+            line(*mat, foot2, knee2, white);
+        
+        if(foot2.x != -1 && foot2.y != -1)
+            circle(*mat, foot2 ,2, blue, -1);
+        if(knee2.x != -1 && knee2.y != -1) 
+            circle(*mat, knee2 ,2, blue, -1);
+    }
+
+    if( (knee2.x != -1 && knee2.y != -1) || (hip.x != -1 && hip.y != -1) )
+    {
+        if( (knee2.x != -1 && knee2.y != -1) && (hip.x != -1 && hip.y != -1) )
+            line(*mat, knee2, hip, white);
+
+        if(knee2.x != -1 && knee2.y != -1)
+            circle(*mat,knee2,2, blue, -1);
+        if(hip.x != -1 && hip.y != -1)
+            circle(*mat, hip ,2, green, -1);
+    }
+
+    // haut du corps
+
+    if( (hip.x != -1 && hip.y != -1) || (shoulder.x != -1 && shoulder.y != -1) )
+    {
+        if( (hip.x != -1 && hip.y != -1) && (shoulder.x != -1 && shoulder.y != -1) )
+            line(*mat, hip, shoulder, white);
+
+        if(hip.x != -1 && hip.y != -1)
+            circle(*mat,hip,2, green, -1);
+        if(shoulder.x != -1 && shoulder.y != -1)
+            circle(*mat, shoulder ,2, red, -1);
+    } 
+
+    if( (elbow1.x != -1 && elbow1.y != -1) || (shoulder.x != -1 && shoulder.y != -1) )
+    {
+        if( (elbow1.x != -1 && elbow1.y != -1) && (shoulder.x != -1 && shoulder.y != -1) )
+            line(*mat, elbow1, shoulder, white);
+
+        if(elbow1.x != -1 && elbow1.y != -1)
+            circle(*mat,elbow1,2, red, -1);
+        if(shoulder.x != -1 && shoulder.y != -1)
+            circle(*mat, shoulder ,2, red, -1);
+    } 
+
+    if( (elbow1.x != -1 && elbow1.y != -1) || (hand1.x != -1 && hand1.y != -1) )
+    {
+        if( (elbow1.x != -1 && elbow1.y != -1) && (hand1.x != -1 && hand1.y != -1) )
+            line(*mat, elbow1, hand1, white);
+
+        if(elbow1.x != -1 && elbow1.y != -1)
+            circle(*mat,elbow1,2, red, -1);
+        if(hand1.x != -1 && hand1.y != -1)
+            circle(*mat, hand1 ,2, red, -1);
+    } 
+
+    if( (elbow2.x != -1 && elbow2.y != -1) || (shoulder.x != -1 && shoulder.y != -1) )
+    {
+        if( (elbow2.x != -1 && elbow2.y != -1) && (shoulder.x != -1 && shoulder.y != -1) )
+            line(*mat, elbow2, shoulder, white);
+
+        if(elbow2.x != -1 && elbow2.y != -1)
+            circle(*mat,elbow2,2, red, -1);
+        if(shoulder.x != -1 && shoulder.y != -1)
+            circle(*mat, shoulder ,2, red, -1);
+    } 
+
+    if( (elbow2.x != -1 && elbow2.y != -1) || (hand2.x != -1 && hand2.y != -1) )
+    {
+        if( (elbow2.x != -1 && elbow2.y != -1) && (hand2.x != -1 && hand2.y != -1) )
+            line(*mat, elbow2, hand2, white);
+
+        if(elbow2.x != -1 && elbow2.y != -1)
+            circle(*mat,elbow2,2, blue, -1);
+        if(hand2.x != -1 && hand2.y != -1)
+            circle(*mat, hand2 ,2, blue, -1);
+    } 
+
+    if( (head.x != -1 && head.y != -1) || (shoulder.x != -1 && shoulder.y != -1) )
+    {
+        if( (head.x != -1 && head.y != -1) && (shoulder.x != -1 && shoulder.y != -1) )
+            line(*mat, head, shoulder, white);
+
+        if(head.x != -1 && head.y != -1)
+            circle(*mat,head,2, yellow, -1);
+        if(shoulder.x != -1 && shoulder.y != -1)
+            circle(*mat, shoulder ,2, red, -1);
+    } 
+}

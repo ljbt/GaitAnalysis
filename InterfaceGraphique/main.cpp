@@ -9,6 +9,7 @@
 #include <dirent.h>
 #include "donneesPatients.h"
 
+	
 extern "C"
 {
 	#include "GfxLib.h"		// Seul cet include est necessaire pour faire du graphique
@@ -16,8 +17,6 @@ extern "C"
 	#include "OutilsLib.h"	
 	#include "BmpLib.h"
 
-
-	#include "definitions.h"
 	#include "IHM.h"
 	#include "fonctionsTraitementImage.h"
 	
@@ -26,8 +25,8 @@ extern "C"
 static char titre [] = "Gait Analysis";
 
 // Largeur et hauteur par defaut d'une image correspondant a nos criteres
-static int LargeurFenetre = 1000;
-static int HauteurFenetre = 600;
+static int LargeurFenetre = 1050;
+static int HauteurFenetre = 700;
 
 //sert à lier GfxLib.c et main.c pour modifier LargeurFenetre et HauteurFenetre  (redimensionnement)
 extern int varLargeurFenetre;
@@ -72,19 +71,22 @@ void gestionEvenement(EvenementGfx evenement)
 	static char *chaine_taille_nouveau_patient, *chaine_poids_nouveau_patient;
 
 	static zone zChargerVideo, zVideoOrigine, zAnalyser, zAnalyseEnCours, zAnalyseVideo, zNomVideo, zAnalysesPrecedentes;
+	static zone* zBoutonsAnalysesPrecedentes;
 	static char *cheminVideoActuelle, *nomImageVideo;
-	static DonneesImageRGB *imageVideo, *imageVideoCourbes;
+	static DonneesImageRGB *imageVideo, *imageVideoCourbes, *imageVideoSquelettes;
 	static bool enCours, enCoursAffichage;
 	static int compteurImageAlpha;
 	static int nbImageAlpha, lecture;
 	static struct dirent** listeImageAlpha;
 	static zone zAnalyse, zVideoSquelette, zGraph, zDonneesBio, zTailleAnalyse, zPoidsAnalyse, zPathologies, zCourbe, zBoite,ZMarcheReguliere;
+	static analyse* analyses = NULL;
+	static int nbAnalyses = 0;
 	static char *poids, *taille, *courbe, *boite, *marcheRegu;
 	static char date[32];
 	static bool resetPageAnalyse;
-	static int compteurImageAlphaCourbes;
-	static int nbImageAlphaCourbes, lectureCourbes;
-	static struct dirent** listeImageAlphaCourbes;
+	static int compteurImageAlphaCourbes, compteurImageAlphaSquelettes;
+	static int nbImageAlphaCourbes, lectureCourbes, nbImageAlphaSquelettes, lectureSquelettes;
+	static struct dirent** listeImageAlphaCourbes, **listeImageAlphaSquelettes;
 	static int rapiditeAffichage = 3, compteurRapiditeAffichage = 0;
 
 
@@ -100,8 +102,10 @@ void gestionEvenement(EvenementGfx evenement)
 			nouveau_prenom = nouveau_nom = chaine_taille_nouveau_patient = chaine_poids_nouveau_patient = NULL;
 			compteurImageAlpha = 0;
 			lecture = 0;
-			compteurImageAlphaCourbes = 0;
+			compteurImageAlphaSquelettes = 0;
 			lectureCourbes = 0;
+			compteurImageAlphaCourbes = 0;
+			lectureSquelettes = 0;
 			resetPageAnalyse = true;
 			enCours = false;
 			enCoursAffichage = false;
@@ -129,7 +133,7 @@ void gestionEvenement(EvenementGfx evenement)
 			initZonesNouveauPatient(zChargerPatient, &zNouveauPatient, &zPrenomNouveauPatient, &zNomNouveauPatient, &zTailleNouveauPatient, &zPoidsNouveauPatient, &zCreerPatient);
 
 			initZonesAnalyseVideo(zPatientActuel, &zAnalyseVideo, &zNomVideo, &zChargerVideo, &zVideoOrigine, &zAnalyser, &zAnalyseEnCours);
-			initZonesAnalysesPrecedentes(zPatientActuel, &zAnalysesPrecedentes);
+			//initZonesAnalysesPrecedentes(zPatientActuel, &zAnalysesPrecedentes);
 
             initZonesAnalyse(zPatientActuel, &zAnalyse, &zVideoSquelette, &zGraph);
             initZonesDonneesBio(zAnalyse, &zDonneesBio, &zTailleAnalyse, &zPoidsAnalyse);
@@ -191,13 +195,18 @@ void gestionEvenement(EvenementGfx evenement)
                 case 4: // page analyse
 					changeTexteZone(&zTitre,"Analyse");
 					char fullPathCourbes[256];
+					char fullPathSquelettes[256];
 					sprintf(fullPathCourbes, "%s/%s", CHEMIN_DOSSIER_COURBES, date);
+					sprintf(fullPathSquelettes, "%s/%s", CHEMIN_DOSSIER_SQUELETTES, date);
 					if (resetPageAnalyse) // On vient d'arriver sur la page, on declenche les fonctions pour la 1ere fois
 					{
 						resetPageAnalyse = false;
 						compteurImageAlphaCourbes = 0;
+						compteurImageAlphaSquelettes = 0;
 						nbImageAlphaCourbes = scandir(fullPathCourbes, &listeImageAlphaCourbes, NULL, alphasort);
-						printf("%d\n", nbImageAlphaCourbes);
+						nbImageAlphaSquelettes = scandir(fullPathSquelettes, &listeImageAlphaSquelettes, NULL, alphasort);
+						printf("courbes : %d\n", nbImageAlphaCourbes);
+						printf("squelettes : %d\n", nbImageAlphaSquelettes);
 						if (nbImageAlphaCourbes == -1)
 						{
 							lectureCourbes = 0;
@@ -205,6 +214,14 @@ void gestionEvenement(EvenementGfx evenement)
 						else
 						{
 							lectureCourbes = 1;
+						}
+						if (nbImageAlphaSquelettes == -1)
+						{
+							lectureSquelettes = 0;
+						}
+						else
+						{
+							lectureSquelettes = 1;
 						}
 					}
 					if (compteurRapiditeAffichage < rapiditeAffichage)
@@ -214,6 +231,7 @@ void gestionEvenement(EvenementGfx evenement)
 					else
 					{
 						compteurRapiditeAffichage = 0;
+						
 						libereDonneesImageRGB(&imageVideoCourbes);
 						imageVideoCourbes = lisImageCouranteAlphabetique(listeImageAlphaCourbes[compteurImageAlphaCourbes], fullPathCourbes, &nomImageVideo); //listeImageAlpha[compteurImageAlpha] l'image que l'on veut lire
 						if(imageVideoCourbes == NULL)
@@ -226,11 +244,28 @@ void gestionEvenement(EvenementGfx evenement)
 						{
 							compteurImageAlphaCourbes++;
 						}
+						
+						libereDonneesImageRGB(&imageVideoSquelettes);
+						imageVideoSquelettes = lisImageCouranteAlphabetique(listeImageAlphaSquelettes[compteurImageAlphaSquelettes], fullPathSquelettes, &nomImageVideo); //listeImageAlpha[compteurImageAlpha] l'image que l'on veut lire
+						if(imageVideoSquelettes == NULL)
+						{
+							perror("erreur lecture image video");
+							libereDonneesImageRGB(&imageVideoSquelettes);
+							compteurImageAlphaSquelettes++;
+						}
+						else // image bien lue donc on peut detecter les lignes
+						{
+							compteurImageAlphaSquelettes++;
+						}
 					}
 					
 					if(lectureCourbes != 0 && compteurImageAlphaCourbes == nbImageAlphaCourbes)
 					{
 						compteurImageAlphaCourbes = 0;
+					}
+					if(lectureSquelettes != 0 && compteurImageAlphaSquelettes == nbImageAlphaSquelettes)
+					{
+						compteurImageAlphaSquelettes = 0;
 					}
 					break;
 				case 21: // page fiche patient
@@ -274,13 +309,8 @@ void gestionEvenement(EvenementGfx evenement)
 					affichePatientActuel(zPatientActuel,zPrenomPatientActuel,prenom, zNomPatientActuel,nom,zVoirFiche);
 					afficheAnalyseVideo(zAnalyseVideo, zNomVideo, zChargerVideo, cheminVideoActuelle, zVideoOrigine, imageVideo, zAnalyser, zAnalyseEnCours, enCours, fleche);
 					
-					// A modifier, il faut lire les fichiers du dossier du patient
-					analyse analysesPrecedentes[3];
-					analysesPrecedentes[0].dateHeure = "10-10-2019_22:22:22";
-					analysesPrecedentes[1].dateHeure = "10-10-2019_22:22:23";
-					analysesPrecedentes[2].dateHeure = "10-10-2019_22:22:24";
+					afficheAnalysesPrecedentes(zAnalysesPrecedentes, zBoutonsAnalysesPrecedentes, analyses, nbAnalyses);
 					
-					afficheAnalysesPrecedentes(zAnalysesPrecedentes, analysesPrecedentes, 3);
 					if (enCours)
 					{
 						enCoursAffichage = true;
@@ -290,7 +320,7 @@ void gestionEvenement(EvenementGfx evenement)
 					monIHM(zQuit,zHome,zRetour,retour,home,croix,logo,numPage);
 					afficheTitre(zTitre,3);
 					affichePatientActuel(zPatientActuel,zPrenomPatientActuel,prenom, zNomPatientActuel,nom,zVoirFiche);
-					afficheAnalyse(zAnalyse, zVideoSquelette, zGraph, imageVideoCourbes);
+					afficheAnalyse(zAnalyse, zVideoSquelette, imageVideoSquelettes, zGraph, imageVideoCourbes);
 					afficheDonneesBio(zDonneesBio, zTailleAnalyse, taille, zPoidsAnalyse, poids);
 					affichePathologies(zPathologies, zCourbe, "Oui", zBoite, "Non", ZMarcheReguliere, "Oui"); // Oui Non Oui
 					break;
@@ -485,6 +515,12 @@ void gestionEvenement(EvenementGfx evenement)
 						
 						
 						numPage=3;
+						
+						nbAnalyses = 0;
+						// Pas d'analyses actuelles
+						analyses = NULL;
+						zBoutonsAnalysesPrecedentes = NULL;
+						initZonesAnalysesPrecedentes(zPatientActuel, &zAnalysesPrecedentes, zBoutonsAnalysesPrecedentes, analyses, nbAnalyses);
 					}
 					else
 					{
@@ -517,6 +553,11 @@ void gestionEvenement(EvenementGfx evenement)
 						strcpy(taille, tailleTemp);
 						strcpy(poids, poidsTemp);
 						numPage=3;
+						
+						// Chargement des analyses precedentes s'il y en a
+						analyses = chargeAnalysesPatient(nom, prenom, &nbAnalyses);
+						zBoutonsAnalysesPrecedentes = (zone*) malloc(nbAnalyses * sizeof(zone)); // On alloue le tableau avec le nombre d'analyses
+						initZonesAnalysesPrecedentes(zPatientActuel, &zAnalysesPrecedentes, zBoutonsAnalysesPrecedentes, analyses, nbAnalyses);
 						//int test1 = ajouteElementTableau(nom, prenom, "Videos", "TESTAJOUTVIDEO"); // Ajoute la video TESTAJOUTEVIDEO au fichier txt patient
 						//int test2 = modifieChamp(nom, prenom, "Courbe", "Non"); // Change la valeur de Courbe dans le fichir txt du patient
 					}
@@ -559,6 +600,28 @@ void gestionEvenement(EvenementGfx evenement)
 				{
 					enCours = true;
 				}
+				else if(numPage == 3 && nbAnalyses >0 && analyses != NULL && zAnalysesPrecedentes.xmin<abscisseSouris() && abscisseSouris()<zAnalysesPrecedentes.xmax && zAnalysesPrecedentes.ymin<ordonneeSouris() && ordonneeSouris()<zAnalysesPrecedentes.ymax)
+				{
+					int p = 0;
+					for (p=0; p<nbAnalyses;p++)
+					{
+						// SI on clic sur un bouton de la liste
+						if (zBoutonsAnalysesPrecedentes[p].xmin<abscisseSouris() && abscisseSouris()<zBoutonsAnalysesPrecedentes[p].xmax && zBoutonsAnalysesPrecedentes[p].ymin<ordonneeSouris() && ordonneeSouris()<zBoutonsAnalysesPrecedentes[p].ymax)
+						{
+							// MEme chose que quand on lance une analyse sauf qu'on a pas a cree l'analyse car elle existe deja
+							lecture = 0;
+							enCours = false;
+							enCoursAffichage = false;
+							resetPageAnalyse = true;
+							
+							//On doit changer date par la date sur laquelle on a clique, pareil pour poids et taille et le reste
+							strcpy(date, analyses[p].dateHeure);
+							strcpy(poids, analyses[p].poids);
+							strcpy(taille, analyses[p].taille);
+							numPage = 4;
+						}
+					}
+				}
 				else // clic sur toute autre zone de l'ihm
 				{
 					zPrenomChargerPatient.saisie = false;
@@ -593,7 +656,7 @@ void gestionEvenement(EvenementGfx evenement)
 				case 3:
 					redimensionneZonePatientActuel(zTitre, &zPatientActuel, &zVoirFiche, &zPrenomPatientActuel, &zNomPatientActuel);
 					redimensionneZoneAnalyseVideo(zPatientActuel, &zAnalyseVideo, &zNomVideo, &zChargerVideo, &zVideoOrigine, &zAnalyser, &zAnalyseEnCours);
-					redimensionneZoneAnalysesPrecedentes(zPatientActuel, &zAnalysesPrecedentes);
+					redimensionneZoneAnalysesPrecedentes(zPatientActuel, &zAnalysesPrecedentes, zBoutonsAnalysesPrecedentes, analyses, nbAnalyses);
 					break;
                 case 4:
 					redimensionneZonePatientActuel(zTitre, &zPatientActuel, &zVoirFiche, &zPrenomPatientActuel, &zNomPatientActuel);

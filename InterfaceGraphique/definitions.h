@@ -19,6 +19,11 @@ typedef struct _zones{
 	}_zones;
 
 typedef struct analyse {
-	char *poids, *taille, *courbe, *marcheReguliere, *boite, *dateHeure ;
-	
+	char poids[8];
+	char taille[8];
+	char courbe[8];
+	char marcheReguliere[8];
+	char boite[8];
+	char dateHeure[32];
+	char video[128];
 	} analyse;
