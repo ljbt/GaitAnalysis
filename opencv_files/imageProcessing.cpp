@@ -169,7 +169,7 @@ void drawSqueletton(Mat *mat, Point foot1, Point foot2, Point knee1, Point knee2
             line(*mat, elbow2, shoulder, white);
 
         if(elbow2.x != -1 && elbow2.y != -1)
-            circle(*mat,elbow2,2, blue, -1);
+            circle(*mat,elbow2,2, red, -1);
         if(shoulder.x != -1 && shoulder.y != -1)
             circle(*mat, shoulder ,2, red, -1);
     } 
@@ -182,7 +182,7 @@ void drawSqueletton(Mat *mat, Point foot1, Point foot2, Point knee1, Point knee2
         if(elbow2.x != -1 && elbow2.y != -1)
             circle(*mat,elbow2,2, blue, -1);
         if(hand2.x != -1 && hand2.y != -1)
-            circle(*mat, hand2 ,2, red, -1);
+            circle(*mat, hand2 ,2, blue, -1);
     } 
 
     if( (head.x != -1 && head.y != -1) || (shoulder.x != -1 && shoulder.y != -1) )
