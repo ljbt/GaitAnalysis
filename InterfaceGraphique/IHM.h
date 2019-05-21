@@ -30,6 +30,32 @@ void initZonesNouveauPatient(zone zChargerPatient, zone *zNouveauPatient, zone *
 void afficheNouveauPatient(zone zNouveauPatient, zone zPrenom, char *prenom, zone zNom, char *nom, zone zTaille, char *taille, zone zPoids, char *poids, zone zCreerPatient);
 void redimensionneZoneNouveauPatient(zone zChargerPatient,zone *zNouveauPatient,zone *zPrenom,zone *zNom, zone *zTaille,zone *zPoids,zone *zCreerPatient);
 
+void initZonesAnalyseVideo(zone zPatientActuel, zone * zAnalyseVideo, zone *zNomVideo, zone *zChargerVideo, zone *zVideoOrigine, zone *zAnalyser, zone *zAnalyseEnCours);
+void afficheAnalyseVideo(zone zAnalyseVideo, zone zNomVideo, zone zChargerVideo, char* nomVideo, zone zVideoOrigine, DonneesImageRGB* video, zone zAnalyser, zone zAnalyseEnCours, bool enCours, DonneesImageRGB* fleche);
+void redimensionneZoneAnalyseVideo(zone zPatientActuel, zone * zAnalyseVideo, zone *zNomVideo, zone *zChargerVideo, zone *zVideoOrigine, zone *zAnalyser, zone *zAnalyseEnCours);
+void gestionVideoActuelle(zone *zVideoOrigine, char **nomVideo);
+
+void initZonesAnalysesPrecedentes(zone zPatientActuel, zone * zAnalysesPrecedentes);
+void afficheAnalysesPrecedentes(zone zAnalysesPrecedentes, analyse* analysesPrecedentes, int nbAnalyses);
+void redimensionneZoneAnalysesPrecedentes(zone zPatientActuel, zone * zAnalysesPrecedentes);
+
+void initZonesAnalyse(zone zPatientActuel, zone *zAnalyse, zone *zVideoSquelette, zone *zGraph);
+void afficheAnalyse(zone zAnalyse, zone zVideoSquelette, zone zGraph, DonneesImageRGB* video);
+void redimensionneZoneAnalyse(zone zPatientActuel, zone *zAnalyse, zone *zVideoSquelette, zone *zGraph);
+
+void initZonesDonneesBio(zone zAnalyse, zone *zDonneesBio, zone *zTailleAnalyse, zone *zPoidsAnalyse);
+void afficheDonneesBio(zone zDonneesBio, zone zTailleAnalyse, char* taille, zone zPoidsAnalyse, char* poids);
+void redimensionneZoneDonneesBio(zone zAnalyse, zone *zDonneesBio, zone *zTailleAnalyse, zone *zPoidsAnalyse);
+
+void initZonesPathologies(zone zDonneesBio, zone *zPathologies, zone *zCourbe, zone *zBoite, zone* zMarcheReguliere);
+void affichePathologies(zone zPathologies, zone zCourbe, char* courbe, zone zBoite, char* boite, zone zMarcheReguliere, char* marcheRegu);
+void redimensionneZonePathologies(zone zDonneesBio, zone *zPathologies, zone *zCourbe, zone *zBoite, zone* zMarcheReguliere);
+
+void initZonesFichePatient(zone zPatientActuel, zone *zFichePatient, zone *zFicheNom, zone *zFichePrenom, zone *zFicheTaille, zone *zFichePoids, zone *zFicheCourbe, zone *zFicheBoite, zone *zFicheMarcheRegu, zone *zFicheVideos);
+void afficheFichePatient(zone zFichePatient, zone zFicheNom, char* nom, zone zFichePrenom, char* prenom, zone zFicheTaille, char* taille, zone zFichePoids, char* poids,
+                         zone zFicheCourbe, char* courbe, zone zFicheBoite, char* boite, zone zFicheMarcheRegu, char* marcheRegu, zone zFicheVideos, char** videos);
+void redimensionneZoneFichePatient(zone zPatientActuel, zone *zFichePatient, zone *zFicheNom, zone *zFichePrenom, zone *zFicheTaille, zone *zFichePoids, zone *zFicheCourbe, zone *zFicheBoite, zone *zFicheMarcheRegu, zone *zFicheVideos);
+
 
 void recupereTexte(char **chaine);
 void recupereTexteEntiers(char **chaine);
