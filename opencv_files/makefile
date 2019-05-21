@@ -9,7 +9,7 @@ TARGET = program
 
 all: $(TARGET)
 
-$(TARGET): main.o Mask.o imageProcessing.o
+$(TARGET): main.o Mask.o imageProcessing.o statistics.o
 	$(CXX) -o $@ $(FLAGS) $^ $(LDLIBS)
 
 
@@ -20,6 +20,9 @@ Mask.o: Mask.cpp Mask.h
 	$(CXX) $(CFLAGS) $<
 
 imageProcessing.o: imageProcessing.cpp imageProcessing.h
+	$(CXX) $(CFLAGS) $<
+
+statistics.o: statistics.cpp statistics.h
 	$(CXX) $(CFLAGS) $<
 
 clean:
