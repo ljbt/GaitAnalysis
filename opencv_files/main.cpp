@@ -249,6 +249,9 @@ int main(void)
         if(!centresPastillesBleues.empty())
             identifyArticulationsfromBluePoints(centresPastillesBleues,yminPiedBleu,ymaxPiedBleu,&piedBleu,&piedBleuPrecedent,yminGenouBleu,ymaxGenouBleu,&genouBleu,&genouBleuPrecedent, yminMainBleu,ymaxMainBleu,&mainBleu,&mainBleuPrecedent, yminCoudeBleu,ymaxCoudeBleu,&coudeBleu,&coudeBleuPrecedent,&drawing2,color);
 
+        // une fois que les lignes entre les articulations precedentes et les actuelles, il faut enregistrer les points de ces lignes
+        // dans des vecteurs, pour les comparer avec 
+
         // Puis on affiche les articulations sur l'image
         
        // Mat dessinCourbes = drawing2.clone();
