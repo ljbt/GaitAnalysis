@@ -1,5 +1,9 @@
 #include "imageProcessing.h"
 #include "opencv2/imgproc.hpp"
+#include "statistics.h"
+#include <iostream>
+
+using namespace std;
 
 void writeLinestoMat(const vector<Point> pointsA, const vector<Point> pointsB, Mat *mat, const Scalar color)
 {
@@ -195,4 +199,34 @@ void drawSqueletton(Mat *mat, Point foot1, Point foot2, Point knee1, Point knee2
         if(shoulder.x != -1 && shoulder.y != -1)
             circle(*mat, shoulder ,2, red, -1);
     } 
+}
+
+// fonction qui entre newPoint dans le vector v, en decalant les autres pour pas depasser maxSize
+void managePointVector(Point newPoint, vector<Point> *v, size_t maxSize)
+{
+    if(newPoint.x != -1 && newPoint.y != -1)
+    {
+        if(v->size() < maxSize)
+            v->push_back(newPoint);
+        else
+        {
+            // decale les points avant d'inserer le nouveau
+            rotate(v->begin(),v->begin()+(v->size()+1 - maxSize) ,v->end());
+            v->resize(maxSize-1);
+            v->push_back(newPoint);
+        }
+    }
+}
+
+bool detectFootDown(vector<Point> posFeet)
+{
+    vector<double> posY;
+    for (size_t i = 0; i < posFeet.size(); i++)
+        posY.push_back(posFeet[i].y);
+    
+    double coef = coef_variation(posY);
+
+    if(coef > 0.005)
+        return false;
+    else return true;
 }

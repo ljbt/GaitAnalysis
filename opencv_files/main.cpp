@@ -7,7 +7,8 @@
 
 #include "Mask.h"
 #include "imageProcessing.h"
- 
+ #include "statistics.h"
+
 using namespace std;
 using namespace cv;
 
@@ -63,6 +64,7 @@ int main(void)
     Mat drawing2 = Mat::zeros( image.size(), CV_8UC3 );
 
     vector<Point> centresPastillesRougesImagePrecedente;
+    vector<Point> posPiedsRouges;
 
     while(1)
     {
@@ -266,6 +268,14 @@ int main(void)
         drawSqueletton(&dessinSquelette, piedRouge,piedBleu,genouRouge,genouBleu,hanche,mainRouge,mainBleu,coudeRouge,coudeBleu,epauleRouge,tete);
         imshow("Squelette", dessinSquelette);
 
+
+        // on gere maintenant les cycles de marche
+        // d'abord il faut detecter un cycle, pour ça il faut savoir detecter un pied a terre, donc recuperer la position d'un pied dans plusieurs images
+        int nb_images_pr_detect = 5;
+        managePointVector(piedRouge,&posPiedsRouges, nb_images_pr_detect);
+        if(!posPiedsRouges.empty())
+            if( detectFootDown(posPiedsRouges) )
+                cout<<"Pose pied rouge!"<<endl;
         
         char c=(char)waitKey(125); // waits 125ms to get a key value
         if(c==27) // echap
