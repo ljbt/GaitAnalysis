@@ -1,6 +1,8 @@
 #include "imageProcessing.h"
 #include "opencv2/imgproc.hpp"
 #include "statistics.h"
+#include "definitions.h"
+
 #include <iostream>
 
 using namespace std;
@@ -218,15 +220,19 @@ void managePointVector(Point newPoint, vector<Point> *v, size_t maxSize)
     }
 }
 
-bool detectFootDown(vector<Point> posFoot)
+// fonction qui renvoie true si la position en x d'un tableau de numElmts Points varie assez
+// si le tableau ne contient pas numElmts elements retourne aussi faux
+bool detectFootDown(vector<Point> posFoot, size_t numElmts)
 {
-    vector<double> posY;
-    for (size_t i = 0; i < posFoot.size(); i++)
-        posY.push_back(posFoot[i].y);
+    if(posFoot.size() < numElmts)
+        return false;
     
-    double coef = coef_variation(posY);
-
-    if(coef > 0.005)
+    vector<double> posX;
+    for (size_t i = 0; i < posFoot.size(); i++)
+        posX.push_back(posFoot[i].x);
+    
+    double coef = coef_variation(posX);
+    if(coef > 0.05)
         return false;
     else return true;
 }
@@ -236,14 +242,20 @@ bool detectGaitCycle(int *numFootRightDown, vector<Point> posFootRight, int *num
     // si le pied rouge ne s'est pas posé ou que le pied bleu s'est posé on doit detecter la pose du pied rouge
     if(*numFootRightDown == 0 || *numFootLeftDown == 1)
     {
-        if( detectFootDown(posFootRight) )
+        if( detectFootDown(posFootRight, NB_IMAGES_DETECT_FOOT_DOWN) )
+        {
+            cout<<"foot red down"<<endl;
             (*numFootRightDown) ++;
+        }
     }
     // si le pied rouge s'est posé, on doit attendre que le pied bleu se pose
     if(*numFootRightDown == 1 && *numFootLeftDown < 1)
     {
-        if( detectFootDown(posFootLeft) )
+        if( detectFootDown(posFootLeft, NB_IMAGES_DETECT_FOOT_DOWN) )
+        {
+            cout<<"foot blue down"<<endl;
             (*numFootLeftDown) ++;
+        }
     }
     // Une fois que le pied bleu s'est posé on doit attendre que le pied rouge se repose
 
@@ -253,4 +265,12 @@ bool detectGaitCycle(int *numFootRightDown, vector<Point> posFootRight, int *num
         return true;
     }
     else return false;
+}
+
+void saveGaitCyclePositions(vector<Point> *footRightCycle, vector<Point> *footLeftCycle, int *numFootRightDown, vector<Point> posFootRight, int *numFootLeftDown, vector<Point> posFootLeft)
+{
+    if(!posFootRight.empty() && !posFootLeft.empty())
+            if( detectGaitCycle(numFootRightDown, posFootRight, numFootLeftDown,posFootLeft) )
+                cout<<"Cycle fait!\n"<<endl;
+    
 }

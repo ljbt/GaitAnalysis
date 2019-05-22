@@ -7,7 +7,8 @@
 
 #include "Mask.h"
 #include "imageProcessing.h"
- #include "statistics.h"
+#include "statistics.h"
+#include "definitions.h"
 
 using namespace std;
 using namespace cv;
@@ -55,7 +56,7 @@ int main(void)
     enum {Rouge,Vert,Bleu,Jaune} Masque = Rouge;
 
 
-    image = imread("./learning_videos/courbe0rythme0boited-1/01.bmp");
+    image = imread("./learning_videos/courbe0rythme0boite0-1/01.bmp"); // pour récupérer la taille des images de la video
     if( ! image.data )
     {
         cout << "Error loading image " << endl;
@@ -68,6 +69,7 @@ int main(void)
 
     int nbPiedRougeDown = 0;
     int nbPiedBleuDown = 0;
+    vector<Point> footRedCycle, footBlueCycle;
 
     while(1)
     {
@@ -274,13 +276,11 @@ int main(void)
 
         // on gere maintenant les cycles de marche
         // d'abord il faut detecter un cycle, pour ça il faut savoir detecter un pied a terre, donc recuperer la position d'un pied dans plusieurs images
-        int nb_images_pr_detect = 5;
-        managePointVector(piedRouge,&posPiedsRouges, nb_images_pr_detect);
-        managePointVector(piedBleu,&posPiedsBleus, nb_images_pr_detect);
+        managePointVector(piedRouge,&posPiedsRouges, NB_IMAGES_DETECT_FOOT_DOWN);
+        managePointVector(piedBleu,&posPiedsBleus, NB_IMAGES_DETECT_FOOT_DOWN);
+
+        saveGaitCyclePositions(&footRedCycle,&footBlueCycle, &nbPiedRougeDown, posPiedsRouges, &nbPiedBleuDown,posPiedsBleus);
         
-        if(!posPiedsRouges.empty() && !posPiedsBleus.empty())
-            if( detectGaitCycle(&nbPiedRougeDown, posPiedsRouges, &nbPiedBleuDown,posPiedsBleus) )
-                cout<<"\nCycle fait!"<<endl;
         
         char c=(char)waitKey(125); // waits 125ms to get a key value
         if(c==27) // echap
