@@ -316,7 +316,7 @@ void initZonesChargerPatient(zone zPatientActuel, zone *zChargerPatient, zone *z
 
 	zCharger->hauteur = HAUTEUR_TEXTE;
 	changeTexteZone(zCharger,"Charger donnees");
-	zCharger->espaceGauche = 20;
+	zCharger->espaceGauche = 15;
 	zCharger->espaceDroite = 5;
 	zCharger->longueur = tailleChaine(zCharger->texte,zCharger->hauteur);
 	zCharger->xmin = zNom->xmax + zNom->espaceDroite + zCharger->espaceGauche;
@@ -760,14 +760,19 @@ void gestionVideoActuelle(zone *zVideoOrigine, char **nomVideo)
 	}
 }
 
-void initZonesAnalysesPrecedentes(zone zPatientActuel, zone * zAnalysesPrecedentes)
+void initZonesAnalysesPrecedentes(zone zPatientActuel, zone * zAnalysesPrecedentes, zone* zBoutonsAnalysesPrecedentes, analyse* analysesPrecedentes, int nbAnalyses)
 {
+	int i =0;
+	float coeffEspace = 2.5;
+	int contourRectangle = 10;
+	
+	
 	zAnalysesPrecedentes->espaceHaut = 50;
 	zAnalysesPrecedentes->espaceBas = 25;
 	zAnalysesPrecedentes->espaceGauche = 50;
 	zAnalysesPrecedentes->espaceDroite = 50;
 	zAnalysesPrecedentes->hauteur = HAUTEUR_TEXTE;
-	changeTexteZone(zAnalysesPrecedentes,"Analyses precedentes (en travaux) :");
+	changeTexteZone(zAnalysesPrecedentes,"Analyses precedentes :");
 	
 	zAnalysesPrecedentes->longueur = largeurFenetre()/2 - zAnalysesPrecedentes->espaceGauche - zAnalysesPrecedentes->espaceDroite ;
 	zAnalysesPrecedentes->xmin = zAnalysesPrecedentes->espaceGauche;
@@ -775,9 +780,18 @@ void initZonesAnalysesPrecedentes(zone zPatientActuel, zone * zAnalysesPrecedent
 	zAnalysesPrecedentes->ymax = zPatientActuel.ymin - zAnalysesPrecedentes->espaceHaut;
 	zAnalysesPrecedentes->ymin = zAnalysesPrecedentes->espaceBas ;
 	
+	for (i=0; i<nbAnalyses;i++)
+	{
+		int iymax = zAnalysesPrecedentes->ymax - (coeffEspace *(i+1)*HAUTEUR_TEXTE);
+		zBoutonsAnalysesPrecedentes[i].xmin = zAnalysesPrecedentes->xmin;
+		zBoutonsAnalysesPrecedentes[i].xmax = zAnalysesPrecedentes->xmin + tailleChaine(analysesPrecedentes[i].dateHeure, HAUTEUR_TEXTE) + 20;
+		zBoutonsAnalysesPrecedentes[i].ymin = iymax - HAUTEUR_TEXTE - contourRectangle;
+		zBoutonsAnalysesPrecedentes[i].ymax = iymax + contourRectangle;
+	}
+	
 }
 
-void afficheAnalysesPrecedentes(zone zAnalysesPrecedentes, analyse* analysesPrecedentes, int nbAnalyses)
+void afficheAnalysesPrecedentes(zone zAnalysesPrecedentes, zone* zBoutonsAnalysesPrecedentes, analyse* analysesPrecedentes, int nbAnalyses)
 {
 	int i = 0;
 	couleurCourante(0,0,0);
@@ -785,35 +799,40 @@ void afficheAnalysesPrecedentes(zone zAnalysesPrecedentes, analyse* analysesPrec
 	afficheChaine(zAnalysesPrecedentes.texte, zAnalysesPrecedentes.hauteur, zAnalysesPrecedentes.xmin,zAnalysesPrecedentes.ymax - zAnalysesPrecedentes.hauteur);
 	float coeffEspace = 2.5;
 	int contourRectangle = 10;
-	/*couleurCourante(0,0,0);
-	couleurCourante(204,204,0);
-	rectangle(zAnalysesPrecedentes.xmin, zAnalysesPrecedentes.ymax-(i+2)*HAUTEUR_TEXTE, zAnalysesPrecedentes.xmin + tailleChaine(analysesPrecedentes[i].dateHeure, HAUTEUR_TEXTE) + 20, zAnalysesPrecedentes.ymax + (i+1)*HAUTEUR_TEXTE);
-	couleurCourante(0,0,0);
-	afficheChaine(analysesPrecedentes[i].dateHeure, HAUTEUR_TEXTE, zAnalysesPrecedentes.xmin+10, zAnalysesPrecedentes.ymax+25-(i+2)*HAUTEUR_TEXTE);*/
-
 	
-	if(nbAnalyses != 0)
+	if(nbAnalyses > 0 && analysesPrecedentes != NULL)
 		for(i=0; i< nbAnalyses; i++)
 		{
-			//int iymax = (int)((float)zAnalysesPrecedentes.ymax - (2.5 *(float)(i+1)*(float)HAUTEUR_TEXTE));
-			int iymax = zAnalysesPrecedentes.ymax - (coeffEspace *(i+1)*HAUTEUR_TEXTE);
-			//int iymax = zAnalysesPrecedentes.ymax - (1.5 * i + 1.5)*HAUTEUR_TEXTE;
+			//int iymax = zAnalysesPrecedentes.ymax - (coeffEspace *(i+1)*HAUTEUR_TEXTE);
 			couleurCourante(26,71,255);
-			//rectangle(zAnalysesPrecedentes.xmin, zAnalysesPrecedentes.ymax - zAnalysesPrecedentes.espaceBas -(i+1)*(HAUTEUR_TEXTE+5) + HAUTEUR_TEXTE -3, zAnalysesPrecedentes.xmin + tailleChaine(analysesPrecedentes[i].dateHeure, HAUTEUR_TEXTE) + 20, zAnalysesPrecedentes.ymax- zAnalysesPrecedentes.espaceBas - (i+1)*(HAUTEUR_TEXTE +5) +3);
 			// On calcule les ymax pour chaque i, le ymin est juste le ymax - la HAUTEUR_TEXTE. On fait -3 et +3 pour avoir un rectangle jaune + grand que le texte
-			rectangle(zAnalysesPrecedentes.xmin, iymax - HAUTEUR_TEXTE - contourRectangle, zAnalysesPrecedentes.xmin + tailleChaine(analysesPrecedentes[i].dateHeure, HAUTEUR_TEXTE) + 20, iymax + contourRectangle);
+			//rectangle(zAnalysesPrecedentes.xmin, iymax - HAUTEUR_TEXTE - contourRectangle, zAnalysesPrecedentes.xmin + tailleChaine(analysesPrecedentes[i].dateHeure, HAUTEUR_TEXTE) + 20, iymax + contourRectangle);
+			rectangle(zBoutonsAnalysesPrecedentes[i].xmin, zBoutonsAnalysesPrecedentes[i].ymin, zBoutonsAnalysesPrecedentes[i].xmax, zBoutonsAnalysesPrecedentes[i].ymax);
 			couleurCourante(255,255,255);
 			//afficheChaine(analysesPrecedentes[i].dateHeure, HAUTEUR_TEXTE, zAnalysesPrecedentes.xmin+10, zAnalysesPrecedentes.ymax - zAnalysesPrecedentes.espaceBas -(i+2)*(HAUTEUR_TEXTE+5));
-			afficheChaine(analysesPrecedentes[i].dateHeure, HAUTEUR_TEXTE, zAnalysesPrecedentes.xmin+10, iymax - HAUTEUR_TEXTE );
+			afficheChaine(analysesPrecedentes[i].dateHeure, HAUTEUR_TEXTE, zBoutonsAnalysesPrecedentes[i].xmin+10, zBoutonsAnalysesPrecedentes[i].ymin + contourRectangle);
 		}
 }
 
-void redimensionneZoneAnalysesPrecedentes(zone zPatientActuel, zone * zAnalysesPrecedentes)
+void redimensionneZoneAnalysesPrecedentes(zone zPatientActuel, zone * zAnalysesPrecedentes, zone* zBoutonsAnalysesPrecedentes, analyse* analysesPrecedentes, int nbAnalyses)
 {
+	int i = 0;
+	float coeffEspace = 2.5;
+	int contourRectangle = 10;
+	zAnalysesPrecedentes->longueur = largeurFenetre()/2 - zAnalysesPrecedentes->espaceGauche - zAnalysesPrecedentes->espaceDroite ;
 	zAnalysesPrecedentes->xmin = zAnalysesPrecedentes->espaceGauche;
 	zAnalysesPrecedentes->xmax = zAnalysesPrecedentes->xmin + zAnalysesPrecedentes->longueur;
 	zAnalysesPrecedentes->ymax = zPatientActuel.ymin - zAnalysesPrecedentes->espaceHaut;
 	zAnalysesPrecedentes->ymin = zAnalysesPrecedentes->espaceBas ;
+	
+	for (i=0; i<nbAnalyses;i++)
+	{
+		int iymax = zAnalysesPrecedentes->ymax - (coeffEspace *(i+1)*HAUTEUR_TEXTE);
+		zBoutonsAnalysesPrecedentes[i].xmin = zAnalysesPrecedentes->xmin;
+		zBoutonsAnalysesPrecedentes[i].xmax = zAnalysesPrecedentes->xmin + tailleChaine(analysesPrecedentes[i].dateHeure, HAUTEUR_TEXTE) + 20;
+		zBoutonsAnalysesPrecedentes[i].ymin = iymax - HAUTEUR_TEXTE - contourRectangle;
+		zBoutonsAnalysesPrecedentes[i].ymax = iymax + contourRectangle;
+	}
 }
 
 
@@ -822,9 +841,9 @@ void initZonesAnalyse(zone zPatientActuel, zone *zAnalyse, zone *zVideoSquelette
     // contenant
 	zAnalyse->espaceHaut = 50;
 	zAnalyse->espaceBas = 15;
-	zAnalyse->espaceGauche = 50;
-	zAnalyse->espaceDroite = 50;
-	zAnalyse->hauteur = 250; // hauteur image
+	zAnalyse->espaceGauche = 15;
+	zAnalyse->espaceDroite = 15;
+	zAnalyse->hauteur = 281; // hauteur image
 	//changeTexteZone(zAnalyse,"Charger video : ");
 	zAnalyse->longueur = largeurFenetre() - zAnalyse->espaceGauche - zAnalyse->espaceDroite ;
 	zAnalyse->xmin = zAnalyse->espaceGauche;
@@ -834,12 +853,12 @@ void initZonesAnalyse(zone zPatientActuel, zone *zAnalyse, zone *zVideoSquelette
 
 	// zones interieures
 
-	zVideoSquelette->hauteur = 250;
+	zVideoSquelette->hauteur = 281;
 	zVideoSquelette->espaceGauche = 0;
 	zVideoSquelette->espaceDroite = 10;
 	zVideoSquelette->espaceBas = 10;
 	zVideoSquelette->espaceHaut = 0;
-	zVideoSquelette->longueur = 250;
+	zVideoSquelette->longueur = 500;
 	zVideoSquelette->xmin = zAnalyse->xmin + zVideoSquelette->espaceGauche;
 	zVideoSquelette->xmax = zVideoSquelette->xmin + zVideoSquelette->longueur;
 	zVideoSquelette->ymax = zAnalyse->ymax - zVideoSquelette->espaceHaut;
@@ -847,7 +866,7 @@ void initZonesAnalyse(zone zPatientActuel, zone *zAnalyse, zone *zVideoSquelette
 	
 	zGraph->hauteur = 281; // img dim
 	zGraph->longueur = 500; // img dim
-	zGraph->espaceGauche = 10;
+	zGraph->espaceGauche = 20;
 	zGraph->espaceDroite = 10;
 	zGraph->espaceBas = 10;
 	zGraph->espaceHaut = 0;
@@ -857,17 +876,20 @@ void initZonesAnalyse(zone zPatientActuel, zone *zAnalyse, zone *zVideoSquelette
 	zGraph->ymax = zAnalyse->ymax - zGraph->espaceHaut;
 	zGraph->ymin = zGraph->ymax - zGraph->hauteur;
 }
-void afficheAnalyse(zone zAnalyse, zone zVideoSquelette, zone zGraph, DonneesImageRGB* video)
+
+void afficheAnalyse(zone zAnalyse, zone zVideoSquelette, DonneesImageRGB* videoSquelette, zone zGraph, DonneesImageRGB* videoGraph)
 {
     couleurCourante(0,0,0);
 	epaisseurDeTrait(2);
 
-	couleurCourante(255,0,0);
-	rectangle(zVideoSquelette.xmin, zVideoSquelette.ymin, zVideoSquelette.xmax, zVideoSquelette.ymax); // video
-	
-	if (video != NULL)
+	if (videoSquelette != NULL)
 	{
-		afficheImage(zGraph, video);
+		afficheImage(zVideoSquelette, videoSquelette);
+	}
+	
+	if (videoGraph != NULL)
+	{
+		afficheImage(zGraph, videoGraph);
 	}
 
 }

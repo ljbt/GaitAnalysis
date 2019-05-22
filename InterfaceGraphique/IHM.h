@@ -35,12 +35,12 @@ void afficheAnalyseVideo(zone zAnalyseVideo, zone zNomVideo, zone zChargerVideo,
 void redimensionneZoneAnalyseVideo(zone zPatientActuel, zone * zAnalyseVideo, zone *zNomVideo, zone *zChargerVideo, zone *zVideoOrigine, zone *zAnalyser, zone *zAnalyseEnCours);
 void gestionVideoActuelle(zone *zVideoOrigine, char **nomVideo);
 
-void initZonesAnalysesPrecedentes(zone zPatientActuel, zone * zAnalysesPrecedentes);
-void afficheAnalysesPrecedentes(zone zAnalysesPrecedentes, analyse* analysesPrecedentes, int nbAnalyses);
-void redimensionneZoneAnalysesPrecedentes(zone zPatientActuel, zone * zAnalysesPrecedentes);
+void initZonesAnalysesPrecedentes(zone zPatientActuel, zone * zAnalysesPrecedentes, zone* zBoutonsAnalysesPrecedentes, analyse* analysesPrecedentes, int nbAnalyses);
+void afficheAnalysesPrecedentes(zone zAnalysesPrecedentes, zone* zBoutonsAnalysesPrecedentes, analyse* analysesPrecedentes, int nbAnalyses);
+void redimensionneZoneAnalysesPrecedentes(zone zPatientActuel, zone * zAnalysesPrecedentes, zone* zBoutonsAnalysesPrecedentes, analyse* analysesPrecedentes, int nbAnalyses);
 
 void initZonesAnalyse(zone zPatientActuel, zone *zAnalyse, zone *zVideoSquelette, zone *zGraph);
-void afficheAnalyse(zone zAnalyse, zone zVideoSquelette, zone zGraph, DonneesImageRGB* video);
+void afficheAnalyse(zone zAnalyse, zone zVideoSquelette, DonneesImageRGB* videoSquelette, zone zGraph, DonneesImageRGB* videoGraph);
 void redimensionneZoneAnalyse(zone zPatientActuel, zone *zAnalyse, zone *zVideoSquelette, zone *zGraph);
 
 void initZonesDonneesBio(zone zAnalyse, zone *zDonneesBio, zone *zTailleAnalyse, zone *zPoidsAnalyse);
