@@ -34,6 +34,7 @@ int ajouteElementTableau(char* nom, char* prenom, char* cleTab, char* valTab);
 
 //Modifie la valeur d'un champ cle dans le fichier txt du patient 
 int modifieChamp(char* nom, char* prenom, char* cleChamp, char* valChamp);
+int changeNomDossier(char* nomActuel, char* prenomActuel, char* modifNom, char *modifPrenom);
 
 int creeAnalysePatient(char* nom, char* prenom, char* taille, char* poids, char* courbe, char* claudification, char* marcheRegu, char* video, int nbImages, char* dateHeure);
 analyse lisAnalysePatient(char* nom, char* prenom, char* nomFichier);

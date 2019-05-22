@@ -88,9 +88,11 @@ void gestionEvenement(EvenementGfx evenement)
 	static int nbImageAlphaCourbes, lectureCourbes, nbImageAlphaSquelettes, lectureSquelettes;
 	static struct dirent** listeImageAlphaCourbes, **listeImageAlphaSquelettes;
 	static int rapiditeAffichage = 3, compteurRapiditeAffichage = 0;
-
-
-	static zone zFichePatient, zFicheNom, zFichePrenom, zFicheTaille, zFichePoids, zFicheCourbe, zFicheBoite, zFicheMarcheRegu, zFicheVideos;
+	
+	static char* modifPrenom, *modifNom, *modifTaille, *modifPoids;
+	static bool resetPageFichePatient;
+	static int numPagePrecedente;
+	static zone zFichePatient, zFicheNom, zFichePrenom, zFicheTaille, zFichePoids, zFicheMaj;
 
 	static time_t start_time, actual_time;
 
@@ -107,6 +109,7 @@ void gestionEvenement(EvenementGfx evenement)
 			compteurImageAlphaCourbes = 0;
 			lectureSquelettes = 0;
 			resetPageAnalyse = true;
+			resetPageFichePatient = true;
 			enCours = false;
 			enCoursAffichage = false;
 			nomImageVideo = (char *)malloc(sizeof(char) * 256);
@@ -138,6 +141,8 @@ void gestionEvenement(EvenementGfx evenement)
             initZonesAnalyse(zPatientActuel, &zAnalyse, &zVideoSquelette, &zGraph);
             initZonesDonneesBio(zAnalyse, &zDonneesBio, &zTailleAnalyse, &zPoidsAnalyse);
             initZonesPathologies(zDonneesBio, &zPathologies, &zCourbe, &zBoite, &ZMarcheReguliere);
+            
+            initZonesFichePatient(&zFichePatient, &zFicheNom, &zFichePrenom, &zFicheTaille, &zFichePoids, &zFicheMaj);
 
 			start_time = time(NULL); // gets system time
 			break;
@@ -268,8 +273,21 @@ void gestionEvenement(EvenementGfx evenement)
 						compteurImageAlphaSquelettes = 0;
 					}
 					break;
-				case 21: // page fiche patient
+				case 11: // page fiche patient
 					changeTexteZone(&zTitre,"Fiche patient");
+					if (resetPageFichePatient)
+					{
+						resetPageFichePatient = false;
+						modifPrenom = (char *)malloc(sizeof(char) * 32);
+						modifNom = (char *)malloc(sizeof(char) * 32);
+						modifTaille = (char *)malloc(sizeof(char) * 32);
+						modifPoids = (char *)malloc(sizeof(char) * 32);
+						strcpy(modifPrenom, prenom);
+						strcpy(modifNom, nom);
+						strcpy(modifTaille, taille);
+						strcpy(modifPoids, poids);
+					}
+					gestionFichePatient(&zFichePrenom, &zFicheNom, &zFicheTaille, &zFichePoids, &modifPrenom, &modifNom, &modifTaille, &modifPoids);
 					break;
 
 				default:
@@ -325,9 +343,10 @@ void gestionEvenement(EvenementGfx evenement)
 					affichePathologies(zPathologies, zCourbe, "Oui", zBoite, "Non", ZMarcheReguliere, "Oui"); // Oui Non Oui
 					break;
 
-				case 21: // page fiche patient
+				case 11: // page fiche patient
 					monIHM(zQuit,zHome,zRetour,retour,home,croix,logo,numPage);
 					afficheTitre(zTitre,3);
+					afficheFichePatient(zFichePatient, zFicheNom, modifNom, zFichePrenom, modifPrenom, zFicheTaille, modifTaille, zFichePoids, modifPoids, zFicheMaj);
 					break;
 
 			}
@@ -361,6 +380,22 @@ void gestionEvenement(EvenementGfx evenement)
 			else if(zNomVideo.saisie)
 			{
 				recupereTexte(&cheminVideoActuelle);
+			}
+			else if(zFichePrenom.saisie)
+			{
+				recupereTexte(&modifPrenom);
+			}
+			else if(zFicheNom.saisie)
+			{
+				recupereTexte(&modifNom);
+			}
+			else if(zFicheTaille.saisie)
+			{
+				recupereTexteEntiers(&modifTaille);
+			}
+			else if(zFichePoids.saisie)
+			{
+				recupereTexteEntiers(&modifPoids);
 			}
 			else{
 				switch (caractereClavier())
@@ -407,7 +442,11 @@ void gestionEvenement(EvenementGfx evenement)
 					zTailleNouveauPatient.saisie = false;
 					zPoidsNouveauPatient.saisie = false;
 					zNomVideo.saisie = false;
-					if(numPage > 2)
+					if (numPage == 11) // Page voir fiche
+					{
+						numPage = numPagePrecedente; // Retour a la page precendte
+					}
+					else if(numPage > 2)
 						numPage--;
 				}
 
@@ -421,7 +460,8 @@ void gestionEvenement(EvenementGfx evenement)
 					zTailleNouveauPatient.saisie = false;
 					zPoidsNouveauPatient.saisie = false;
 					zNomVideo.saisie = false;
-					numPage = 21;
+					numPagePrecedente = numPage;
+					numPage = 11;
 				}
 
 				else if(numPage == 2 && zPrenomChargerPatient.xmin<abscisseSouris() && abscisseSouris()<zPrenomChargerPatient.xmax && zPrenomChargerPatient.ymin<ordonneeSouris() && ordonneeSouris()<zPrenomChargerPatient.ymax)
@@ -622,6 +662,81 @@ void gestionEvenement(EvenementGfx evenement)
 						}
 					}
 				}
+				else if(numPage == 11 && zFichePrenom.xmin<abscisseSouris() && abscisseSouris()<zFichePrenom.xmax && zFichePrenom.ymin<ordonneeSouris() && ordonneeSouris()<zFichePrenom.ymax)
+				{
+					zFichePrenom.saisie = true;
+					zFicheNom.saisie = false;
+					zFichePoids.saisie = false;
+					zFicheTaille.saisie = false;
+				}
+				else if(numPage == 11 && zFicheNom.xmin<abscisseSouris() && abscisseSouris()<zFicheNom.xmax && zFicheNom.ymin<ordonneeSouris() && ordonneeSouris()<zFicheNom.ymax)
+				{
+					zFichePrenom.saisie = false;
+					zFicheNom.saisie = true;
+					zFichePoids.saisie = false;
+					zFicheTaille.saisie = false;
+				}
+				else if(numPage == 11 && zFichePoids.xmin<abscisseSouris() && abscisseSouris()<zFichePoids.xmax && zFichePoids.ymin<ordonneeSouris() && ordonneeSouris()<zFichePoids.ymax)
+				{
+					zFichePrenom.saisie = false;
+					zFicheNom.saisie = false;
+					zFichePoids.saisie = true;
+					zFicheTaille.saisie = false;
+				}
+				else if(numPage == 11 && zFicheTaille.xmin<abscisseSouris() && abscisseSouris()<zFicheTaille.xmax && zFicheTaille.ymin<ordonneeSouris() && ordonneeSouris()<zFicheTaille.ymax)
+				{
+					zFichePrenom.saisie = false;
+					zFicheNom.saisie = false;
+					zFichePoids.saisie = false;
+					zFicheTaille.saisie = true;
+				}
+				else if(numPage == 11 && zFicheMaj.xmin<abscisseSouris() && abscisseSouris()<zFicheMaj.xmax && zFicheMaj.ymin<ordonneeSouris() && ordonneeSouris()<zFicheMaj.ymax)
+				{
+					zFichePrenom.saisie = false;
+					zFicheNom.saisie = false;
+					zFichePoids.saisie = false;
+					zFicheTaille.saisie = false;
+					
+					
+					int modifOk = changeNomDossier(nom, prenom, modifNom, modifPrenom);
+					if (modifOk != -1)
+					{
+						printf("\nMise a jour fiche ok\n");
+						if (strcmp(modifPrenom, "") != 0)
+						{
+							modifieChamp(modifNom, modifPrenom, "Prenom", modifPrenom);
+							prenom = (char *)malloc(sizeof(char) * strlen(modifPrenom));
+							strcpy(prenom, modifPrenom);
+							printf("\nPrenom modifie\n");
+						}
+						if (strcmp(modifNom, "") != 0)
+						{
+							modifieChamp(modifNom, modifPrenom, "Nom", modifNom);
+							nom = (char *)malloc(sizeof(char) * strlen(modifNom));
+							strcpy(nom, modifNom);
+							printf("\nNom modifie\n");
+						}
+						if (strcmp(modifTaille, "") != 0)
+						{
+							modifieChamp(modifNom, modifPrenom, "Taille", modifTaille);
+							taille = (char *)malloc(sizeof(char) * strlen(modifTaille));
+							strcpy(taille, modifTaille);
+							printf("\nPTaille modifie\n");
+						}
+						if (strcmp(modifPoids, "") != 0)
+						{
+							modifieChamp(modifNom, modifPrenom, "Poids", modifPoids);
+							poids = (char *)malloc(sizeof(char) * strlen(modifPoids));
+							strcpy(poids, modifPoids);
+							printf("\nPoids modifie\n");
+						}
+						numPage = numPagePrecedente;
+					}
+					else
+					{
+						printf("\nERREUR lors de Mise a jour fiche\n");
+					}
+				}
 				else // clic sur toute autre zone de l'ihm
 				{
 					zPrenomChargerPatient.saisie = false;
@@ -631,6 +746,10 @@ void gestionEvenement(EvenementGfx evenement)
 					zTailleNouveauPatient.saisie = false;
 					zPoidsNouveauPatient.saisie = false;
 					zNomVideo.saisie = false;
+					zFichePrenom.saisie = false;
+					zFicheNom.saisie = false;
+					zFichePoids.saisie = false;
+					zFicheTaille.saisie = false;
 				}
 				rafraichisFenetre();
 			}
@@ -663,6 +782,9 @@ void gestionEvenement(EvenementGfx evenement)
 					redimensionneZoneAnalyse(zPatientActuel, &zAnalyse, &zVideoSquelette, &zGraph);
                     redimensionneZoneDonneesBio(zAnalyse, &zDonneesBio, &zTailleAnalyse, &zPoidsAnalyse);
                     redimensionneZonePathologies(zDonneesBio, &zPathologies, &zCourbe, &zBoite, &ZMarcheReguliere);
+					break;
+				case 11:
+					redimensionneZoneFichePatient(&zFichePatient, &zFicheNom, &zFichePrenom, &zFicheTaille, &zFichePoids, &zFicheMaj);
 					break;
 				default:
 					break;

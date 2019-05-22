@@ -7,7 +7,6 @@ void writeLinestoMat(const vector<Point> pointsA, const vector<Point> pointsB, M
         line( *mat, pointsA[i], pointsB[i], color);		
 }
 
-
 void writePointstoMat(const vector<Point> points, Mat *mat, const Scalar color)
 {
     for (size_t i = 0; i < points.size(); i++)

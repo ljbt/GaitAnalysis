@@ -816,3 +816,16 @@ int extraitCourbesSquelettesDossier(char* nomDossier, int nbImages, char* dateHe
 	}
 	return 1;
 }
+
+int changeNomDossier(char* nomActuel, char* prenomActuel, char* modifNom, char *modifPrenom)
+{
+	char filepath[128];
+	sprintf(filepath, "%s/%s_%s", CHEMIN_DOSSIER_PATIENT, prenomActuel, nomActuel); // On remple filepath avec le chemin et nom du fichier
+	if (modifNom == NULL || modifPrenom == NULL || strcmp(modifNom, "") == 0 || strcmp(modifPrenom, "") == 0)
+		return -1;
+		
+	char filepath_new[128];
+	sprintf(filepath_new, "%s/%s_%s", CHEMIN_DOSSIER_PATIENT, modifPrenom, modifNom); // On remple filepath avec le chemin et nom du fichier
+	
+	return rename(filepath, filepath_new);
+}
