@@ -218,15 +218,39 @@ void managePointVector(Point newPoint, vector<Point> *v, size_t maxSize)
     }
 }
 
-bool detectFootDown(vector<Point> posFeet)
+bool detectFootDown(vector<Point> posFoot)
 {
     vector<double> posY;
-    for (size_t i = 0; i < posFeet.size(); i++)
-        posY.push_back(posFeet[i].y);
+    for (size_t i = 0; i < posFoot.size(); i++)
+        posY.push_back(posFoot[i].y);
     
     double coef = coef_variation(posY);
 
     if(coef > 0.005)
         return false;
     else return true;
+}
+
+bool detectGaitCycle(int *numFootRightDown, vector<Point> posFootRight, int *numFootLeftDown, vector<Point> posFootLeft)
+{
+    // si le pied rouge ne s'est pas posé ou que le pied bleu s'est posé on doit detecter la pose du pied rouge
+    if(*numFootRightDown == 0 || *numFootLeftDown == 1)
+    {
+        if( detectFootDown(posFootRight) )
+            (*numFootRightDown) ++;
+    }
+    // si le pied rouge s'est posé, on doit attendre que le pied bleu se pose
+    if(*numFootRightDown == 1 && *numFootLeftDown < 1)
+    {
+        if( detectFootDown(posFootLeft) )
+            (*numFootLeftDown) ++;
+    }
+    // Une fois que le pied bleu s'est posé on doit attendre que le pied rouge se repose
+
+    if( *numFootRightDown == 2)
+    {
+        *numFootRightDown = *numFootLeftDown = 0;
+        return true;
+    }
+    else return false;
 }

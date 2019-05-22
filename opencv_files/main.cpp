@@ -64,7 +64,10 @@ int main(void)
     Mat drawing2 = Mat::zeros( image.size(), CV_8UC3 );
 
     vector<Point> centresPastillesRougesImagePrecedente;
-    vector<Point> posPiedsRouges;
+    vector<Point> posPiedsRouges, posPiedsBleus;
+
+    int nbPiedRougeDown = 0;
+    int nbPiedBleuDown = 0;
 
     while(1)
     {
@@ -273,9 +276,11 @@ int main(void)
         // d'abord il faut detecter un cycle, pour ça il faut savoir detecter un pied a terre, donc recuperer la position d'un pied dans plusieurs images
         int nb_images_pr_detect = 5;
         managePointVector(piedRouge,&posPiedsRouges, nb_images_pr_detect);
-        if(!posPiedsRouges.empty())
-            if( detectFootDown(posPiedsRouges) )
-                cout<<"Pose pied rouge!"<<endl;
+        managePointVector(piedBleu,&posPiedsBleus, nb_images_pr_detect);
+        
+        if(!posPiedsRouges.empty() && !posPiedsBleus.empty())
+            if( detectGaitCycle(&nbPiedRougeDown, posPiedsRouges, &nbPiedBleuDown,posPiedsBleus) )
+                cout<<"\nCycle fait!"<<endl;
         
         char c=(char)waitKey(125); // waits 125ms to get a key value
         if(c==27) // echap
