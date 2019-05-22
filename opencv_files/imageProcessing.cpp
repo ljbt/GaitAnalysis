@@ -266,11 +266,3 @@ bool detectGaitCycle(int *numFootRightDown, vector<Point> posFootRight, int *num
     }
     else return false;
 }
-
-void saveGaitCyclePositions(vector<Point> *footRightCycle, vector<Point> *footLeftCycle, int *numFootRightDown, vector<Point> posFootRight, int *numFootLeftDown, vector<Point> posFootLeft)
-{
-    if(!posFootRight.empty() && !posFootLeft.empty())
-            if( detectGaitCycle(numFootRightDown, posFootRight, numFootLeftDown,posFootLeft) )
-                cout<<"Cycle fait!\n"<<endl;
-    
-}

@@ -16,7 +16,6 @@
     void managePointVector(Point newPoint, vector<Point> *v, size_t maxSize);
     bool detectFootDown(vector<Point> posFoot, size_t numElmts);
     bool detectGaitCycle(int *numFootRightDown, vector<Point> posFootRight, int *numFootLeftDown, vector<Point> posFootLeft);
-    void saveGaitCyclePositions(vector<Point> *footRightCycle, vector<Point> *footLeftCycle, int *numFootRightDown, vector<Point> posFootRight, int *numFootLeftDown, vector<Point> posFootLeft);
     
 
 #endif

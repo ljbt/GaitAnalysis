@@ -70,6 +70,7 @@ int main(void)
     int nbPiedRougeDown = 0;
     int nbPiedBleuDown = 0;
     vector<Point> footRedCycle, footBlueCycle;
+    vector< vector<Point> > cyclesPiedRouge, cyclesPiedBleu;
 
     while(1)
     {
@@ -111,12 +112,13 @@ int main(void)
 
             inRange(hsv, Scalar(l_h,l_s,l_v), Scalar(u_h,u_s,u_v), mask); 
             blur( mask, mask, Size(3,3) );       // ou GaussianBlur(mask,mask,Size(5,5),0); en changeant la taille de la fenetre de floutage
-       
+
             /// Find contours
             Canny( mask, canny_output, 100, 100*2 );
             vector<vector<Point> > contours;
             vector<Vec4i> hierarchy;
             findContours( canny_output, contours, hierarchy, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE ); //EXTERNAL pour un contour exterieur
+
 
             vector<Point> centres;
             Rect rect = Rect(0, 0, canny_output.size().width, canny_output.size().height);
@@ -209,14 +211,14 @@ int main(void)
             ifPointinRange_drawLine(centrePastilleVerte[0],0,500,&hanche,&hanchePrecedent,&drawing2,color);
         Mat dessinCourbes = drawing2.clone();
         if(hanche.x != -1 && hanche.y != -1)
-            writePointwithTexttoMat(hanche,"hanche",&dessinCourbes,Scalar(0,255,0));
+            writePointwithTexttoMat(hanche,"hip",&dessinCourbes,Scalar(0,255,0));
 
         // Puis la pastille jaune
         color = Scalar(0,199,199);
         if(!centrePastilleJaune.empty())
             ifPointinRange_drawLine(centrePastilleJaune[0],0,500,&tete,&tetePrecedent,&drawing2,color);
         if(tete.x != -1 && tete.y != -1)
-            writePointwithTexttoMat(tete,"tete",&dessinCourbes,Scalar(0,255,255));
+            writePointwithTexttoMat(tete,"head",&dessinCourbes,Scalar(0,255,255));
 
 
         //Puis les pastilles rouges
@@ -227,47 +229,44 @@ int main(void)
         // On affiche les articulations rouges sur l'image
 
         if(piedRouge.x != -1 && piedRouge.y != -1)
-            writePointwithTexttoMat(piedRouge,"pied",&dessinCourbes,Scalar(0,0,255));
+            writePointwithTexttoMat(piedRouge,"foot",&dessinCourbes,Scalar(0,0,255));
 
         if(genouRouge.x != -1 && genouRouge.y != -1)
-            writePointwithTexttoMat(genouRouge,"genou",&dessinCourbes,Scalar(0,0,255));
+            writePointwithTexttoMat(genouRouge,"knee",&dessinCourbes,Scalar(0,0,255));
 
         if(mainRouge.x != -1 && mainRouge.y != -1)
-            writePointwithTexttoMat(mainRouge,"main",&dessinCourbes,Scalar(0,0,255));
+            writePointwithTexttoMat(mainRouge,"hand",&dessinCourbes,Scalar(0,0,255));
         
         if(coudeRouge.x != -1 && coudeRouge.y != -1)
-            writePointwithTexttoMat(coudeRouge,"coude",&dessinCourbes,Scalar(0,0,255));
+            writePointwithTexttoMat(coudeRouge,"elbow",&dessinCourbes,Scalar(0,0,255));
 
         if(epauleRouge.x != -1 && epauleRouge.y != -1)
-            writePointwithTexttoMat(epauleRouge,"epaule",&dessinCourbes,Scalar(0,0,255));
+            writePointwithTexttoMat(epauleRouge,"shoulder",&dessinCourbes,Scalar(0,0,255));
 
-        //imshow("Courbes pastilles rouges", dessinCourbes);
-        
+        imshow("Courbes pastilles", dessinCourbes);
+
 
         // Puis les articulation correspondant aux pastilles bleues, et on trace leur trajectoire
         color = Scalar(199,0,0);
         if(!centresPastillesBleues.empty())
             identifyArticulationsfromBluePoints(centresPastillesBleues,yminPiedBleu,ymaxPiedBleu,&piedBleu,&piedBleuPrecedent,yminGenouBleu,ymaxGenouBleu,&genouBleu,&genouBleuPrecedent, yminMainBleu,ymaxMainBleu,&mainBleu,&mainBleuPrecedent, yminCoudeBleu,ymaxCoudeBleu,&coudeBleu,&coudeBleuPrecedent,&drawing2,color);
 
-        // une fois que les lignes entre les articulations precedentes et les actuelles, il faut enregistrer les points de ces lignes
-        // dans des vecteurs, pour les comparer avec 
-
         // Puis on affiche les articulations sur l'image
         
        // Mat dessinCourbes = drawing2.clone();
         if(piedBleu.x != -1 && piedBleu.y != -1)
-            writePointwithTexttoMat(piedBleu,"pied",&dessinCourbes,Scalar(255,0,0));
+            writePointwithTexttoMat(piedBleu,"foot",&dessinCourbes,Scalar(255,0,0));
 
         if(genouBleu.x != -1 && genouBleu.y != -1)
-            writePointwithTexttoMat(genouBleu,"genou",&dessinCourbes,Scalar(255,0,0));
+            writePointwithTexttoMat(genouBleu,"knee",&dessinCourbes,Scalar(255,0,0));
 
         if(mainBleu.x != -1 && mainBleu.y != -1)
-            writePointwithTexttoMat(mainBleu,"main",&dessinCourbes,Scalar(255,0,0));
+            writePointwithTexttoMat(mainBleu,"hand",&dessinCourbes,Scalar(255,0,0));
         
         if(coudeBleu.x != -1 && coudeBleu.y != -1)
-            writePointwithTexttoMat(coudeBleu,"coude",&dessinCourbes,Scalar(255,0,0));
+            writePointwithTexttoMat(coudeBleu,"elbow",&dessinCourbes,Scalar(255,0,0));
 
-        imshow("Courbes pastilles bleues", dessinCourbes);
+        imshow("Courbes pastilles", dessinCourbes);
 
 
         // Maintenant qu'on a toutes les articulations définies, on peut tracer le squelette
@@ -277,12 +276,45 @@ int main(void)
         imshow("Squelette", dessinSquelette);
 
 
+        // une fois que les lignes entre les articulations precedentes et les actuelles, il faut enregistrer les points de ces lignes
+        // dans des vecteurs, pour les comparer avec le cycle de référence
+        // Donc d'abord il faut savoir enregistrer les cycles de marche
+        footRedCycle.push_back(piedRouge);
+        footBlueCycle.push_back(piedBleu);
+
+        // Une fois qu'on a enregistré les cycles,il faut en faire un cycle moyen, qu'on peut comparer avec le cycle moyen de ref
+
+
+        Mat drawing4 = Mat::zeros( image.size(), CV_8UC3 );
+        for (size_t i = 0; i < footRedCycle.size(); i++)
+        {
+            circle(drawing4, footRedCycle[i] ,2, Scalar(0,0,255), -1);
+        }
+        for (size_t i = 0; i < footBlueCycle.size(); i++)
+        {
+            circle(drawing4, footBlueCycle[i] ,2, Scalar(255,0,0), -1);
+        }        
+
+        imshow("points cycles", drawing4);
+
+
+
+
         // on gere maintenant les cycles de marche
         // d'abord il faut detecter un cycle, pour ça il faut savoir detecter un pied a terre, donc recuperer la position d'un pied dans plusieurs images
         managePointVector(piedRouge,&posPiedsRouges, NB_IMAGES_DETECT_FOOT_DOWN);
         managePointVector(piedBleu,&posPiedsBleus, NB_IMAGES_DETECT_FOOT_DOWN);
-
-        saveGaitCyclePositions(&footRedCycle,&footBlueCycle, &nbPiedRougeDown, posPiedsRouges, &nbPiedBleuDown,posPiedsBleus);
+        if(!posPiedsRouges.empty() && !posPiedsBleus.empty())
+        {
+            if( detectGaitCycle(&nbPiedRougeDown, posPiedsRouges, &nbPiedBleuDown,posPiedsBleus) )
+            {
+                cout<<"Cycle fait!\n"<<endl;
+                cyclesPiedRouge.push_back(footRedCycle);
+                cyclesPiedBleu.push_back(footBlueCycle);
+                footRedCycle.clear();
+                footBlueCycle.clear();
+            }
+        }
         
         
         char c=(char)waitKey(125); // waits 125ms to get a key value
@@ -306,11 +338,24 @@ int main(void)
             mode = Pause;
             image_num++;
         }
-
     }
-
-    
     destroyAllWindows();
+
+/*     // A la fin du while, toute la video est passée
+    // Donc on peut faire la moyenne des cycles
+    Mat dessinfinal = Mat::zeros( image.size(), CV_8UC3 );
+    for (size_t i = 0; i < cyclesPiedRouge.size(); i++)
+    {
+        for (size_t j = 0; j < cyclesPiedRouge[i].size(); j++)
+        {
+            circle(dessinfinal, cyclesPiedRouge[i][j] ,2, Scalar(0,0,255), -1);
+        }
+    }
+    
+    imshow("tous les cycles rouges", dessinfinal);
+
+    waitKey(10000);
+    destroyAllWindows(); */
 
     return 0;
   }
