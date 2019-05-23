@@ -71,6 +71,7 @@ int main(void)
     int nbPiedBleuDown = 0;
     vector<Point> footRedCycle, footBlueCycle;
     vector< vector<Point> > cyclesPiedRouge, cyclesPiedBleu;
+    bool piedRougeFirstTimeDown = false;
 
     while(1)
     {
@@ -302,6 +303,16 @@ int main(void)
         // pour detecter un cycle, il faut savoir detecter un pied a terre, donc recuperer la position d'un pied dans plusieurs images
         managePointVector(piedRouge,&posPiedsRouges, NB_IMAGES_DETECT_FOOT_DOWN);
         managePointVector(piedBleu,&posPiedsBleus, NB_IMAGES_DETECT_FOOT_DOWN);
+
+        if(!posPiedsRouges.empty())
+        {
+            if(detectFootDown(posPiedsRouges, NB_IMAGES_DETECT_FOOT_DOWN) && !piedRougeFirstTimeDown) // enleve les premiers points avant le premier cycle
+            {
+                piedRougeFirstTimeDown = true;
+                footRedCycle.clear();
+            }
+        }
+
         if(!posPiedsRouges.empty() && !posPiedsBleus.empty())
         {
             if( detectGaitCycle(&nbPiedRougeDown, posPiedsRouges, &nbPiedBleuDown,posPiedsBleus) )
@@ -339,14 +350,19 @@ int main(void)
         }
     }
     destroyAllWindows();
+    // A la fin du while, toute la video est passée
 
 
-/*     Mat dessinfinal = Mat::zeros( imgRef.size(), CV_8UC3 );
+/*         Mat dessinfinal = Mat::zeros( imgRef.size(), CV_8UC3 );
     for (size_t i = 0; i < cyclesPiedRouge.size(); i++)
     {
         for (size_t j = 0; j < cyclesPiedRouge[i].size(); j++)
         {
             circle(dessinfinal, cyclesPiedRouge[i][j] ,2, Scalar(0,0,255), -1);
+        }
+        for (size_t j = 0; j < cyclesPiedBleu[i].size(); j++)
+        {
+            circle(dessinfinal, cyclesPiedBleu[i][j] ,2, Scalar(255,0,0), -1);
         }
     }
     
@@ -354,7 +370,8 @@ int main(void)
 
     waitKey(0);
     destroyAllWindows(); */
-    // A la fin du while, toute la video est passée
+
+    
     // Donc on peut faire la moyenne des cycles
 
     // pour faire cette moyenne il faut deja que tous les cycles aient le même point de depart,
@@ -375,7 +392,7 @@ int main(void)
         }
     }
 
-Mat dessinfinal = Mat::zeros( imgRef.size(), CV_8UC3 );
+    Mat dessinfinal = Mat::zeros( imgRef.size(), CV_8UC3 );
     for (size_t i = 0; i < cyclesPiedRouge.size(); i++)
     {
         for (size_t j = 0; j < cyclesPiedRouge[i].size(); j++)
@@ -391,7 +408,36 @@ Mat dessinfinal = Mat::zeros( imgRef.size(), CV_8UC3 );
     imshow("tous les cycles rouges", dessinfinal);
 
     waitKey(0);
-    destroyAllWindows();
+    destroyAllWindows();    
+
+    // ici on a les cycles ramenés à l'origine
+    // on doit donc trouver le point moyen en y pour chaque x
+    // il faut donc additionner les y de chaque cycle pour un x donné et le diviser par le nombre de y trouvé
+    // le plus simple serait de stocker à l'indice x tous les y donc unvecteur de vecteurs de double
+    vector < vector <double> > tabPointsCyclesRouges;
+
+    for (size_t i = 0; i < cyclesPiedRouge.size(); i++)
+    {
+        for (size_t j = 0; j < cyclesPiedRouge[i].size(); j++)
+        {
+            // pour chaque point de chaque cycle on doit enregistrer, à l'indice x, l'ordonnee y 
+            if((long unsigned int)cyclesPiedRouge[i][j].x+1 > tabPointsCyclesRouges.size() && cyclesPiedRouge[i][j].y >= 0 )
+            {
+                cout << "resize to "<< cyclesPiedRouge[i][j].x+1 <<endl;
+                tabPointsCyclesRouges.resize((long unsigned int)cyclesPiedRouge[i][j].x+1);
+            }
+            if(cyclesPiedRouge[i][j].y >= 0)
+            {
+                cout << "enter y = "<<cyclesPiedRouge[i][j].y<<endl ;
+                tabPointsCyclesRouges[ (long unsigned int)cyclesPiedRouge[i][j].x ].push_back( cyclesPiedRouge[i][j].y );
+            }  
+        }
+    }
+    
+
+
+    // un cycle contient plusieurs points, ces points sont séparés, une ligne permet donc d'avoir tous les points
+    // on doit enregistrer ces points dans les vecteurs pour avoir des cycles complets et pouvoir comparer en y
 
     return 0;
   }
