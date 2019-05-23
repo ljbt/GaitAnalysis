@@ -266,3 +266,27 @@ bool detectGaitCycle(int *numFootRightDown, vector<Point> posFootRight, int *num
     }
     else return false;
 }
+
+// fonction qui prend en parametre un vecteur de vecteurs de points, et retourne un vecteur de vecteurs de double
+// le x de chaque point correspond aux indices du vecteur, et pour chaque indice on stocke tous les y correspondant
+vector<vector<double>> pointsToDouble( vector<vector<Point>> tabPoints)
+{
+    vector < vector <double> > tabDouble;
+
+    for (size_t i = 0; i < tabPoints.size(); i++)
+    {
+        for (size_t j = 0; j < tabPoints[i].size(); j++)
+        {
+            // pour chaque point de chaque cycle on doit enregistrer, à l'indice x, l'ordonnee y 
+            if((long unsigned int)tabPoints[i][j].x+1 > tabDouble.size() && tabPoints[i][j].y >= 0 )
+            {
+                tabDouble.resize((long unsigned int)tabPoints[i][j].x+1);
+            }
+            if(tabPoints[i][j].y >= 0)
+            {
+                tabDouble[ (long unsigned int)tabPoints[i][j].x ].push_back( tabPoints[i][j].y );
+            }  
+        }
+    }
+    return tabDouble;
+}
