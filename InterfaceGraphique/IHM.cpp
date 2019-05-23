@@ -916,7 +916,7 @@ void redimensionneZoneAnalyse(zone zPatientActuel, zone *zAnalyse, zone *zVideoS
 	zGraph->ymin = zGraph->ymax - zGraph->hauteur;
 }
 
-void initZonesDonneesBio(zone zAnalyse, zone *zDonneesBio, zone *zTailleAnalyse, zone *zPoidsAnalyse)
+void initZonesDonneesBio(zone zAnalyse, zone *zDonneesBio, zone *zTailleAnalyse, zone *zPoidsAnalyse, zone *zlongueurBrasAnalyse, zone *zlongueurJambeAnalyse)
 {
     // contenant
 	zDonneesBio->espaceHaut = 15;
@@ -956,9 +956,33 @@ void initZonesDonneesBio(zone zAnalyse, zone *zDonneesBio, zone *zTailleAnalyse,
 	zPoidsAnalyse->xmax = zPoidsAnalyse->xmin + zPoidsAnalyse->longueur;
 	zPoidsAnalyse->ymax = zTailleAnalyse->ymin - zPoidsAnalyse->espaceHaut;
 	zPoidsAnalyse->ymin = zPoidsAnalyse->ymax - zPoidsAnalyse->hauteur;
+
+	zlongueurBrasAnalyse->hauteur = HAUTEUR_TEXTE;
+	changeTexteZone(zlongueurBrasAnalyse,"Longueur bras : ");
+	zlongueurBrasAnalyse->espaceGauche = 0;
+	zlongueurBrasAnalyse->espaceDroite = 10;
+	zlongueurBrasAnalyse->espaceBas = 10;
+	zlongueurBrasAnalyse->espaceHaut = 10;
+	zlongueurBrasAnalyse->longueur = tailleChaine(zlongueurBrasAnalyse->texte,zlongueurBrasAnalyse->hauteur);
+	zlongueurBrasAnalyse->xmin = zDonneesBio->xmin + zlongueurBrasAnalyse->espaceGauche;
+	zlongueurBrasAnalyse->xmax = zlongueurBrasAnalyse->xmin + zlongueurBrasAnalyse->longueur;
+	zlongueurBrasAnalyse->ymax = zPoidsAnalyse->ymin - zlongueurBrasAnalyse->espaceHaut;
+	zlongueurBrasAnalyse->ymin = zlongueurBrasAnalyse->ymax - zlongueurBrasAnalyse->hauteur;
+
+	zlongueurJambeAnalyse->hauteur = HAUTEUR_TEXTE;
+	changeTexteZone(zlongueurJambeAnalyse,"Longueur jambe : ");
+	zlongueurJambeAnalyse->espaceGauche = 0;
+	zlongueurJambeAnalyse->espaceDroite = 10;
+	zlongueurJambeAnalyse->espaceBas = 10;
+	zlongueurJambeAnalyse->espaceHaut = 10;
+	zlongueurJambeAnalyse->longueur = tailleChaine(zlongueurJambeAnalyse->texte,zlongueurJambeAnalyse->hauteur);
+	zlongueurJambeAnalyse->xmin = zDonneesBio->xmin + zlongueurJambeAnalyse->espaceGauche;
+	zlongueurJambeAnalyse->xmax = zlongueurJambeAnalyse->xmin + zlongueurJambeAnalyse->longueur;
+	zlongueurJambeAnalyse->ymax = zlongueurBrasAnalyse->ymin - zlongueurJambeAnalyse->espaceHaut;
+	zlongueurJambeAnalyse->ymin = zlongueurJambeAnalyse->ymax - zlongueurJambeAnalyse->hauteur;
 }
 
-void afficheDonneesBio(zone zDonneesBio, zone zTailleAnalyse, char* taille, zone zPoidsAnalyse, char* poids)
+void afficheDonneesBio(zone zDonneesBio, zone zTailleAnalyse, char* taille, zone zPoidsAnalyse, char* poids, zone zlongueurBrasAnalyse, char* longueurBras, zone zlongueurJambeAnalyse, char* longueurJambe)
 {
 	
     couleurCourante(0,0,0);
@@ -968,6 +992,8 @@ void afficheDonneesBio(zone zDonneesBio, zone zTailleAnalyse, char* taille, zone
 
 	char tailleBase[32] = "Taille : ";
     char poidsBase[32] = "Poids : ";
+    char longueurBrasBase[32] = "Longueur bras : ";
+    char longueurJambeBase[32] = "Longueur jambe : ";
     
     
 
@@ -982,10 +1008,21 @@ void afficheDonneesBio(zone zDonneesBio, zone zTailleAnalyse, char* taille, zone
         strcat(poidsBase, poids);
         afficheChaine(poidsBase,zPoidsAnalyse.hauteur, zPoidsAnalyse.xmin+5,zPoidsAnalyse.ymin+5);
     }
-    // etc si d'autres donnees
+    
+	if(longueurBras != NULL)
+    {
+        strcat(longueurBrasBase, longueurBras);
+        afficheChaine(longueurBrasBase,zlongueurBrasAnalyse.hauteur, zlongueurBrasAnalyse.xmin+5,zlongueurBrasAnalyse.ymin+5);
+    }
+
+	if(longueurJambe != NULL)
+    {
+        strcat(longueurJambeBase, longueurJambe);
+        afficheChaine(longueurJambeBase,zlongueurJambeAnalyse.hauteur, zlongueurJambeAnalyse.xmin+5,zlongueurJambeAnalyse.ymin+5);
+    }
 }
 
-void redimensionneZoneDonneesBio(zone zAnalyse, zone *zDonneesBio, zone *zTailleAnalyse, zone *zPoidsAnalyse)
+void redimensionneZoneDonneesBio(zone zAnalyse, zone *zDonneesBio, zone *zTailleAnalyse, zone *zPoidsAnalyse, zone *zlongueurBrasAnalyse, zone *zlongueurJambeAnalyse)
 {
     // contenant
 	zDonneesBio->longueur = largeurFenetre()/2 - zDonneesBio->espaceGauche - zDonneesBio->espaceDroite ;
@@ -1007,6 +1044,20 @@ void redimensionneZoneDonneesBio(zone zAnalyse, zone *zDonneesBio, zone *zTaille
 	zPoidsAnalyse->xmax = zPoidsAnalyse->xmin + zPoidsAnalyse->longueur;
 	zPoidsAnalyse->ymax = zTailleAnalyse->ymin - zPoidsAnalyse->espaceHaut;
 	zPoidsAnalyse->ymin = zPoidsAnalyse->ymax - zPoidsAnalyse->hauteur;
+
+	zlongueurBrasAnalyse->longueur = tailleChaine(zlongueurBrasAnalyse->texte,zlongueurBrasAnalyse->hauteur);
+	zlongueurBrasAnalyse->xmin = zDonneesBio->xmin + zlongueurBrasAnalyse->espaceGauche;
+	zlongueurBrasAnalyse->xmax = zlongueurBrasAnalyse->xmin + zlongueurBrasAnalyse->longueur;
+	zlongueurBrasAnalyse->ymax = zPoidsAnalyse->ymin - zlongueurBrasAnalyse->espaceHaut;
+	zlongueurBrasAnalyse->ymin = zlongueurBrasAnalyse->ymax - zlongueurBrasAnalyse->hauteur;
+
+	zlongueurJambeAnalyse->longueur = tailleChaine(zlongueurJambeAnalyse->texte,zlongueurJambeAnalyse->hauteur);
+	zlongueurJambeAnalyse->xmin = zDonneesBio->xmin + zlongueurJambeAnalyse->espaceGauche;
+	zlongueurJambeAnalyse->xmax = zlongueurJambeAnalyse->xmin + zlongueurJambeAnalyse->longueur;
+	zlongueurJambeAnalyse->ymax = zlongueurBrasAnalyse->ymin - zlongueurJambeAnalyse->espaceHaut;
+	zlongueurJambeAnalyse->ymin = zlongueurJambeAnalyse->ymax - zlongueurJambeAnalyse->hauteur;
+
+
 }
 
 void initZonesPathologies(zone zDonneesBio, zone *zPathologies, zone *zCourbe, zone *zBoite, zone* zMarcheReguliere)

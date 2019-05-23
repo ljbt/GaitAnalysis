@@ -78,10 +78,10 @@ void gestionEvenement(EvenementGfx evenement)
 	static int compteurImageAlpha;
 	static int nbImageAlpha, lecture;
 	static struct dirent** listeImageAlpha;
-	static zone zAnalyse, zVideoSquelette, zGraph, zDonneesBio, zTailleAnalyse, zPoidsAnalyse, zPathologies, zCourbe, zBoite,ZMarcheReguliere;
+	static zone zAnalyse, zVideoSquelette, zGraph, zDonneesBio, zTailleAnalyse, zPoidsAnalyse,zlongueurBrasAnalyse,zlongueurJambeAnalyse ,zPathologies, zCourbe, zBoite,ZMarcheReguliere;
 	static analyse* analyses = NULL;
 	static int nbAnalyses = 0;
-	static char *poids, *taille, *courbe, *boite, *marcheRegu;
+	static char *poids, *taille, *longueurBras,*longueurJambe, *courbe, *boite, *marcheRegu;
 	static char date[32];
 	static bool resetPageAnalyse;
 	static int compteurImageAlphaCourbes, compteurImageAlphaSquelettes;
@@ -100,7 +100,8 @@ void gestionEvenement(EvenementGfx evenement)
 	{
 		case Initialisation:
 
-			prenom = nom = prenom_a_charger = nom_a_charger = poids = taille = NULL;
+			prenom = nom = prenom_a_charger = nom_a_charger = poids = taille = longueurBras = longueurJambe = NULL;
+			longueurBras = longueurJambe = "teessst";
 			nouveau_prenom = nouveau_nom = chaine_taille_nouveau_patient = chaine_poids_nouveau_patient = NULL;
 			compteurImageAlpha = 0;
 			lecture = 0;
@@ -139,7 +140,7 @@ void gestionEvenement(EvenementGfx evenement)
 			//initZonesAnalysesPrecedentes(zPatientActuel, &zAnalysesPrecedentes);
 
             initZonesAnalyse(zPatientActuel, &zAnalyse, &zVideoSquelette, &zGraph);
-            initZonesDonneesBio(zAnalyse, &zDonneesBio, &zTailleAnalyse, &zPoidsAnalyse);
+            initZonesDonneesBio(zAnalyse, &zDonneesBio, &zTailleAnalyse, &zPoidsAnalyse, &zlongueurBrasAnalyse,&zlongueurJambeAnalyse);
             initZonesPathologies(zDonneesBio, &zPathologies, &zCourbe, &zBoite, &ZMarcheReguliere);
             
             initZonesFichePatient(&zFichePatient, &zFicheNom, &zFichePrenom, &zFicheTaille, &zFichePoids, &zFicheMaj);
@@ -173,7 +174,7 @@ void gestionEvenement(EvenementGfx evenement)
 						enCoursAffichage = false;
 						resetPageAnalyse = true;
 						numPage = 4;
-						creeAnalysePatient(nom, prenom, taille, poids, "Oui", "Non", "Oui", cheminVideoActuelle, nbImageAlpha, date);
+						creeAnalysePatient(nom, prenom, taille, poids,&longueurBras,&longueurJambe, "Oui", "Non", "Oui", cheminVideoActuelle, nbImageAlpha, date);
 					}
 					else if(cheminVideoActuelle != NULL && strcmp(cheminVideoActuelle, "") != 0 && lecture != 0 && compteurImageAlpha < nbImageAlpha)
 					{
@@ -334,12 +335,12 @@ void gestionEvenement(EvenementGfx evenement)
 						enCoursAffichage = true;
 					}
 					break;
-                case 4:
+                case 4: // page analyse
 					monIHM(zQuit,zHome,zRetour,retour,home,croix,logo,numPage);
 					afficheTitre(zTitre,3);
 					affichePatientActuel(zPatientActuel,zPrenomPatientActuel,prenom, zNomPatientActuel,nom,zVoirFiche);
 					afficheAnalyse(zAnalyse, zVideoSquelette, imageVideoSquelettes, zGraph, imageVideoCourbes);
-					afficheDonneesBio(zDonneesBio, zTailleAnalyse, taille, zPoidsAnalyse, poids);
+					afficheDonneesBio(zDonneesBio, zTailleAnalyse, taille, zPoidsAnalyse, poids, zlongueurBrasAnalyse, longueurBras, zlongueurJambeAnalyse, longueurJambe);
 					affichePathologies(zPathologies, zCourbe, "Oui", zBoite, "Non", ZMarcheReguliere, "Oui"); // Oui Non Oui
 					break;
 
@@ -780,7 +781,7 @@ void gestionEvenement(EvenementGfx evenement)
                 case 4:
 					redimensionneZonePatientActuel(zTitre, &zPatientActuel, &zVoirFiche, &zPrenomPatientActuel, &zNomPatientActuel);
 					redimensionneZoneAnalyse(zPatientActuel, &zAnalyse, &zVideoSquelette, &zGraph);
-                    redimensionneZoneDonneesBio(zAnalyse, &zDonneesBio, &zTailleAnalyse, &zPoidsAnalyse);
+                    redimensionneZoneDonneesBio(zAnalyse, &zDonneesBio, &zTailleAnalyse, &zPoidsAnalyse, &zlongueurBrasAnalyse, &zlongueurJambeAnalyse);
                     redimensionneZonePathologies(zDonneesBio, &zPathologies, &zCourbe, &zBoite, &ZMarcheReguliere);
 					break;
 				case 11:

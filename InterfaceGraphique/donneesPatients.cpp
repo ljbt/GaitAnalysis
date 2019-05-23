@@ -151,7 +151,7 @@ int modifieChamp(char* nom, char* prenom, char* cleChamp, char* valChamp)
 }
 
 // cree une analyse en fichier txt et lance la fonction d'extraction des courbes. Replie egalement la variable dateHeure avec le timestamp genere de la forme dd-mm-YYYY_HH:MM:SS
-int creeAnalysePatient(char* nom, char* prenom, char* taille, char* poids, char* courbe, char* claudification, char* marcheRegu, char* video, int nbImages, char* dateHeure)
+int creeAnalysePatient(char* nom, char* prenom, char* taille, char* poids, char **stringlongueurBras,char **stringlongueurJambe, char* courbe, char* claudification, char* marcheRegu, char* video, int nbImages, char* dateHeure )
 {	
 	char filepath[128];
 	time_t timestamp; 
@@ -183,8 +183,22 @@ int creeAnalysePatient(char* nom, char* prenom, char* taille, char* poids, char*
 	fprintf(fiche, "Video:%s\n", video);
 	
 	fclose(fiche);
-	
-	int extract = extraitCourbesSquelettesDossier(video, nbImages, dateChaine);
+
+	double longueurBras,longueurJambe;
+	int extract = extraitCourbesSquelettesDossier(video, nbImages, dateChaine, &longueurBras, &longueurJambe);
+    
+    ostringstream strs1,strs2;
+    strs1 << longueurBras;
+    string str = strs1.str();
+    *stringlongueurBras = (char *)malloc(sizeof(char) * 32);
+    strcpy(*stringlongueurBras,str.c_str());
+
+    strs2 << longueurJambe;
+    str = strs2.str();
+    *stringlongueurJambe = (char *)malloc(sizeof(char) * 32);
+    strcpy(*stringlongueurJambe,str.c_str());
+
+
 	return 1;
 }
 
@@ -308,239 +322,8 @@ DonneesImageRGB *lisImageCouranteAlphabetique(struct dirent *lecture, char *fold
 	return NULL;
 }
 
-int extraitCourbesDossier(char* nomDossier, int nbImages, char* dateHeure)
-{
-	Mat image, hsv, mask;
-    string image_name;
-	string image_name_save; // Ajout pour test ecriture dossier
-	string nomDossierString(nomDossier);
-	string dateHeureString(dateHeure);
-	string cheminDossierCourbes(CHEMIN_DOSSIER_COURBES);
-	string cheminDossierVideos(CHEMIN_DOSSIER_VIDEO);
-	string pathDir = cheminDossierCourbes + "/" + dateHeureString;
-	mkdir(pathDir.c_str(), ACCESSPERMS);
-    int image_num = 0;
 
-    // Red mask - front side
-    MaskHSV RedMask = MaskHSV(Mask(0,10), Mask(100,255), Mask(100,255));
-
-    // Green mask - hanche
-    MaskHSV GreenMask = MaskHSV(Mask(70,90), Mask(100,255), Mask(30,255));
-
-    // Blue mask - hidden side
-    MaskHSV BlueMask = MaskHSV(Mask(95,125), Mask(173,255), Mask(40,255));
-
-    // Yellow mask - Head
-    MaskHSV YellowMask = MaskHSV(Mask(15,30), Mask(150,255), Mask(70,255));
-
-
-    
-    int l_h ,u_h, l_s ,u_s ,l_v, u_v ;
-
-    Point piedRougePrecedent(-1,-1), piedRouge;     Point piedBleuPrecedent(-1,-1), piedBleu;
-    Point genouRougePrecedent(-1,-1), genouRouge;   Point genouBleuPrecedent(-1,-1), genouBleu;
-    Point mainRougePrecedent(-1,-1), mainRouge;     Point mainBleuPrecedent(-1,-1), mainBleu;
-    Point coudeRougePrecedent(-1,-1), coudeRouge;   Point coudeBleuPrecedent(-1,-1), coudeBleu;
-    Point epauleRougePrecedent(-1,-1), epauleRouge;
-    
-    
-    int yminPiedRouge = 200, ymaxPiedRouge = 230;    int yminPiedBleu = 200, ymaxPiedBleu = 230; 
-    int yminGenouRouge = 170, ymaxGenouRouge = 200;  int yminGenouBleu = 160, ymaxGenouBleu = 190;
-    int yminMainRouge = 130, ymaxMainRouge = 170;    int yminMainBleu = 130, ymaxMainBleu = 160;
-    int yminCoudeRouge = 105, ymaxCoudeRouge = 130;  int yminCoudeBleu = 105, ymaxCoudeBleu = 130;
-    int yminEpauleRouge = 50, ymaxEpauleRouge = 105;
-
-    enum {Rouge,Vert,Bleu,Jaune} Masque = Rouge;
-
-	image = imread(cheminDossierVideos + "/" + nomDossierString + "/01.bmp");
-    if( ! image.data )
-    {
-        cout << "Error loading image " << endl;
-        return -1;
-    } 
-    Mat drawing2 = Mat::zeros( image.size(), CV_8UC3 );
-
-    vector<Point> centresPastillesRougesImagePrecedente;
-
-    for (image_num =1; image_num<=nbImages; image_num++)
-    {
-        image_name = to_string(image_num);
-        if(image_num < 10)
-            image_name = cheminDossierVideos + "/" + nomDossierString + "/0" + image_name + ".bmp";
-        else image_name = cheminDossierVideos + "/" + nomDossierString + "/" + image_name + ".bmp";
-        //printf("image name = %s\n", image_name.c_str());
-        image = imread(image_name);
-        if( ! image.data )
-        {
-            cout << "Error loading image " << cheminDossierVideos << endl << image_name << endl;
-			//rmdir(pathDir.c_str());
-            //return -1;
-            continue; // On met continue car sinon, la video dans le dossier declenche le return -1. A modifier si besoin (et temps)
-        }
-        cvtColor(image, hsv ,COLOR_BGR2HSV);
-
-        vector<Point> centresPastillesRouges,centrePastilleVerte,centresPastillesBleues,centrePastilleJaune;
-        MaskHSV MaskForLoop = RedMask;
-        Mat canny_output;
-        do
-        {
-            l_h = MaskForLoop.maskH().min();
-            u_h = MaskForLoop.maskH().max();
-            l_s = MaskForLoop.maskS().min();
-            u_s = MaskForLoop.maskS().max();
-            l_v = MaskForLoop.maskV().min();
-            u_v = MaskForLoop.maskV().max();
-
-            inRange(hsv, Scalar(l_h,l_s,l_v), Scalar(u_h,u_s,u_v), mask); 
-            blur( mask, mask, Size(3,3) );       // ou GaussianBlur(mask,mask,Size(5,5),0); en changeant la taille de la fenetre de floutage
-       
-            /// Find contours
-            Canny( mask, canny_output, 100, 100*2 );
-            vector<vector<Point> > contours;
-            vector<Vec4i> hierarchy;
-            findContours( canny_output, contours, hierarchy, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE ); //EXTERNAL pour un contour exterieur
-
-            vector<Point> centres;
-            Rect rect = Rect(0, 0, canny_output.size().width, canny_output.size().height);
-            for( size_t i = 0; i< contours.size(); i++ ) // on recupere les centres des contours
-            {
-                Moments m = moments(contours[i]);
-                Point p = Point(m.m10/m.m00, m.m01/m.m00);
-                // on verifie que le centre calculé est bien dans l'image
-                if( rect.contains(p) )
-                    centres.push_back(p);
-            }
-
-
-
-    // ici on a les centres des contours, mais il peut y avoir deux contours pour une meme pastille, donc 2 centres tres proches
-    // on veut obtenir un tableau de centres rectifié
-
-            vector<Point> bons_centres;
-            for (size_t i = 0; i < centres.size(); i++)
-            {
-                int cote = 20;
-                Rect zone = Rect(centres[i].x - cote/2, centres[i].y - cote/2, cote, cote);
-
-                // on doit verifier que la zone ne contient pas d'autres centres
-                // si il y a un autre centre on le supprime
-                vector<Point> centres_proches;
-                for (size_t j = 0; j < centres.size(); j++)
-                {
-                    if(j != i)
-                    {
-                        if( zone.contains(centres[j]) )
-                        {
-                            centres_proches.push_back(centres[j]);
-                            centres.erase(centres.begin()+j);
-                        }
-                    }
-                }
-                if( !centres_proches.empty() )
-                {
-                    for (size_t l = 0; l < centres_proches.size(); l++)
-                        centres[i] += centres_proches[l];
-                    
-                    centres[i].x /= centres_proches.size()+1;
-                    centres[i].y /= centres_proches.size()+1;
-                }
-            }
-            
-
-            vector<Point> *centresPastilles;
-            if(Masque == Rouge) 
-            {
-                centresPastilles = &centresPastillesRouges;
-                MaskForLoop = BlueMask;
-                Masque = Bleu;
-            }
-            else if(Masque == Bleu) 
-            {
-                centresPastilles = &centresPastillesBleues;
-                MaskForLoop = GreenMask;
-                Masque = Vert;
-            }
-            else if(Masque == Vert) 
-            {
-                centresPastilles = &centrePastilleVerte;
-                MaskForLoop = YellowMask;
-                Masque = Jaune;
-            }
-            else if(Masque == Jaune) 
-            {
-                centresPastilles = &centrePastilleJaune;
-                MaskForLoop = RedMask;
-                Masque = Rouge;
-            }
-            for (size_t i = 0; i < centres.size(); i++) // enregistre les centres des pastilles de chaque couleur
-            {
-                centresPastilles->push_back(centres[i]);
-            }
-            
-        } while (Masque != Rouge);
-
-
-        // ici on a les bons centres des pastilles 
-
-        // on associe chaque centre à son articulation et on trace leur trajectoire
-        Scalar color(0,0,199);
-        identifyArticulationsfromRedPoints(centresPastillesRouges,yminPiedRouge,ymaxPiedRouge,&piedRouge,&piedRougePrecedent,yminGenouRouge,ymaxGenouRouge,&genouRouge,&genouRougePrecedent, yminMainRouge,ymaxMainRouge,&mainRouge,&mainRougePrecedent, yminCoudeRouge,ymaxCoudeRouge,&coudeRouge,&coudeRougePrecedent, yminEpauleRouge,ymaxEpauleRouge,&epauleRouge,&epauleRougePrecedent,&drawing2,color);
-
-
-
-        // Puis on affiche les articulations sur l'image
-
-        Mat drawing3 = drawing2.clone();
-        if(piedRouge.x != -1 && piedRouge.y != -1)
-            writePointwithTexttoMat(piedRouge,"pied",&drawing3,Scalar(0,0,255));
-
-        if(genouRouge.x != -1 && genouRouge.y != -1)
-            writePointwithTexttoMat(genouRouge,"genou",&drawing3,Scalar(0,0,255));
-
-        if(mainRouge.x != -1 && mainRouge.y != -1)
-            writePointwithTexttoMat(mainRouge,"main",&drawing3,Scalar(0,0,255));
-        
-        if(coudeRouge.x != -1 && coudeRouge.y != -1)
-            writePointwithTexttoMat(coudeRouge,"coude",&drawing3,Scalar(0,0,255));
-
-        if(epauleRouge.x != -1 && epauleRouge.y != -1)
-            writePointwithTexttoMat(epauleRouge,"epaule",&drawing3,Scalar(0,0,255));
-
-        //imshow("Courbes pastilles rouges", drawing3);
-        
-
-        // on associe chaque centre à son articulation et on trace leur trajectoire
-        color = Scalar(199,0,0);
-        identifyArticulationsfromBluePoints(centresPastillesBleues,yminPiedBleu,ymaxPiedBleu,&piedBleu,&piedBleuPrecedent,yminGenouBleu,ymaxGenouBleu,&genouBleu,&genouBleuPrecedent, yminMainBleu,ymaxMainBleu,&mainBleu,&mainBleuPrecedent, yminCoudeBleu,ymaxCoudeBleu,&coudeBleu,&coudeBleuPrecedent,&drawing2,color);
-
-        // Puis on affiche les articulations sur l'image
-
-       // Mat drawing3 = drawing2.clone();
-        if(piedBleu.x != -1 && piedBleu.y != -1)
-            writePointwithTexttoMat(piedBleu,"pied",&drawing3,Scalar(255,0,0));
-
-        if(genouBleu.x != -1 && genouBleu.y != -1)
-            writePointwithTexttoMat(genouBleu,"genou",&drawing3,Scalar(255,0,0));
-
-        if(mainBleu.x != -1 && mainBleu.y != -1)
-            writePointwithTexttoMat(mainBleu,"main",&drawing3,Scalar(255,0,0));
-        
-        if(coudeBleu.x != -1 && coudeBleu.y != -1)
-            writePointwithTexttoMat(coudeBleu,"coude",&drawing3,Scalar(255,0,0));
-		
-		
-		// Ajout ecriture dossier test
-		image_name_save = to_string(image_num);
-		if(image_num < 10)
-            image_name_save = cheminDossierCourbes + "/" + dateHeureString + "/0" + image_name_save + ".bmp";
-        else image_name_save = cheminDossierCourbes + "/" + dateHeureString + "/" + image_name_save + ".bmp";
-		imwrite(image_name_save, drawing3);
-		// Fin de l'ajout
-	}
-	return 1;
-}
-
-int extraitCourbesSquelettesDossier(char* nomDossier, int nbImages, char* dateHeure)
+int extraitCourbesSquelettesDossier(char* nomDossier, int nbImages, char* dateHeure, double *longueurBras, double *longueurJambe)
 {
 	Mat image, hsv, mask;
     string image_name;
@@ -562,7 +345,7 @@ int extraitCourbesSquelettesDossier(char* nomDossier, int nbImages, char* dateHe
     // Red mask - front side
     MaskHSV RedMask = MaskHSV(Mask(0,10), Mask(100,255), Mask(100,255));
 
-    // Green mask - hanche
+    // Green mask - hip
     MaskHSV GreenMask = MaskHSV(Mask(70,90), Mask(100,255), Mask(30,255));
 
     // Blue mask - hidden side
@@ -575,8 +358,8 @@ int extraitCourbesSquelettesDossier(char* nomDossier, int nbImages, char* dateHe
     
     int l_h ,u_h, l_s ,u_s ,l_v, u_v ;
 
-    Point hanchePrecedent(-1,-1), hanche(-1,-1);
-    Point tetePrecedent(-1,-1), tete(-1,-1);
+    Point hanchePrecedent(-1,-1), hip(-1,-1);
+    Point tetePrecedent(-1,-1), head(-1,-1);
 
     Point piedRougePrecedent(-1,-1), piedRouge;     Point piedBleuPrecedent(-1,-1), piedBleu;
     Point genouRougePrecedent(-1,-1), genouRouge;   Point genouBleuPrecedent(-1,-1), genouBleu;
@@ -603,7 +386,11 @@ int extraitCourbesSquelettesDossier(char* nomDossier, int nbImages, char* dateHe
     Mat drawing2 = Mat::zeros( image.size(), CV_8UC3 );
 
     vector<Point> centresPastillesRougesImagePrecedente;
-
+    double longueurJambeDroite;
+    double sommeLongueurJambeDroite = 0; int nb_sommes_longueurJambeDroite = 0;
+    double longueurBrasDroit;
+    double sommeLongueurBrasDroit = 0; int nb_sommes_longueurBrasDroit = 0;
+    
     for (image_num =1; image_num<=nbImages; image_num++)
     {
         image_name = to_string(image_num);
@@ -612,17 +399,11 @@ int extraitCourbesSquelettesDossier(char* nomDossier, int nbImages, char* dateHe
         else image_name = cheminDossierVideos + "/" + nomDossierString + "/" + image_name + ".bmp";
         //printf("image name = %s\n", image_name.c_str());
         image = imread(image_name);
-        if( ! image.data )
-        {
-            cout << "Error loading image " << endl;
-            return -1;
-        } 
-        //imshow("Original", image);
 
         // Check if image loaded successfully
         if( ! image.data ){
             cout << "Error loading image " + image_name << endl;
-            return -1;
+            break;
         } 
 
         cvtColor(image, hsv ,COLOR_BGR2HSV);
@@ -730,23 +511,23 @@ int extraitCourbesSquelettesDossier(char* nomDossier, int nbImages, char* dateHe
 
         // ici on a les bons centres des pastilles 
 
-        piedBleu = piedRouge = genouBleu = genouRouge = hanche = mainBleu = mainRouge = coudeBleu = coudeRouge = epauleRouge = tete = Point(-1,-1);
+        piedBleu = piedRouge = genouBleu = genouRouge = hip = mainBleu = mainRouge = coudeBleu = coudeRouge = epauleRouge = head = Point(-1,-1);
 
         // on associe chaque centre à son articulation et on trace leur trajectoire
         // on commence par la pastille verte
         Scalar color(0,199,0);
         if(!centrePastilleVerte.empty())
-            ifPointinRange_drawLine(centrePastilleVerte[0],0,500,&hanche,&hanchePrecedent,&drawing2,color);
+            ifPointinRange_drawLine(centrePastilleVerte[0],0,500,&hip,&hanchePrecedent,&drawing2,color);
         Mat dessinCourbes = drawing2.clone();
-        if(hanche.x != -1 && hanche.y != -1)
-            writePointwithTexttoMat(hanche,"hanche",&dessinCourbes,Scalar(0,255,0));
+        if(hip.x != -1 && hip.y != -1)
+            writePointwithTexttoMat(hip,"hip",&dessinCourbes,Scalar(0,255,0));
 
         // Puis la pastille jaune
         color = Scalar(0,199,199);
         if(!centrePastilleJaune.empty())
-            ifPointinRange_drawLine(centrePastilleJaune[0],0,500,&tete,&tetePrecedent,&drawing2,color);
-        if(tete.x != -1 && tete.y != -1)
-            writePointwithTexttoMat(tete,"tete",&dessinCourbes,Scalar(0,255,255));
+            ifPointinRange_drawLine(centrePastilleJaune[0],0,500,&head,&tetePrecedent,&drawing2,color);
+        if(head.x != -1 && head.y != -1)
+            writePointwithTexttoMat(head,"head",&dessinCourbes,Scalar(0,255,255));
 
 
         //Puis les pastilles rouges
@@ -757,19 +538,19 @@ int extraitCourbesSquelettesDossier(char* nomDossier, int nbImages, char* dateHe
         // On affiche les articulations rouges sur l'image
 
         if(piedRouge.x != -1 && piedRouge.y != -1)
-            writePointwithTexttoMat(piedRouge,"pied",&dessinCourbes,Scalar(0,0,255));
+            writePointwithTexttoMat(piedRouge,"foot",&dessinCourbes,Scalar(0,0,255));
 
         if(genouRouge.x != -1 && genouRouge.y != -1)
-            writePointwithTexttoMat(genouRouge,"genou",&dessinCourbes,Scalar(0,0,255));
+            writePointwithTexttoMat(genouRouge,"knee",&dessinCourbes,Scalar(0,0,255));
 
         if(mainRouge.x != -1 && mainRouge.y != -1)
-            writePointwithTexttoMat(mainRouge,"main",&dessinCourbes,Scalar(0,0,255));
+            writePointwithTexttoMat(mainRouge,"hand",&dessinCourbes,Scalar(0,0,255));
         
         if(coudeRouge.x != -1 && coudeRouge.y != -1)
-            writePointwithTexttoMat(coudeRouge,"coude",&dessinCourbes,Scalar(0,0,255));
+            writePointwithTexttoMat(coudeRouge,"elbow",&dessinCourbes,Scalar(0,0,255));
 
         if(epauleRouge.x != -1 && epauleRouge.y != -1)
-            writePointwithTexttoMat(epauleRouge,"epaule",&dessinCourbes,Scalar(0,0,255));
+            writePointwithTexttoMat(epauleRouge,"shoulder",&dessinCourbes,Scalar(0,0,255));
 
         //imshow("Courbes pastilles rouges", dessinCourbes);
         
@@ -783,16 +564,16 @@ int extraitCourbesSquelettesDossier(char* nomDossier, int nbImages, char* dateHe
         
        // Mat dessinCourbes = drawing2.clone();
         if(piedBleu.x != -1 && piedBleu.y != -1)
-            writePointwithTexttoMat(piedBleu,"pied",&dessinCourbes,Scalar(255,0,0));
+            writePointwithTexttoMat(piedBleu,"foot",&dessinCourbes,Scalar(255,0,0));
 
         if(genouBleu.x != -1 && genouBleu.y != -1)
-            writePointwithTexttoMat(genouBleu,"genou",&dessinCourbes,Scalar(255,0,0));
+            writePointwithTexttoMat(genouBleu,"knee",&dessinCourbes,Scalar(255,0,0));
 
         if(mainBleu.x != -1 && mainBleu.y != -1)
-            writePointwithTexttoMat(mainBleu,"main",&dessinCourbes,Scalar(255,0,0));
+            writePointwithTexttoMat(mainBleu,"hand",&dessinCourbes,Scalar(255,0,0));
         
         if(coudeBleu.x != -1 && coudeBleu.y != -1)
-            writePointwithTexttoMat(coudeBleu,"coude",&dessinCourbes,Scalar(255,0,0));
+            writePointwithTexttoMat(coudeBleu,"elbow",&dessinCourbes,Scalar(255,0,0));
 
 
 		// Ajout ecriture dossier test
@@ -806,14 +587,36 @@ int extraitCourbesSquelettesDossier(char* nomDossier, int nbImages, char* dateHe
 		
 		 // Maintenant qu'on a toutes les articulations définies, on peut tracer le squelette
         Mat dessinSquelette = Mat::zeros( image.size(), CV_8UC3 );
-        drawSqueletton(&dessinSquelette, piedRouge,piedBleu,genouRouge,genouBleu,hanche,mainRouge,mainBleu,coudeRouge,coudeBleu,epauleRouge,tete);
+        drawSqueletton(&dessinSquelette, piedRouge,piedBleu,genouRouge,genouBleu,hip,mainRouge,mainBleu,coudeRouge,coudeBleu,epauleRouge,head);
         //imshow("Squelette", dessinSquelette);
 		image_name_save = to_string(image_num);
 		if(image_num < 10)
             image_name_save = cheminDossierSquelettes + "/" + dateHeureString + "/0" + image_name_save + ".bmp";
         else image_name_save = cheminDossierSquelettes + "/" + dateHeureString + "/" + image_name_save + ".bmp";
 		imwrite(image_name_save, dessinSquelette);
+
+
+        // On peut aussi calculer la longeur de membres
+        longueurJambeDroite = longeurMembre(piedRouge, genouRouge, hip);
+        if(longueurJambeDroite != -1)
+        {
+            sommeLongueurJambeDroite += longueurJambeDroite;
+            nb_sommes_longueurJambeDroite ++;
+        }
+        longueurBrasDroit = longeurMembre(mainRouge, coudeRouge, epauleRouge);
+        if(longueurBrasDroit != -1)
+        {
+            sommeLongueurBrasDroit += longueurBrasDroit;
+            nb_sommes_longueurBrasDroit ++;
+        }
 	}
+
+    *longueurBras = sommeLongueurBrasDroit/nb_sommes_longueurBrasDroit;
+    *longueurJambe = sommeLongueurJambeDroite/nb_sommes_longueurJambeDroite;
+    cout << "longeur jambe droite moyenne = "<< *longueurJambe <<endl; 
+    cout << "longeur bras droit moyen = "<< *longueurBras <<endl; 
+
+
 	return 1;
 }
 

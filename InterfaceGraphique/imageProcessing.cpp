@@ -195,3 +195,12 @@ void drawSqueletton(Mat *mat, Point foot1, Point foot2, Point knee1, Point knee2
             circle(*mat, shoulder ,2, red, -1);
     } 
 }
+
+double longeurMembre (Point articulation1, Point articulation2, Point articulation3)
+{
+    if( articulation1.x != -1 && articulation1.y != -1 && articulation2.x != -1 && articulation2.y != -1 && articulation3.x != -1 && articulation3.y != -1 )
+    {
+        return norm(articulation2 - articulation1) + norm(articulation3 - articulation2);
+    }
+    else return -1;
+}

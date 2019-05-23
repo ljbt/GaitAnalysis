@@ -43,9 +43,9 @@ void initZonesAnalyse(zone zPatientActuel, zone *zAnalyse, zone *zVideoSquelette
 void afficheAnalyse(zone zAnalyse, zone zVideoSquelette, DonneesImageRGB* videoSquelette, zone zGraph, DonneesImageRGB* videoGraph);
 void redimensionneZoneAnalyse(zone zPatientActuel, zone *zAnalyse, zone *zVideoSquelette, zone *zGraph);
 
-void initZonesDonneesBio(zone zAnalyse, zone *zDonneesBio, zone *zTailleAnalyse, zone *zPoidsAnalyse);
-void afficheDonneesBio(zone zDonneesBio, zone zTailleAnalyse, char* taille, zone zPoidsAnalyse, char* poids);
-void redimensionneZoneDonneesBio(zone zAnalyse, zone *zDonneesBio, zone *zTailleAnalyse, zone *zPoidsAnalyse);
+void initZonesDonneesBio(zone zAnalyse, zone *zDonneesBio, zone *zTailleAnalyse, zone *zPoidsAnalyse, zone *zlongueurBrasAnalyse, zone *zlongueurJambeAnalyse);
+void afficheDonneesBio(zone zDonneesBio, zone zTailleAnalyse, char* taille, zone zPoidsAnalyse, char* poids, zone zlongueurBrasAnalyse, char* longueurBras, zone zlongueurJambeAnalyse, char* longueurJambe);
+void redimensionneZoneDonneesBio(zone zAnalyse, zone *zDonneesBio, zone *zTailleAnalyse, zone *zPoidsAnalyse, zone *zlongueurBrasAnalyse, zone *zlongueurJambeAnalyse);
 
 void initZonesPathologies(zone zDonneesBio, zone *zPathologies, zone *zCourbe, zone *zBoite, zone* zMarcheReguliere);
 void affichePathologies(zone zPathologies, zone zCourbe, char* courbe, zone zBoite, char* boite, zone zMarcheReguliere, char* marcheRegu);

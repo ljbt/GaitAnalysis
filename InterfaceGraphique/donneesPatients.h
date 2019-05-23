@@ -36,9 +36,8 @@ int ajouteElementTableau(char* nom, char* prenom, char* cleTab, char* valTab);
 int modifieChamp(char* nom, char* prenom, char* cleChamp, char* valChamp);
 int changeNomDossier(char* nomActuel, char* prenomActuel, char* modifNom, char *modifPrenom);
 
-int creeAnalysePatient(char* nom, char* prenom, char* taille, char* poids, char* courbe, char* claudification, char* marcheRegu, char* video, int nbImages, char* dateHeure);
+int creeAnalysePatient(char* nom, char* prenom, char* taille, char* poids, char **stringlongueurBras,char **stringlongueurJambe, char* courbe, char* claudification, char* marcheRegu, char* video, int nbImages, char* dateHeure );
 analyse lisAnalysePatient(char* nom, char* prenom, char* nomFichier);
 analyse* chargeAnalysesPatient(char* nom, char* prenom, int* nbAnalyses);
 DonneesImageRGB *lisImageCouranteAlphabetique(struct dirent *lecture, char *folderPath, char **nomImageVideo);
-int extraitCourbesDossier(char* nomDossier, int nbImages, char* dateHeure);
-int extraitCourbesSquelettesDossier(char* nomDossier, int nbImages, char* dateHeure);
+int extraitCourbesSquelettesDossier(char* nomDossier, int nbImages, char* dateHeure, double *longueurBras, double *longueurJambe);
