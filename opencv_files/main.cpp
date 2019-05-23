@@ -16,7 +16,7 @@ using namespace cv;
 
 int main(void)
 {
-    Mat image, hsv, mask;
+    Mat imgRef, image, hsv, mask;
     string image_name;
     int image_num = 0;
 
@@ -56,13 +56,13 @@ int main(void)
     enum {Rouge,Vert,Bleu,Jaune} Masque = Rouge;
 
 
-    image = imread("./learning_videos/courbe0rythme0boite0-1/01.bmp"); // pour récupérer la taille des images de la video
-    if( ! image.data )
+    imgRef = imread("./learning_videos/courbe0rythme0boite0-1/01.bmp"); // pour récupérer la taille des images de la video
+    if( ! imgRef.data )
     {
         cout << "Error loading image " << endl;
         return -1;
     } 
-    Mat drawing2 = Mat::zeros( image.size(), CV_8UC3 );
+    Mat drawing2 = Mat::zeros( imgRef.size(), CV_8UC3 );
 
     vector<Point> centresPastillesRougesImagePrecedente;
     vector<Point> posPiedsRouges, posPiedsBleus;
@@ -86,14 +86,14 @@ int main(void)
         if( ! image.data )
         {
             cout << "Error loading image " << endl;
-            return -1;
+            break;
         } 
         imshow("Original", image);
 
         // Check if image loaded successfully
         if( ! image.data ){
             cout << "Error loading image " + image_name << endl;
-            return -1;
+            break;
         } 
 
         cvtColor(image, hsv ,COLOR_BGR2HSV);
@@ -276,9 +276,9 @@ int main(void)
         imshow("Squelette", dessinSquelette);
 
 
-        // une fois que les lignes entre les articulations precedentes et les actuelles, il faut enregistrer les points de ces lignes
-        // dans des vecteurs, pour les comparer avec le cycle de référence
-        // Donc d'abord il faut savoir enregistrer les cycles de marche
+        // On doit pouvoir comparer un cycle moyen avec un cycle moyen de reference
+        // Donc d'abord il faut savoir enregistrer un cycle, pour ça on enregistre la position des deux pieds tant qu'on a pas fait un cycle
+        // Puis on recommence
         footRedCycle.push_back(piedRouge);
         footBlueCycle.push_back(piedBleu);
 
@@ -299,9 +299,7 @@ int main(void)
 
 
 
-
-        // on gere maintenant les cycles de marche
-        // d'abord il faut detecter un cycle, pour ça il faut savoir detecter un pied a terre, donc recuperer la position d'un pied dans plusieurs images
+        // pour detecter un cycle, il faut savoir detecter un pied a terre, donc recuperer la position d'un pied dans plusieurs images
         managePointVector(piedRouge,&posPiedsRouges, NB_IMAGES_DETECT_FOOT_DOWN);
         managePointVector(piedBleu,&posPiedsBleus, NB_IMAGES_DETECT_FOOT_DOWN);
         if(!posPiedsRouges.empty() && !posPiedsBleus.empty())
@@ -309,10 +307,11 @@ int main(void)
             if( detectGaitCycle(&nbPiedRougeDown, posPiedsRouges, &nbPiedBleuDown,posPiedsBleus) )
             {
                 cout<<"Cycle fait!\n"<<endl;
-                cyclesPiedRouge.push_back(footRedCycle);
+                cyclesPiedRouge.push_back(footRedCycle); // enregistre le cycle dans un tableau de tableaux de points
                 cyclesPiedBleu.push_back(footBlueCycle);
-                footRedCycle.clear();
+                footRedCycle.clear(); // supprime le cycle pour en enregistrer un nouveau
                 footBlueCycle.clear();
+                cout << "nb cycles pbleu enregistrés: "<<cyclesPiedRouge.size()<<endl;
             }
         }
         
@@ -341,9 +340,8 @@ int main(void)
     }
     destroyAllWindows();
 
-/*     // A la fin du while, toute la video est passée
-    // Donc on peut faire la moyenne des cycles
-    Mat dessinfinal = Mat::zeros( image.size(), CV_8UC3 );
+
+/*     Mat dessinfinal = Mat::zeros( imgRef.size(), CV_8UC3 );
     for (size_t i = 0; i < cyclesPiedRouge.size(); i++)
     {
         for (size_t j = 0; j < cyclesPiedRouge[i].size(); j++)
@@ -354,8 +352,46 @@ int main(void)
     
     imshow("tous les cycles rouges", dessinfinal);
 
-    waitKey(10000);
+    waitKey(0);
     destroyAllWindows(); */
+    // A la fin du while, toute la video est passée
+    // Donc on peut faire la moyenne des cycles
+
+    // pour faire cette moyenne il faut deja que tous les cycles aient le même point de depart,
+    // donc on ramene le premier point de chaque cycle à 0 en x
+    for (size_t i = 0; i < cyclesPiedRouge.size(); i++)
+    {
+        // pour chaque cycle on calcule l'écart entre l'origine et le premier point 
+        int ecart = cyclesPiedRouge[i][0].x;
+        for (size_t j = 0; j < cyclesPiedRouge[i].size(); j++)
+        {
+            // pour chaque point du cycle on enleve l'ecart
+            cyclesPiedRouge[i][j].x -= ecart;
+        }
+        for (size_t j = 0; j < cyclesPiedBleu[i].size(); j++)
+        {
+            // pour chaque point du cycle on enleve l'ecart
+            cyclesPiedBleu[i][j].x -= ecart;
+        }
+    }
+
+Mat dessinfinal = Mat::zeros( imgRef.size(), CV_8UC3 );
+    for (size_t i = 0; i < cyclesPiedRouge.size(); i++)
+    {
+        for (size_t j = 0; j < cyclesPiedRouge[i].size(); j++)
+        {
+            circle(dessinfinal, cyclesPiedRouge[i][j] ,2, Scalar(0,0,255), -1);
+        }
+        for (size_t j = 0; j < cyclesPiedBleu[i].size(); j++)
+        {
+            circle(dessinfinal, cyclesPiedBleu[i][j] ,2, Scalar(255,0,0), -1);
+        }
+    }
+    
+    imshow("tous les cycles rouges", dessinfinal);
+
+    waitKey(0);
+    destroyAllWindows();
 
     return 0;
   }
