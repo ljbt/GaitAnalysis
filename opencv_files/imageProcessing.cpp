@@ -290,3 +290,13 @@ vector<vector<double>> pointsToDouble( vector<vector<Point>> tabPoints)
     }
     return tabDouble;
 }
+
+
+double longeurJambe (Point pied, Point genou, Point hanche)
+{
+    if( pied.x != -1 && pied.y != -1 && genou.x != -1 && genou.y != -1 && hanche.x != -1 && hanche.y != -1 )
+    {
+        return norm(genou - pied) + norm(hanche - genou);
+    }
+    else return -1;
+}

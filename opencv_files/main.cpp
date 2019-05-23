@@ -73,6 +73,10 @@ int main(void)
     vector< vector<Point> > cyclesPiedRouge, cyclesPiedBleu;
     bool piedRougeFirstTimeDown = false;
 
+    double longueurJambeDroite;
+    double sommeLongueurJambeDroite = 0; int nb_sommes_longueurJambeDroite = 0;
+    double longueurBrasDroit;
+    double sommeLongueurBrasDroit = 0; int nb_sommes_longueurBrasDroit = 0;
     while(1)
     {
         if(mode == Play)
@@ -277,6 +281,24 @@ int main(void)
         imshow("Squelette", dessinSquelette);
 
 
+
+        // On peut aussi calculer la longeur de membres
+        longueurJambeDroite = longeurJambe(piedRouge, genouRouge, hanche);
+        if(longueurJambeDroite != -1)
+        {
+            cout << "longeur jambe droite = "<<longueurJambeDroite<<endl; 
+            sommeLongueurJambeDroite += longueurJambeDroite;
+            nb_sommes_longueurJambeDroite ++;
+        }
+        longueurBrasDroit = longeurJambe(mainRouge, coudeRouge, epauleRouge);
+        if(longueurBrasDroit != -1)
+        {
+            cout << "longeur bras droit = "<<longueurBrasDroit<<endl; 
+            sommeLongueurBrasDroit += longueurBrasDroit;
+            nb_sommes_longueurBrasDroit ++;
+        }
+
+
         // On doit pouvoir comparer un cycle moyen avec un cycle moyen de reference
         // Donc d'abord il faut savoir enregistrer un cycle, pour ça on enregistre la position des deux pieds tant qu'on a pas fait un cycle
         // Puis on recommence
@@ -353,6 +375,13 @@ int main(void)
     }
     destroyAllWindows();
     // A la fin du while, toute la video est passée
+
+
+    cout << "longeur jambe droite moyenne = "<<sommeLongueurJambeDroite/nb_sommes_longueurJambeDroite<<endl; 
+    cout << "longeur bras droit moyen = "<<sommeLongueurBrasDroit/nb_sommes_longueurBrasDroit<<endl; 
+
+
+
 
     
     // Donc on peut faire la moyenne des cycles
