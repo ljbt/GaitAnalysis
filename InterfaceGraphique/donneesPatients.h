@@ -41,3 +41,5 @@ analyse lisAnalysePatient(char* nom, char* prenom, char* nomFichier);
 analyse* chargeAnalysesPatient(char* nom, char* prenom, int* nbAnalyses);
 DonneesImageRGB *lisImageCouranteAlphabetique(struct dirent *lecture, char *folderPath, char **nomImageVideo);
 int extraitCourbesSquelettesDossier(char* nomDossier, int nbImages, char* dateHeure, double *longueurBras, double *longueurJambe);
+
+void evaluePathologies(char* nomVideo, char* courbe, char* marcheRegu, char* boite);

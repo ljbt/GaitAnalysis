@@ -182,7 +182,7 @@ int creeAnalysePatient(char* nom, char* prenom, char* taille, char* poids, char 
 	fprintf(fiche, "Marche:%s\n", marcheRegu);
 	fprintf(fiche, "Video:%s\n", video);
 	
-	fclose(fiche);
+	
 
 	double longueurBras,longueurJambe;
 	int extract = extraitCourbesSquelettesDossier(video, nbImages, dateChaine, &longueurBras, &longueurJambe);
@@ -190,15 +190,19 @@ int creeAnalysePatient(char* nom, char* prenom, char* taille, char* poids, char 
     ostringstream strs1,strs2;
     strs1 << longueurBras;
     string str = strs1.str();
-    *stringlongueurBras = (char *)malloc(sizeof(char) * 32);
+    *stringlongueurBras = (char *)malloc(sizeof(char) * 8);
     strcpy(*stringlongueurBras,str.c_str());
 
     strs2 << longueurJambe;
     str = strs2.str();
-    *stringlongueurJambe = (char *)malloc(sizeof(char) * 32);
+    *stringlongueurJambe = (char *)malloc(sizeof(char) * 8);
     strcpy(*stringlongueurJambe,str.c_str());
+    
+    fprintf(fiche, "Bras:%s\n", *stringlongueurBras);
+	fprintf(fiche, "Jambe:%s\n", *stringlongueurJambe);
 
-
+	fclose(fiche);
+	
 	return 1;
 }
 
@@ -247,6 +251,14 @@ analyse lisAnalysePatient(char* nom, char* prenom, char* nomFichier)
 		else if (strcmp(cle, "Video") == 0) 
 		{
 			strcpy(a.video, valeur); 
+		}
+		else if (strcmp(cle, "Bras") == 0) 
+		{
+			strcpy(a.longueurBras, valeur); 
+		}
+		else if (strcmp(cle, "Jambe") == 0) 
+		{
+			strcpy(a.longueurJambe, valeur); 
 		}
 	}	
 	fclose(fichierAnalyse);
@@ -631,4 +643,28 @@ int changeNomDossier(char* nomActuel, char* prenomActuel, char* modifNom, char *
 	sprintf(filepath_new, "%s/%s_%s", CHEMIN_DOSSIER_PATIENT, modifPrenom, modifNom); // On remple filepath avec le chemin et nom du fichier
 	
 	return rename(filepath, filepath_new);
+}
+
+void evaluePathologies(char* nomVideo, char* courbe, char* marcheRegu, char* boite)
+{
+	char c = '0';
+	char mr = '0';
+	char b = '0';
+	
+	sscanf(nomVideo, "video%c%c%c_", &c, &mr, &b);
+	
+	if (c == '1')
+		strcpy(courbe, "Yes");
+	else
+		strcpy(courbe, "No");
+		
+	if (mr == '1') // MarcheRegu = Inverse de rythme
+		strcpy(marcheRegu, "No");
+	else
+		strcpy(marcheRegu, "Yes");
+		
+	if (b == '1')
+		strcpy(boite, "Yes");
+	else
+		strcpy(boite, "No");
 }

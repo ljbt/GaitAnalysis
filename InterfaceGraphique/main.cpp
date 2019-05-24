@@ -101,7 +101,7 @@ void gestionEvenement(EvenementGfx evenement)
 		case Initialisation:
 
 			prenom = nom = prenom_a_charger = nom_a_charger = poids = taille = longueurBras = longueurJambe = NULL;
-			longueurBras = longueurJambe = "teessst";
+			longueurBras = longueurJambe = NULL;
 			nouveau_prenom = nouveau_nom = chaine_taille_nouveau_patient = chaine_poids_nouveau_patient = NULL;
 			compteurImageAlpha = 0;
 			lecture = 0;
@@ -114,6 +114,11 @@ void gestionEvenement(EvenementGfx evenement)
 			enCours = false;
 			enCoursAffichage = false;
 			nomImageVideo = (char *)malloc(sizeof(char) * 256);
+			courbe = (char*)malloc(sizeof(char) * 8);
+			boite = (char*)malloc(sizeof(char) * 8);
+			marcheRegu = (char*)malloc(sizeof(char) * 8);
+			longueurBras = (char*)malloc(sizeof(char) * 8);
+			longueurJambe = (char*)malloc(sizeof(char) * 8);
 			
 			retour = lisBMPRGB("retour.bmp");
 			home = lisBMPRGB("home.bmp");
@@ -162,7 +167,7 @@ void gestionEvenement(EvenementGfx evenement)
 					gestionNomPrenomPatient(&zPrenomPatientActuel, &zNomPatientActuel,&prenom,&nom);
 					break;
 				case 3: // page analyse video
-					changeTexteZone(&zTitre,"Analyse video");
+					changeTexteZone(&zTitre,"Video analysis");
 					gestionNomPrenomPatient(&zPrenomPatientActuel, &zNomPatientActuel,&prenom,&nom);
 					gestionVideoActuelle(&zNomVideo, &cheminVideoActuelle);
 					char fullPath[256];
@@ -174,7 +179,8 @@ void gestionEvenement(EvenementGfx evenement)
 						enCoursAffichage = false;
 						resetPageAnalyse = true;
 						numPage = 4;
-						creeAnalysePatient(nom, prenom, taille, poids,&longueurBras,&longueurJambe, "Oui", "Non", "Oui", cheminVideoActuelle, nbImageAlpha, date);
+						evaluePathologies(cheminVideoActuelle, courbe, marcheRegu, boite);
+						creeAnalysePatient(nom, prenom, taille, poids,&longueurBras,&longueurJambe, courbe, boite, marcheRegu, cheminVideoActuelle, nbImageAlpha, date);
 					}
 					else if(cheminVideoActuelle != NULL && strcmp(cheminVideoActuelle, "") != 0 && lecture != 0 && compteurImageAlpha < nbImageAlpha)
 					{
@@ -199,7 +205,8 @@ void gestionEvenement(EvenementGfx evenement)
 					}
 					break;
                 case 4: // page analyse
-					changeTexteZone(&zTitre,"Analyse");
+					changeTexteZone(&zTitre,"Analysis");
+					gestionNomPrenomPatient(&zPrenomPatientActuel, &zNomPatientActuel,&prenom,&nom);
 					char fullPathCourbes[256];
 					char fullPathSquelettes[256];
 					sprintf(fullPathCourbes, "%s/%s", CHEMIN_DOSSIER_COURBES, date);
@@ -275,7 +282,7 @@ void gestionEvenement(EvenementGfx evenement)
 					}
 					break;
 				case 11: // page fiche patient
-					changeTexteZone(&zTitre,"Fiche patient");
+					changeTexteZone(&zTitre,"Patient record");
 					if (resetPageFichePatient)
 					{
 						resetPageFichePatient = false;
@@ -341,7 +348,7 @@ void gestionEvenement(EvenementGfx evenement)
 					affichePatientActuel(zPatientActuel,zPrenomPatientActuel,prenom, zNomPatientActuel,nom,zVoirFiche);
 					afficheAnalyse(zAnalyse, zVideoSquelette, imageVideoSquelettes, zGraph, imageVideoCourbes);
 					afficheDonneesBio(zDonneesBio, zTailleAnalyse, taille, zPoidsAnalyse, poids, zlongueurBrasAnalyse, longueurBras, zlongueurJambeAnalyse, longueurJambe);
-					affichePathologies(zPathologies, zCourbe, "Oui", zBoite, "Non", ZMarcheReguliere, "Oui"); // Oui Non Oui
+					affichePathologies(zPathologies, zCourbe, courbe, zBoite, boite, ZMarcheReguliere, marcheRegu);
 					break;
 
 				case 11: // page fiche patient
@@ -659,6 +666,11 @@ void gestionEvenement(EvenementGfx evenement)
 							strcpy(date, analyses[p].dateHeure);
 							strcpy(poids, analyses[p].poids);
 							strcpy(taille, analyses[p].taille);
+							strcpy(courbe, analyses[p].courbe);
+							strcpy(boite, analyses[p].boite);
+							strcpy(marcheRegu, analyses[p].marcheReguliere);
+							strcpy(longueurBras, analyses[p].longueurBras);
+							strcpy(longueurJambe, analyses[p].longueurJambe);
 							numPage = 4;
 						}
 					}

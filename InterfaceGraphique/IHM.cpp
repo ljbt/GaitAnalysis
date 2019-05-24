@@ -176,7 +176,7 @@ void initZonesPatientActuel(zone zTitre, zone *zPatientActuel, zone *zPrenomPati
 	zPatientActuel->espaceGauche = 50;
 	zPatientActuel->espaceDroite = 50;
 	zPatientActuel->hauteur = HAUTEUR_TEXTE;
-	changeTexteZone(zPatientActuel,"Patient actuel : ");
+	changeTexteZone(zPatientActuel,"Current patient : ");
 	zPatientActuel->longueur = largeurFenetre() - zPatientActuel->espaceGauche - zPatientActuel->espaceDroite ;
 	zPatientActuel->xmin = zPatientActuel->espaceGauche;
 	zPatientActuel->xmax = zPatientActuel->xmin + zPatientActuel->longueur;
@@ -186,7 +186,7 @@ void initZonesPatientActuel(zone zTitre, zone *zPatientActuel, zone *zPrenomPati
 	// zones interieures
 
 	zPrenomPatientActuel->hauteur = HAUTEUR_TEXTE;
-	changeTexteZone(zPrenomPatientActuel,"Prenom : ");
+	changeTexteZone(zPrenomPatientActuel,"Firstname : ");
 	zPrenomPatientActuel->espaceGauche = 5;
 	zPrenomPatientActuel->espaceDroite = 5;
 	zPrenomPatientActuel->xmin = zPatientActuel->xmin + tailleChaine(zPatientActuel->texte,zPatientActuel->hauteur) + 10 + tailleChaine(zPrenomPatientActuel->texte, zPrenomPatientActuel->hauteur);
@@ -195,7 +195,7 @@ void initZonesPatientActuel(zone zTitre, zone *zPatientActuel, zone *zPrenomPati
 	zPrenomPatientActuel->ymin = zPatientActuel->ymin;
 
 	zNomPatientActuel->hauteur = HAUTEUR_TEXTE;
-	changeTexteZone(zNomPatientActuel,"Nom : ");
+	changeTexteZone(zNomPatientActuel,"Lastname : ");
 	zNomPatientActuel->espaceGauche = 5;
 	zNomPatientActuel->espaceDroite = 5;
 	zNomPatientActuel->xmin = zPrenomPatientActuel->xmax + zPrenomPatientActuel->espaceDroite + zNomPatientActuel->espaceGauche + tailleChaine(zNomPatientActuel->texte, zNomPatientActuel->hauteur);
@@ -203,7 +203,7 @@ void initZonesPatientActuel(zone zTitre, zone *zPatientActuel, zone *zPrenomPati
 	zNomPatientActuel->ymin = zPatientActuel->ymin;
 
 	zVoirFiche->hauteur = HAUTEUR_TEXTE;
-	changeTexteZone(zVoirFiche,"Voir fiche");
+	changeTexteZone(zVoirFiche,"Edit record");
 	zVoirFiche->espaceGauche = 10;
 	zVoirFiche->espaceDroite = 5;
 	zVoirFiche->longueur = tailleChaine(zVoirFiche->texte,zVoirFiche->hauteur);
@@ -285,7 +285,7 @@ void initZonesChargerPatient(zone zPatientActuel, zone *zChargerPatient, zone *z
 	zChargerPatient->espaceGauche = 50;
 	zChargerPatient->espaceDroite = 50;
 	zChargerPatient->hauteur = HAUTEUR_TEXTE;
-	changeTexteZone(zChargerPatient,"Charger patient : ");
+	changeTexteZone(zChargerPatient,"Load patient : ");
 	zChargerPatient->longueur = largeurFenetre() - zChargerPatient->espaceGauche - zChargerPatient->espaceDroite ;
 	zChargerPatient->xmin = zChargerPatient->espaceGauche;
 	zChargerPatient->xmax = zChargerPatient->xmin + zChargerPatient->longueur;
@@ -295,7 +295,7 @@ void initZonesChargerPatient(zone zPatientActuel, zone *zChargerPatient, zone *z
 	// zones interieures
 
 	zPrenom->hauteur = HAUTEUR_TEXTE;
-	changeTexteZone(zPrenom,"Prenom : ");
+	changeTexteZone(zPrenom,"Firstname : ");
 	zPrenom->espaceGauche = 10;
 	zPrenom->espaceDroite = 10;
 	zPrenom->xmin = zChargerPatient->xmin + tailleChaine(zChargerPatient->texte,zChargerPatient->hauteur) + 10 + tailleChaine(zPrenom->texte, zPrenom->hauteur);
@@ -305,7 +305,7 @@ void initZonesChargerPatient(zone zPatientActuel, zone *zChargerPatient, zone *z
 	zPrenom->saisie = false;
 
 	zNom->hauteur = HAUTEUR_TEXTE;
-	changeTexteZone(zNom,"Nom : ");
+	changeTexteZone(zNom,"Lastname : ");
 	zNom->espaceGauche = 10;
 	zNom->espaceDroite = 10;
 	zNom->xmin = zPrenom->xmax + zPrenom->espaceDroite + zNom->espaceGauche +  tailleChaine(zNom->texte, zNom->hauteur);
@@ -315,7 +315,7 @@ void initZonesChargerPatient(zone zPatientActuel, zone *zChargerPatient, zone *z
 	zNom->saisie = false;
 
 	zCharger->hauteur = HAUTEUR_TEXTE;
-	changeTexteZone(zCharger,"Charger donnees");
+	changeTexteZone(zCharger,"Load data");
 	zCharger->espaceGauche = 15;
 	zCharger->espaceDroite = 5;
 	zCharger->longueur = tailleChaine(zCharger->texte,zCharger->hauteur);
@@ -386,7 +386,7 @@ void initZonesNouveauPatient(zone zChargerPatient, zone *zNouveauPatient, zone *
 	zNouveauPatient->espaceGauche = 50;
 	zNouveauPatient->espaceDroite = 50;
 	zNouveauPatient->hauteur = HAUTEUR_TEXTE;
-	changeTexteZone(zNouveauPatient,"Creer patient : ");
+	changeTexteZone(zNouveauPatient,"Create patient : ");
 	zNouveauPatient->longueur = largeurFenetre() - zNouveauPatient->espaceGauche - zNouveauPatient->espaceDroite ;
 	zNouveauPatient->xmin = zNouveauPatient->espaceGauche;
 	zNouveauPatient->xmax = zNouveauPatient->xmin + zNouveauPatient->longueur;
@@ -396,7 +396,7 @@ void initZonesNouveauPatient(zone zChargerPatient, zone *zNouveauPatient, zone *
 	// zones interieures
 
 	zPrenom->hauteur = HAUTEUR_TEXTE;
-	changeTexteZone(zPrenom,"Prenom : ");
+	changeTexteZone(zPrenom,"Firstname : ");
 	zPrenom->espaceGauche = 10;
 	zPrenom->espaceDroite = 10;
 	zPrenom->espaceBas = 10;
@@ -407,7 +407,7 @@ void initZonesNouveauPatient(zone zChargerPatient, zone *zNouveauPatient, zone *
 	zPrenom->saisie = false;
 
 	zNom->hauteur = HAUTEUR_TEXTE;
-	changeTexteZone(zNom,"Nom : ");
+	changeTexteZone(zNom,"Lastname : ");
 	zNom->espaceGauche = 10;
 	zNom->espaceDroite = 10;
 	zNom->espaceBas = 10;
@@ -419,7 +419,7 @@ void initZonesNouveauPatient(zone zChargerPatient, zone *zNouveauPatient, zone *
 
 
 	zTaille->hauteur = HAUTEUR_TEXTE;
-	changeTexteZone(zTaille,"Taille : ");
+	changeTexteZone(zTaille,"Size : ");
 	zTaille->espaceGauche = 10;
 	zTaille->espaceDroite = 10;
 	zTaille->espaceHaut = 10;
@@ -430,7 +430,7 @@ void initZonesNouveauPatient(zone zChargerPatient, zone *zNouveauPatient, zone *
 	zTaille->saisie = false;
 
  	zPoids->hauteur = HAUTEUR_TEXTE;
-	changeTexteZone(zPoids,"Poids : ");
+	changeTexteZone(zPoids,"Weight : ");
 	zPoids->espaceGauche = 10;
 	zPoids->espaceDroite = 10;
 	zPoids->espaceHaut = 10;
@@ -442,7 +442,7 @@ void initZonesNouveauPatient(zone zChargerPatient, zone *zNouveauPatient, zone *
 
 
 	zCreerPatient->hauteur = HAUTEUR_TEXTE;
-	changeTexteZone(zCreerPatient,"Creer patient");
+	changeTexteZone(zCreerPatient,"Create patient");
 	zCreerPatient->espaceGauche = 20;
 	zCreerPatient->espaceDroite = 5;
 	zCreerPatient->longueur = tailleChaine(zCreerPatient->texte,zCreerPatient->hauteur);
@@ -594,10 +594,10 @@ void initZonesAnalyseVideo(zone zPatientActuel, zone * zAnalyseVideo, zone *zNom
 	// contenant
 	zAnalyseVideo->espaceHaut = 50;
 	zAnalyseVideo->espaceBas = 50;
-	zAnalyseVideo->espaceGauche = 50;
+	zAnalyseVideo->espaceGauche = 0;
 	zAnalyseVideo->espaceDroite = 50;
 	zAnalyseVideo->hauteur = HAUTEUR_TEXTE;
-	changeTexteZone(zAnalyseVideo,"Nouvelle analyse : ");
+	changeTexteZone(zAnalyseVideo,"New analysis : ");
 	zAnalyseVideo->longueur = largeurFenetre()/2 - zAnalyseVideo->espaceGauche - zAnalyseVideo->espaceDroite ;
 	zAnalyseVideo->xmin = largeurFenetre()/2 + zAnalyseVideo->espaceGauche;
 	zAnalyseVideo->xmax = zAnalyseVideo->xmin + zAnalyseVideo->longueur;
@@ -621,7 +621,7 @@ void initZonesAnalyseVideo(zone zPatientActuel, zone * zAnalyseVideo, zone *zNom
 	zNomVideo->saisie = false;
 
 	zChargerVideo->hauteur = HAUTEUR_TEXTE;
-	changeTexteZone(zChargerVideo,"Charger");
+	changeTexteZone(zChargerVideo,"Load");
 	zChargerVideo->espaceGauche = 10;
 	zChargerVideo->espaceDroite = 10;
 	zChargerVideo->longueur = tailleChaine(zChargerVideo->texte,zChargerVideo->hauteur);
@@ -645,14 +645,14 @@ void initZonesAnalyseVideo(zone zPatientActuel, zone * zAnalyseVideo, zone *zNom
 
 
 	zAnalyser->hauteur = HAUTEUR_TEXTE;
-	changeTexteZone(zAnalyser,"Analyser");
+	changeTexteZone(zAnalyser,"Analyze");
 	zAnalyser->espaceGauche = 10;
 	zAnalyser->espaceDroite = 10;
 	zAnalyser->espaceBas = 10;
 	zAnalyser->espaceHaut = 10;
 	zAnalyser->longueur = tailleChaine(zAnalyser->texte,zAnalyser->hauteur);
-	zAnalyser->xmin =  zAnalyseVideo->xmin;
-	zAnalyser->xmax = zAnalyseVideo->xmin + zAnalyser->longueur;
+	zAnalyser->xmin =  zAnalyseVideo->xmin + largeurFenetre() / 4 - zAnalyser->longueur / 2;
+	zAnalyser->xmax = zAnalyser->xmin + zAnalyser->longueur;
 	zAnalyser->ymax = zVideoOrigine->ymin - zAnalyser->espaceHaut;
 	zAnalyser->ymin = zAnalyser->ymax - zAnalyser->hauteur;
 
@@ -662,8 +662,8 @@ void initZonesAnalyseVideo(zone zPatientActuel, zone * zAnalyseVideo, zone *zNom
 	zAnalyseEnCours->espaceDroite = 10;
 	zAnalyseEnCours->espaceBas = 10;
 	zAnalyseEnCours->espaceHaut = 10;
-	zAnalyseEnCours->xmin = zAnalyseVideo->xmin;
-	zAnalyseEnCours->xmax = zAnalyseVideo->xmin + zAnalyseEnCours->longueur;
+	zAnalyseEnCours->xmin = zAnalyseVideo->xmin + largeurFenetre() / 4 - zAnalyseEnCours->longueur;
+	zAnalyseEnCours->xmax = zAnalyseEnCours->xmin + zAnalyseEnCours->longueur;
 	zAnalyseEnCours->ymax = zAnalyser->ymin - zAnalyseEnCours->espaceHaut;
 	zAnalyseEnCours->ymin = zAnalyseEnCours->ymax - zAnalyseEnCours->hauteur;
 }
@@ -737,13 +737,13 @@ void redimensionneZoneAnalyseVideo(zone zPatientActuel, zone * zAnalyseVideo, zo
 	zVideoOrigine->ymin = zVideoOrigine->ymax - zVideoOrigine->hauteur;
 
 	zAnalyser->longueur = tailleChaine(zAnalyser->texte,zAnalyser->hauteur);
-	zAnalyser->xmin =  zAnalyseVideo->xmin;
-	zAnalyser->xmax = zAnalyseVideo->xmin + zAnalyser->longueur;
+	zAnalyser->xmin =  zAnalyseVideo->xmin + largeurFenetre() / 4 - zAnalyser->longueur / 2;
+	zAnalyser->xmax = zAnalyser->xmin + zAnalyser->longueur;
 	zAnalyser->ymax = zVideoOrigine->ymin - zAnalyser->espaceHaut;
 	zAnalyser->ymin = zAnalyser->ymax - zAnalyser->hauteur;
 
-	zAnalyseEnCours->xmin = zAnalyseVideo->xmin;
-	zAnalyseEnCours->xmax = zAnalyseVideo->xmin + zAnalyseEnCours->longueur;
+	zAnalyseEnCours->xmin = zAnalyseVideo->xmin + largeurFenetre() / 4 - zAnalyseEnCours->longueur;
+	zAnalyseEnCours->xmax = zAnalyseEnCours->xmin + zAnalyseEnCours->longueur;
 	zAnalyseEnCours->ymax = zAnalyser->ymin - zAnalyseEnCours->espaceHaut;
 	zAnalyseEnCours->ymin = zAnalyseEnCours->ymax - zAnalyseEnCours->hauteur;
 }
@@ -772,7 +772,7 @@ void initZonesAnalysesPrecedentes(zone zPatientActuel, zone * zAnalysesPrecedent
 	zAnalysesPrecedentes->espaceGauche = 50;
 	zAnalysesPrecedentes->espaceDroite = 50;
 	zAnalysesPrecedentes->hauteur = HAUTEUR_TEXTE;
-	changeTexteZone(zAnalysesPrecedentes,"Analyses precedentes :");
+	changeTexteZone(zAnalysesPrecedentes,"Previous analyses :");
 	
 	zAnalysesPrecedentes->longueur = largeurFenetre()/2 - zAnalysesPrecedentes->espaceGauche - zAnalysesPrecedentes->espaceDroite ;
 	zAnalysesPrecedentes->xmin = zAnalysesPrecedentes->espaceGauche;
@@ -924,7 +924,7 @@ void initZonesDonneesBio(zone zAnalyse, zone *zDonneesBio, zone *zTailleAnalyse,
 	zDonneesBio->espaceGauche = 50;
 	zDonneesBio->espaceDroite = 50;
 	zDonneesBio->hauteur = HAUTEUR_TEXTE;
-	changeTexteZone(zDonneesBio,"Donnees biometriques");
+	changeTexteZone(zDonneesBio,"Biometric data");
 	zDonneesBio->longueur = largeurFenetre()/2 - zDonneesBio->espaceGauche - zDonneesBio->espaceDroite ;
 	zDonneesBio->xmin = zDonneesBio->espaceGauche;
 	zDonneesBio->xmax = zDonneesBio->xmin + zDonneesBio->longueur;
@@ -934,7 +934,7 @@ void initZonesDonneesBio(zone zAnalyse, zone *zDonneesBio, zone *zTailleAnalyse,
 	// zones interieures
 
 	zTailleAnalyse->hauteur = HAUTEUR_TEXTE;
-	changeTexteZone(zTailleAnalyse,"Taille : ");
+	changeTexteZone(zTailleAnalyse,"Size : ");
 	zTailleAnalyse->espaceGauche = 0;
 	zTailleAnalyse->espaceDroite = 10;
 	zTailleAnalyse->espaceBas = 10;
@@ -946,7 +946,7 @@ void initZonesDonneesBio(zone zAnalyse, zone *zDonneesBio, zone *zTailleAnalyse,
 	zTailleAnalyse->ymin = zTailleAnalyse->ymax - zTailleAnalyse->hauteur;
 
 	zPoidsAnalyse->hauteur = HAUTEUR_TEXTE;
-	changeTexteZone(zPoidsAnalyse,"Poids : ");
+	changeTexteZone(zPoidsAnalyse,"Weight : ");
 	zPoidsAnalyse->espaceGauche = 0;
 	zPoidsAnalyse->espaceDroite = 10;
 	zPoidsAnalyse->espaceBas = 10;
@@ -958,7 +958,7 @@ void initZonesDonneesBio(zone zAnalyse, zone *zDonneesBio, zone *zTailleAnalyse,
 	zPoidsAnalyse->ymin = zPoidsAnalyse->ymax - zPoidsAnalyse->hauteur;
 
 	zlongueurBrasAnalyse->hauteur = HAUTEUR_TEXTE;
-	changeTexteZone(zlongueurBrasAnalyse,"Longueur bras : ");
+	changeTexteZone(zlongueurBrasAnalyse,"Arm length : ");
 	zlongueurBrasAnalyse->espaceGauche = 0;
 	zlongueurBrasAnalyse->espaceDroite = 10;
 	zlongueurBrasAnalyse->espaceBas = 10;
@@ -970,7 +970,7 @@ void initZonesDonneesBio(zone zAnalyse, zone *zDonneesBio, zone *zTailleAnalyse,
 	zlongueurBrasAnalyse->ymin = zlongueurBrasAnalyse->ymax - zlongueurBrasAnalyse->hauteur;
 
 	zlongueurJambeAnalyse->hauteur = HAUTEUR_TEXTE;
-	changeTexteZone(zlongueurJambeAnalyse,"Longueur jambe : ");
+	changeTexteZone(zlongueurJambeAnalyse,"Leg length: ");
 	zlongueurJambeAnalyse->espaceGauche = 0;
 	zlongueurJambeAnalyse->espaceDroite = 10;
 	zlongueurJambeAnalyse->espaceBas = 10;
@@ -990,10 +990,10 @@ void afficheDonneesBio(zone zDonneesBio, zone zTailleAnalyse, char* taille, zone
 	
 	afficheChaine(zDonneesBio.texte, zDonneesBio.hauteur, zDonneesBio.xmin,zDonneesBio.ymax - zDonneesBio.hauteur);
 
-	char tailleBase[32] = "Taille : ";
-    char poidsBase[32] = "Poids : ";
-    char longueurBrasBase[32] = "Longueur bras : ";
-    char longueurJambeBase[32] = "Longueur jambe : ";
+	char tailleBase[32] = "Size : ";
+    char poidsBase[32] = "Weight : ";
+    char longueurBrasBase[32] = "Arm length : ";
+    char longueurJambeBase[32] = "Leg length: ";
     
     
 
@@ -1078,7 +1078,7 @@ void initZonesPathologies(zone zDonneesBio, zone *zPathologies, zone *zCourbe, z
 	// zones interieures
 
 	zCourbe->hauteur = HAUTEUR_TEXTE;
-	changeTexteZone(zCourbe,"Courbe : ");
+	changeTexteZone(zCourbe,"Curve : ");
 	zCourbe->espaceGauche = 0;
 	zCourbe->espaceDroite = 10;
 	zCourbe->espaceBas = 10;
@@ -1090,7 +1090,7 @@ void initZonesPathologies(zone zDonneesBio, zone *zPathologies, zone *zCourbe, z
 	zCourbe->ymin = zCourbe->ymax - zCourbe->hauteur;
 
 	zBoite->hauteur = HAUTEUR_TEXTE;
-	changeTexteZone(zBoite,"Boite : ");
+	changeTexteZone(zBoite,"Limp : ");
 	zBoite->espaceGauche = 0;
 	zBoite->espaceDroite = 10;
 	zBoite->espaceBas = 10;
@@ -1102,7 +1102,7 @@ void initZonesPathologies(zone zDonneesBio, zone *zPathologies, zone *zCourbe, z
 	zBoite->ymin = zBoite->ymax - zBoite->hauteur;
 
 	zMarcheReguliere->hauteur = HAUTEUR_TEXTE;
-	changeTexteZone(zMarcheReguliere,"Marche reguliere : ");
+	changeTexteZone(zMarcheReguliere,"Regular walk : ");
 	zMarcheReguliere->espaceGauche = 0;
 	zMarcheReguliere->espaceDroite = 10;
 	zMarcheReguliere->espaceBas = 10;
@@ -1121,9 +1121,9 @@ void affichePathologies(zone zPathologies, zone zCourbe, char* courbe, zone zBoi
 
 	afficheChaine(zPathologies.texte, zPathologies.hauteur, zPathologies.xmin,zPathologies.ymax - zPathologies.hauteur);
 
-    char courbeBase[32] = "Courbe : ";
-    char boiteBase[32] = "Boite : ";
-    char marcheReguBase[32] = "Marche reguliere : ";
+    char courbeBase[32] = "Curve : ";
+    char boiteBase[32] = "Limp : ";
+    char marcheReguBase[32] = "Regular walk : ";
 
 
 	if(courbe != NULL)
@@ -1184,7 +1184,7 @@ void initZonesFichePatient(zone *zFichePatient, zone *zFicheNom, zone *zFichePre
 	zFichePatient->espaceGauche = 50;
 	zFichePatient->espaceDroite = 50;
 	zFichePatient->hauteur = HAUTEUR_TEXTE;
-	changeTexteZone(zFichePatient,"Editer fiche : ");
+	changeTexteZone(zFichePatient,"Edit record : ");
 	zFichePatient->longueur = largeurFenetre() - zFichePatient->espaceGauche - zFichePatient->espaceDroite ;
 	zFichePatient->xmin = largeurFenetre()/2 + zFichePatient->espaceGauche;
 	zFichePatient->xmax = zFichePatient->xmin + zFichePatient->longueur;
@@ -1194,7 +1194,7 @@ void initZonesFichePatient(zone *zFichePatient, zone *zFicheNom, zone *zFichePre
 	// zones interieures
 
 	zFichePrenom->hauteur = HAUTEUR_TEXTE;
-	changeTexteZone(zFichePrenom,"Prenom : ");
+	changeTexteZone(zFichePrenom,"Firstname : ");
 	zFichePrenom->espaceGauche = 0;
 	zFichePrenom->espaceDroite = 10;
 	zFichePrenom->espaceBas = 10;
@@ -1206,7 +1206,7 @@ void initZonesFichePatient(zone *zFichePatient, zone *zFicheNom, zone *zFichePre
 	zFichePrenom->saisie = false;
 	
 	zFicheNom->hauteur = HAUTEUR_TEXTE;
-	changeTexteZone(zFicheNom,"Nom : ");
+	changeTexteZone(zFicheNom,"Lastname : ");
 	zFicheNom->espaceGauche = 0;
 	zFicheNom->espaceDroite = 10;
 	zFicheNom->espaceBas = 10;
@@ -1218,7 +1218,7 @@ void initZonesFichePatient(zone *zFichePatient, zone *zFicheNom, zone *zFichePre
 	zFicheNom->saisie = false;
 	
 	zFicheTaille->hauteur = HAUTEUR_TEXTE;
-	changeTexteZone(zFicheTaille,"Taille : ");
+	changeTexteZone(zFicheTaille,"Size : ");
 	zFicheTaille->espaceGauche = 0;
 	zFicheTaille->espaceDroite = 10;
 	zFicheTaille->espaceBas = 10;
@@ -1230,7 +1230,7 @@ void initZonesFichePatient(zone *zFichePatient, zone *zFicheNom, zone *zFichePre
 	zFicheTaille->saisie = false;
 	
 	zFichePoids->hauteur = HAUTEUR_TEXTE;
-	changeTexteZone(zFichePoids,"Poids : ");
+	changeTexteZone(zFichePoids,"Weight : ");
 	zFichePoids->espaceGauche = 0;
 	zFichePoids->espaceDroite = 10;
 	zFichePoids->espaceBas = 10;
@@ -1243,7 +1243,7 @@ void initZonesFichePatient(zone *zFichePatient, zone *zFicheNom, zone *zFichePre
 
 
 	zMaj->hauteur = HAUTEUR_TEXTE;
-	changeTexteZone(zMaj,"Mettre a jour");
+	changeTexteZone(zMaj,"Update");
 	zMaj->espaceGauche = -20;
 	zMaj->espaceDroite = 10;
 	zMaj->espaceBas = 10;
