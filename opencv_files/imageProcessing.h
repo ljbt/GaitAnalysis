@@ -21,6 +21,7 @@
     vector<double> meanVector(vector<vector<double>> v);
     void savemeanVector(string filename,vector<double> meanVector);
     vector<double> getmeanVector(string filename);
+    double quadratic_error(vector<double> normalVector, vector<double> meanVector);
 
 
 #endif

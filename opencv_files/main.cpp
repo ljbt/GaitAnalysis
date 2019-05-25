@@ -468,6 +468,8 @@ int main(void)
     }
     imshow("Cycle normal", imgcyclenorm); 
 
+    //double erreur_quad = quadratic_error(cycleRougeNormal,cycleRougeMoyen);
+
     // un cycle contient plusieurs points, ces points sont séparés, une ligne permet donc d'avoir tous les points
     // on doit enregistrer ces points dans les vecteurs pour avoir des cycles complets et pouvoir comparer en y
     waitKey(0);

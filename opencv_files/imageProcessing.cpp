@@ -359,3 +359,15 @@ vector<double> getmeanVector(string filename)
     else cout << "Unable to open file "<<filename<< " to read";  
     return meanVector;
 }
+
+// fonction qui retourne l'erreur quadratique entre le vecteur du cycle normal et celui du cycle de la video actuelle
+double quadratic_error(vector<double> normalVector, vector<double> meanVector)
+{
+    double error;
+    if( normalVector.size() != meanVector.size())
+    {
+        cout<<"Pas possible de comparer deux vecteurs de taille differente !"<<endl;
+        return -1;
+    }
+    return error;
+}
