@@ -432,43 +432,25 @@ int main(void)
     vector < vector <double> > tabPointsCyclesRouges = pointsToDouble(cyclesPiedRouge);
     vector < vector <double> > tabPointsCyclesBleus = pointsToDouble(cyclesPiedBleu);
     
+    vector<double> cycleRougeMoyen = meanVector(tabPointsCyclesRouges);
+    vector<double> cycleBleuMoyen = meanVector(tabPointsCyclesBleus);
 
-    
-   for (size_t i = 0; i < tabPointsCyclesRouges.size(); i++)
-    {
-        if(!tabPointsCyclesRouges[i].empty())
-        {
-            double moy = mean(tabPointsCyclesRouges[i]);
-            tabPointsCyclesRouges[i].clear();
-            tabPointsCyclesRouges[i].push_back(round(moy));           
-        }
-    }
-     for (size_t i = 0; i < tabPointsCyclesBleus.size(); i++)
-    {
-        if(!tabPointsCyclesBleus[i].empty())
-        {
-            double moy = mean(tabPointsCyclesBleus[i]);
-            tabPointsCyclesBleus[i].clear();
-            tabPointsCyclesBleus[i].push_back(round(moy));
-        }
-    }    
-
-
+ 
     Mat imgcyclemoy = Mat::zeros( imgRef.size(), CV_8UC3 );
-    for (size_t i = 0; i < tabPointsCyclesRouges.size(); i++)
+    for (size_t i = 0; i < cycleRougeMoyen.size(); i++)
     {
-        if(!tabPointsCyclesRouges[i].empty())
-            circle(imgcyclemoy, Point(i,tabPointsCyclesRouges[i][0]) ,2, Scalar(0,0,255), -1);
+        if(cycleRougeMoyen[i] > 0)
+            circle(imgcyclemoy, Point(i,cycleRougeMoyen[i]) ,2, Scalar(0,0,255), -1);
         
     }
-    for (size_t i = 0; i < tabPointsCyclesBleus.size(); i++)
+    for (size_t i = 0; i < cycleBleuMoyen.size(); i++)
     {
-        if(!tabPointsCyclesBleus[i].empty())
-            circle(imgcyclemoy, Point(i,tabPointsCyclesBleus[i][0]) ,2, Scalar(255,0,0), -1);
+        if(cycleBleuMoyen[i] > 0)
+            circle(imgcyclemoy, Point(i,cycleBleuMoyen[i]) ,2, Scalar(255,0,0), -1);
         
     }
-
-    imshow("Cycle moyen", imgcyclemoy);
+    imshow("Cycle moyen", imgcyclemoy); 
+    
 
     // un cycle contient plusieurs points, ces points sont séparés, une ligne permet donc d'avoir tous les points
     // on doit enregistrer ces points dans les vecteurs pour avoir des cycles complets et pouvoir comparer en y

@@ -16,9 +16,9 @@
     void managePointVector(Point newPoint, vector<Point> *v, size_t maxSize);
     bool detectFootDown(vector<Point> posFoot, size_t numElmts);
     bool detectGaitCycle(int *numFootRightDown, vector<Point> posFootRight, int *numFootLeftDown, vector<Point> posFootLeft);
-    vector<vector<double>> pointsToDouble( vector<vector<Point>> tabPoints);
     double longeurJambe (Point pied, Point genou, Point hanche);
+    vector<vector<double>> pointsToDouble( vector<vector<Point>> tabPoints);
+    vector<double> meanVector(vector<vector<double>> v);
 
-    
 
 #endif

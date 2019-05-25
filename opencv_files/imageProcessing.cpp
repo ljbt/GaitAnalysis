@@ -267,6 +267,15 @@ bool detectGaitCycle(int *numFootRightDown, vector<Point> posFootRight, int *num
     else return false;
 }
 
+double longeurJambe (Point pied, Point genou, Point hanche)
+{
+    if( pied.x != -1 && pied.y != -1 && genou.x != -1 && genou.y != -1 && hanche.x != -1 && hanche.y != -1 )
+    {
+        return norm(genou - pied) + norm(hanche - genou);
+    }
+    else return -1;
+}
+
 // fonction qui prend en parametre un vecteur de vecteurs de points, et retourne un vecteur de vecteurs de double
 // le x de chaque point correspond aux indices du vecteur, et pour chaque indice on stocke tous les y correspondant
 vector<vector<double>> pointsToDouble( vector<vector<Point>> tabPoints)
@@ -291,12 +300,22 @@ vector<vector<double>> pointsToDouble( vector<vector<Point>> tabPoints)
     return tabDouble;
 }
 
-
-double longeurJambe (Point pied, Point genou, Point hanche)
+// fonction qui prend en param un vecteur de vecteurs de double,
+// et retourne un vecteur contenant les moyennes
+vector<double> meanVector(vector<vector<double>> v)
 {
-    if( pied.x != -1 && pied.y != -1 && genou.x != -1 && genou.y != -1 && hanche.x != -1 && hanche.y != -1 )
+    vector<double> meanVector;
+
+    for (size_t i = 0; i < v.size(); i++)
     {
-        return norm(genou - pied) + norm(hanche - genou);
+        if(!v[i].empty())
+        {
+            if( meanVector.size() < i+1 )
+            {
+                meanVector.resize(i+1);
+            }
+            meanVector[i] = round(mean(v[i])) ;
+        }
     }
-    else return -1;
+    return meanVector;
 }
