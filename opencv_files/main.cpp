@@ -86,7 +86,7 @@ int main(void)
         if(image_num < 10)
             image_name = "./learning_videos/courbe0rythme0boited-1/0" + image_name + ".bmp";
         else image_name = "./learning_videos/courbe0rythme0boited-1/" + image_name + ".bmp";
-        //printf("image name = %s\n", image_name.c_str());
+        
         image = imread(image_name);
         if( ! image.data )
         {
@@ -286,14 +286,12 @@ int main(void)
         longueurJambeDroite = longeurJambe(piedRouge, genouRouge, hanche);
         if(longueurJambeDroite != -1)
         {
-            cout << "longeur jambe droite = "<<longueurJambeDroite<<endl; 
             sommeLongueurJambeDroite += longueurJambeDroite;
             nb_sommes_longueurJambeDroite ++;
         }
         longueurBrasDroit = longeurJambe(mainRouge, coudeRouge, epauleRouge);
         if(longueurBrasDroit != -1)
         {
-            cout << "longeur bras droit = "<<longueurBrasDroit<<endl; 
             sommeLongueurBrasDroit += longueurBrasDroit;
             nb_sommes_longueurBrasDroit ++;
         }
@@ -306,9 +304,9 @@ int main(void)
             footRedCycle.push_back(piedRouge);
         if(piedBleu.x != -1 && piedBleu.y != -1)
             footBlueCycle.push_back(piedBleu);
-        cout << footBlueCycle.size()<<endl;
-        // Une fois qu'on a enregistré les cycles,il faut en faire un cycle moyen, qu'on peut comparer avec le cycle moyen de ref
 
+
+        // Une fois qu'on a enregistré les cycles,il faut en faire un cycle moyen, qu'on peut comparer avec le cycle moyen de ref
 
         Mat drawing4 = Mat::zeros( image.size(), CV_8UC3 );
         for (size_t i = 0; i < footRedCycle.size(); i++)
@@ -345,8 +343,7 @@ int main(void)
                 cyclesPiedRouge.push_back(footRedCycle); // enregistre le cycle dans un tableau de tableaux de points
                 cyclesPiedBleu.push_back(footBlueCycle);
                 footRedCycle.clear(); // supprime le cycle pour en enregistrer un nouveau
-                footBlueCycle.clear();
-                cout << "nb cycles pbleu enregistrés: "<<cyclesPiedBleu.size()<<endl;
+                footBlueCycle.clear();                
             }
         }
         
@@ -401,8 +398,11 @@ int main(void)
         {
             // pour chaque point du cycle on enleve l'ecart
             cyclesPiedBleu[i][j].x -= ecart;
+            if(cyclesPiedBleu[i][j].x < 0)
+                cyclesPiedBleu[i].erase(cyclesPiedBleu[i].begin() + j);
         }
     }
+
 
     Mat dessinfinal = Mat::zeros( imgRef.size(), CV_8UC3 );
     for (size_t i = 0; i < cyclesPiedRouge.size(); i++)
@@ -429,27 +429,30 @@ int main(void)
 
 
 
-// ERROR cyclesPiedBleu, aborted ^^'
-    //vector < vector <double> > tabPointsCyclesRouges = pointsToDouble(cyclesPiedRouge);
-    //vector < vector <double> > tabPointsCyclesBleus = pointsToDouble(cyclesPiedBleu);
+    vector < vector <double> > tabPointsCyclesRouges = pointsToDouble(cyclesPiedRouge);
+    vector < vector <double> > tabPointsCyclesBleus = pointsToDouble(cyclesPiedBleu);
+    
 
     
- /*   for (size_t i = 0; i < tabPointsCyclesRouges.size(); i++)
+   for (size_t i = 0; i < tabPointsCyclesRouges.size(); i++)
     {
         if(!tabPointsCyclesRouges[i].empty())
         {
             double moy = mean(tabPointsCyclesRouges[i]);
             tabPointsCyclesRouges[i].clear();
-            tabPointsCyclesRouges[i].push_back(moy);           
+            tabPointsCyclesRouges[i].push_back(round(moy));           
         }
-
     }
      for (size_t i = 0; i < tabPointsCyclesBleus.size(); i++)
     {
-        double moy = mean(tabPointsCyclesBleus[i]);
-        tabPointsCyclesBleus[i].clear();
-        tabPointsCyclesBleus[i].push_back(moy);
+        if(!tabPointsCyclesBleus[i].empty())
+        {
+            double moy = mean(tabPointsCyclesBleus[i]);
+            tabPointsCyclesBleus[i].clear();
+            tabPointsCyclesBleus[i].push_back(round(moy));
+        }
     }    
+
 
     Mat imgcyclemoy = Mat::zeros( imgRef.size(), CV_8UC3 );
     for (size_t i = 0; i < tabPointsCyclesRouges.size(); i++)
@@ -458,8 +461,14 @@ int main(void)
             circle(imgcyclemoy, Point(i,tabPointsCyclesRouges[i][0]) ,2, Scalar(0,0,255), -1);
         
     }
-    
-    imshow("Cycle moyen", imgcyclemoy); */
+    for (size_t i = 0; i < tabPointsCyclesBleus.size(); i++)
+    {
+        if(!tabPointsCyclesBleus[i].empty())
+            circle(imgcyclemoy, Point(i,tabPointsCyclesBleus[i][0]) ,2, Scalar(255,0,0), -1);
+        
+    }
+
+    imshow("Cycle moyen", imgcyclemoy);
 
     // un cycle contient plusieurs points, ces points sont séparés, une ligne permet donc d'avoir tous les points
     // on doit enregistrer ces points dans les vecteurs pour avoir des cycles complets et pouvoir comparer en y

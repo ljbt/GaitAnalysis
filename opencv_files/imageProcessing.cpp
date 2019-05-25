@@ -280,11 +280,11 @@ vector<vector<double>> pointsToDouble( vector<vector<Point>> tabPoints)
             // pour chaque point de chaque cycle on doit enregistrer, à l'indice x, l'ordonnee y 
             if((long unsigned int)tabPoints[i][j].x+1 > tabDouble.size() && tabPoints[i][j].y >= 0 )
             {
-                tabDouble.resize((long unsigned int)tabPoints[i][j].x+1);
+                tabDouble.resize((size_t)(long unsigned int)tabPoints[i][j].x+1);
             }
             if(tabPoints[i][j].y >= 0)
             {
-                tabDouble[ (long unsigned int)tabPoints[i][j].x ].push_back( tabPoints[i][j].y );
+                tabDouble[ (size_t)(long unsigned int)tabPoints[i][j].x ].push_back( tabPoints[i][j].y );
             }  
         }
     }
