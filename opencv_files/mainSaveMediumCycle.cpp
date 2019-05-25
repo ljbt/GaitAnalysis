@@ -404,7 +404,7 @@ int main(void)
     }
 
 
-/*     Mat dessinfinal = Mat::zeros( imgRef.size(), CV_8UC3 );
+    Mat dessinfinal = Mat::zeros( imgRef.size(), CV_8UC3 );
     for (size_t i = 0; i < cyclesPiedRouge.size(); i++)
     {
         for (size_t j = 0; j < cyclesPiedRouge[i].size(); j++)
@@ -417,7 +417,7 @@ int main(void)
         }
     }
     
-    imshow("Cycles superposés", dessinfinal); */
+    imshow("Cycles superposés", dessinfinal);
 
   
 
@@ -451,22 +451,8 @@ int main(void)
     }
     imshow("Cycle moyen", imgcyclemoy); 
     
-    vector<double> cycleRougeNormal = getmeanVector("cycleRougeNormal.txt");
-    vector<double> cycleBleuNormal = getmeanVector("cycleBleuNormal.txt");
-    Mat imgcyclenorm = Mat::zeros( imgRef.size(), CV_8UC3 );
-    for (size_t i = 0; i < cycleRougeNormal.size(); i++)
-    {
-        if(cycleRougeNormal[i] > 0)
-            circle(imgcyclenorm, Point(i,cycleRougeNormal[i]) ,2, Scalar(0,0,255), -1);
-        
-    }
-    for (size_t i = 0; i < cycleBleuNormal.size(); i++)
-    {
-        if(cycleBleuNormal[i] > 0)
-            circle(imgcyclenorm, Point(i,cycleBleuNormal[i]) ,2, Scalar(255,0,0), -1);
-        
-    }
-    imshow("Cycle normal", imgcyclenorm); 
+    savemeanVector("cycleRougeMoyen.txt",cycleRougeMoyen);
+    savemeanVector("cycleBleuMoyen.txt",cycleBleuMoyen);
 
     // un cycle contient plusieurs points, ces points sont séparés, une ligne permet donc d'avoir tous les points
     // on doit enregistrer ces points dans les vecteurs pour avoir des cycles complets et pouvoir comparer en y

@@ -19,6 +19,8 @@
     double longeurJambe (Point pied, Point genou, Point hanche);
     vector<vector<double>> pointsToDouble( vector<vector<Point>> tabPoints);
     vector<double> meanVector(vector<vector<double>> v);
+    void savemeanVector(string filename,vector<double> meanVector);
+    vector<double> getmeanVector(string filename);
 
 
 #endif

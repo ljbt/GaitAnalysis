@@ -4,6 +4,8 @@
 #include "definitions.h"
 
 #include <iostream>
+#include <fstream>
+
 
 using namespace std;
 
@@ -317,5 +319,43 @@ vector<double> meanVector(vector<vector<double>> v)
             meanVector[i] = round(mean(v[i])) ;
         }
     }
+    return meanVector;
+}
+
+// fonction qui enregistre dans un fichier de nom filename, le vecteur contenant les ordonnees du cycle de marche moyen
+void savemeanVector(string filename,vector<double> meanVector)
+{
+    ofstream myfile (filename); // se place a la fin du ficher pour ecrire les nouveaux points
+    if (myfile.is_open())
+    {
+        for (size_t i = 0; i < meanVector.size(); i++)
+        {
+            myfile << i << " " << meanVector[i] <<"\n";
+        }
+        myfile.close();
+    }
+    else cout << "Unable to open file "<<filename<< " to write";
+}
+
+// fonction qui va chercher dans le fichier de nom filename les donnees permettant de recreer le vecteur decrivant un cycle normal moyen
+vector<double> getmeanVector(string filename)
+{
+    vector<double> meanVector;
+    ifstream myfiletoread (filename);
+    if (myfiletoread.is_open())
+    {
+        string chaine;
+        int i,y;
+        do{
+            getline(myfiletoread,chaine);
+            istringstream iss(chaine);
+            iss >> i >> y;
+            meanVector.resize(i+1);
+            meanVector[i] = y ;
+        }while ( !myfiletoread.eof() );
+
+        myfiletoread.close();
+    }
+    else cout << "Unable to open file "<<filename<< " to read";  
     return meanVector;
 }
