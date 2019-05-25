@@ -453,7 +453,7 @@ int main(void)
     
     vector<double> cycleRougeNormal = getmeanVector("cycleRougeNormal.txt");
     vector<double> cycleBleuNormal = getmeanVector("cycleBleuNormal.txt");
-    Mat imgcyclenorm = Mat::zeros( imgRef.size(), CV_8UC3 );
+/*     Mat imgcyclenorm = Mat::zeros( imgRef.size(), CV_8UC3 );
     for (size_t i = 0; i < cycleRougeNormal.size(); i++)
     {
         if(cycleRougeNormal[i] > 0)
@@ -466,7 +466,44 @@ int main(void)
             circle(imgcyclenorm, Point(i,cycleBleuNormal[i]) ,2, Scalar(255,0,0), -1);
         
     }
-    imshow("Cycle normal", imgcyclenorm); 
+    imshow("Cycle normal", imgcyclenorm); */ 
+
+    vector<Point> pointsCycleRougeNormal = doubleToPoints(cycleRougeNormal);
+    vector<Point> pointsCycleBleuNormal = doubleToPoints(cycleBleuNormal);
+    Mat imgpointscyclenorm = Mat::zeros( imgRef.size(), CV_8UC3 );
+    for (size_t i = 0; i < pointsCycleRougeNormal.size(); i++)
+    {
+        if(pointsCycleRougeNormal[i].y > 0)
+            circle(imgpointscyclenorm, pointsCycleRougeNormal[i] ,2, Scalar(0,0,255), -1);
+        
+    }
+    for (size_t i = 0; i < pointsCycleBleuNormal.size(); i++)
+    {
+        if(pointsCycleBleuNormal[i].y > 0)
+            circle(imgpointscyclenorm, pointsCycleBleuNormal[i] ,2, Scalar(255,0,0), -1);
+        
+    }
+    imshow("points cycle normal", imgpointscyclenorm);
+
+
+
+   vector<Point> pointsCycleRougeNormalFull = fillVectorPoints(pointsCycleRougeNormal, imgRef);
+   vector<Point> pointsCycleBleuNormalFull = fillVectorPoints(pointsCycleBleuNormal, imgRef);
+
+    Mat imgfullpointscyclenorm = Mat::zeros( imgRef.size(), CV_8UC3 );
+    for (size_t i = 0; i < pointsCycleRougeNormalFull.size(); i++)
+    {
+        if(pointsCycleRougeNormalFull[i].y > 0)
+            circle(imgfullpointscyclenorm, pointsCycleRougeNormalFull[i] ,2, Scalar(0,0,255), -1);
+        
+    }
+    for (size_t i = 0; i < pointsCycleBleuNormalFull.size(); i++)
+    {
+        if(pointsCycleBleuNormalFull[i].y > 0)
+            circle(imgfullpointscyclenorm, pointsCycleBleuNormalFull[i] ,2, Scalar(255,0,0), -1);
+        
+    }
+    imshow("full points cycle normal", imgfullpointscyclenorm);
 
     //double erreur_quad = quadratic_error(cycleRougeNormal,cycleRougeMoyen);
 

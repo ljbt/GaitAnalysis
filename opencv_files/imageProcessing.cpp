@@ -369,5 +369,86 @@ double quadratic_error(vector<double> normalVector, vector<double> meanVector)
         cout<<"Pas possible de comparer deux vecteurs de taille differente !"<<endl;
         return -1;
     }
+    // a continuer..
+
     return error;
+}
+
+// fonction qui prend un param un tableau de double et retourne un tableau de points (le x de chaque point correspond a l'abscisse du double, et le y au double)
+vector<Point> doubleToPoints(vector<double> tabDouble)
+{
+    vector<Point> tabPoints;
+    for (size_t i = 0; i < tabDouble.size(); i++)
+    {
+        tabPoints.resize(i+1);
+        tabPoints[i].x = i;
+        tabPoints[i].y = tabDouble[i];
+    }
+    
+    return tabPoints;
+}
+
+// fonction qui prend en param un tableau de vecteurs représentant une courbe, mais dont certains points manquent (valent 0 en ordonnee)
+// Le but est de tracer une ligne entre ces points et d'entrer les points de la ligne entre les deux points connus
+// et de retourner le vecteur contenant la courbe complete (une valeur de y pour chaque abscisse)
+vector<Point> fillVectorPoints(vector<Point> vecNotFull, Mat supportMat)
+{
+    vector<Point> vectorFull;
+
+    Point p1, p2;
+    long unsigned int i1=0, i2;
+    int ecart;
+    while(i1 < vecNotFull.size())
+    {
+        if(i1 == 0 && vecNotFull[i1].y == 0) // premier point du vecteur = 0 donc on doit aller chercher le prochain premier point
+        {
+            do{
+                if(vectorFull.size() < i1+1)
+                    vectorFull.resize(i1+1);
+                vectorFull[i1] = vecNotFull[i1];
+                i1++;
+            }while(vecNotFull[i1].y == 0);
+        }
+        p1 = vecNotFull[i1];
+        i2 = i1+1;
+        ecart =0;
+        if(vecNotFull[i2].y == 0)
+        {
+            while (vecNotFull[i2].y == 0)
+            {
+                ecart++;
+                i2++;
+                if(i2 >= vecNotFull.size())
+                {
+                    cout << "No other point after " << p1 << endl;
+                    return vectorFull;
+                }
+            }
+            if(ecart > 0)
+            {
+                // on doit entrer les deux points connus et les points manquants dans vectorFull
+                p2 = vecNotFull[i2];
+
+                if(vectorFull.size() < i2+1)
+                    vectorFull.resize(i2+1);
+                vectorFull[i1] = p1;
+                vectorFull[i2] = p2;
+                LineIterator it(supportMat, p1, p2, 8);
+                for(int i = 0; i < it.count; i++, ++it)
+                {
+                    vectorFull[it.pos().x] = it.pos() ; 
+                }
+            }
+        }
+        else
+        {
+            if(vectorFull.size() < i2+1)
+                vectorFull.resize(i2+1);
+            vectorFull[i2] = vecNotFull[i2];
+        }
+        i1=i2;
+    }
+    
+
+    return vectorFull;
 }
