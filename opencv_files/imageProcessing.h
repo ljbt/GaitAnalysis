@@ -20,7 +20,7 @@
     vector<vector<double>> pointsToDouble( vector<vector<Point>> tabPoints);
     vector<double> meanVector(vector<vector<double>> v);
     void savemeanVector(string filename,vector<double> meanVector);
-    vector<double> getmeanVector(string filename);
+    vector<double> getNormalmeanVector(string filename);
     double quadratic_error(vector<double> normalVector, vector<double> meanVector);
     vector<Point> doubleToPoints(vector<double> tabDouble);
     vector<Point> fillVectorPoints(vector<Point> vecNotFull, Mat supportMat);

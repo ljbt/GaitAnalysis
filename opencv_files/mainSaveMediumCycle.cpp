@@ -68,10 +68,10 @@ int main(void)
     vector<Point> posPiedsRouges, posPiedsBleus;
 
     int nbPiedRougeDown = 0;
-    int nbPiedBleuDown = 0;
     vector<Point> footRedCycle, footBlueCycle;
     vector< vector<Point> > cyclesPiedRouge, cyclesPiedBleu;
     bool piedRougeFirstTimeDown = false;
+    bool piedBleuFirstTimeDown = false;
 
     double longueurJambeDroite;
     double sommeLongueurJambeDroite = 0; int nb_sommes_longueurJambeDroite = 0;
@@ -84,8 +84,8 @@ int main(void)
 
         image_name = to_string(image_num);
         if(image_num < 10)
-            image_name = "./learning_videos/courbe0rythme0boited-1/0" + image_name + ".bmp";
-        else image_name = "./learning_videos/courbe0rythme0boited-1/" + image_name + ".bmp";
+            image_name = "./learning_videos/courbe0rythme0boite0-1/0" + image_name + ".bmp";
+        else image_name = "./learning_videos/courbe0rythme0boite0-1/" + image_name + ".bmp";
         
         image = imread(image_name);
         if( ! image.data )
@@ -306,7 +306,7 @@ int main(void)
             footBlueCycle.push_back(piedBleu);
 
 
-        // Une fois qu'on a enregistré les cycles,il faut en faire un cycle moyen, qu'on peut comparer avec le cycle moyen de ref
+       // Une fois qu'on a enregistré les cycles,il faut en faire un cycle moyen, qu'on peut comparer avec le cycle moyen de ref
 
         Mat drawing4 = Mat::zeros( image.size(), CV_8UC3 );
         for (size_t i = 0; i < footRedCycle.size(); i++)
@@ -326,25 +326,38 @@ int main(void)
         managePointVector(piedRouge,&posPiedsRouges, NB_IMAGES_DETECT_FOOT_DOWN);
         managePointVector(piedBleu,&posPiedsBleus, NB_IMAGES_DETECT_FOOT_DOWN);
 
-        if(!posPiedsRouges.empty())
+        if( !posPiedsRouges.empty() && !posPiedsBleus.empty())
         {
-            if(detectFootDown(posPiedsRouges, NB_IMAGES_DETECT_FOOT_DOWN) && !piedRougeFirstTimeDown) // enleve les premiers points avant le premier cycle
+            // d'abord on cherche la pose du pied rouge, et qd il s'est posé on cherche la pose du pied bleu
+            // puis on recommence
+            if(nbPiedRougeDown == 0 && piedRouge.x != -1 && piedRouge.y != -1) 
             {
-                piedRougeFirstTimeDown = true;
-                footRedCycle.clear();
+                cout <<"cherche pose pied rouge"<<endl;
+                if( detectFootDown(posPiedsRouges, NB_IMAGES_DETECT_FOOT_DOWN) )
+                {
+                    cout<<"foot red down"<<endl;
+                    (nbPiedRougeDown) ++;
+                    if(piedRougeFirstTimeDown)
+                        cyclesPiedRouge.push_back(footRedCycle);
+                    else piedRougeFirstTimeDown = true;
+                    footRedCycle.clear(); 
+                    posPiedsRouges.clear();
+                }
             }
-        }
-
-        if(!posPiedsRouges.empty() && !posPiedsBleus.empty())
-        {
-            if( detectGaitCycle(&nbPiedRougeDown, posPiedsRouges, &nbPiedBleuDown,posPiedsBleus) )
+            if(nbPiedRougeDown == 1 && piedBleu.x != -1 && piedBleu.y != -1)
             {
-                cout<<"Cycle fait!\n"<<endl;
-                cyclesPiedRouge.push_back(footRedCycle); // enregistre le cycle dans un tableau de tableaux de points
-                cyclesPiedBleu.push_back(footBlueCycle);
-                footRedCycle.clear(); // supprime le cycle pour en enregistrer un nouveau
-                footBlueCycle.clear();                
-            }
+                cout <<"cherche pose pied bleu "<<posPiedsBleus.size()<<endl;
+                if( detectFootDown(posPiedsBleus, NB_IMAGES_DETECT_FOOT_DOWN) )
+                {
+                    cout<<"foot blue down\n"<<endl;
+                    nbPiedRougeDown = 0;
+                    if(piedBleuFirstTimeDown)
+                        cyclesPiedBleu.push_back(footBlueCycle);
+                    else piedBleuFirstTimeDown = true;
+                    footBlueCycle.clear(); 
+                    posPiedsBleus.clear();
+                }
+            } 
         }
         
         
@@ -377,29 +390,56 @@ int main(void)
     cout << "longeur jambe droite moyenne = "<<sommeLongueurJambeDroite/nb_sommes_longueurJambeDroite<<endl; 
     cout << "longeur bras droit moyen = "<<sommeLongueurBrasDroit/nb_sommes_longueurBrasDroit<<endl; 
 
+    if(cyclesPiedBleu.size() > cyclesPiedRouge.size())
+        cyclesPiedBleu.resize(cyclesPiedRouge.size());
 
 
+    Mat dessin = Mat::zeros( imgRef.size(), CV_8UC3 );
+    for (size_t i = 0; i < cyclesPiedRouge.size(); i++)
+    {
+        for (size_t j = 0; j < cyclesPiedRouge[i].size(); j++)
+        {
+            circle(dessin, cyclesPiedRouge[i][j] ,2, Scalar(0,0,255), -1);
+        }
+    }
+    for (size_t i = 0; i < cyclesPiedBleu.size(); i++)
+    {
+        for (size_t j = 0; j < cyclesPiedBleu[i].size(); j++)
+        {
+            circle(dessin, cyclesPiedBleu[i][j] ,2, Scalar(255,0,0), -1);
+        }
+    }
+    
+    imshow("Cycles", dessin);
 
+    
     
     // Donc on peut faire la moyenne des cycles
 
     // pour faire cette moyenne il faut deja que tous les cycles aient le même point de depart,
     // donc on ramene le premier point de chaque cycle à 0 en x
+    //cyclesPiedRouge.shrink_to_fit();
     for (size_t i = 0; i < cyclesPiedRouge.size(); i++)
     {
         // pour chaque cycle on calcule l'écart entre l'origine et le premier point 
-        int ecart = cyclesPiedRouge[i][0].x;
-        for (size_t j = 0; j < cyclesPiedRouge[i].size(); j++)
-        {
-            // pour chaque point du cycle on enleve l'ecart
-            cyclesPiedRouge[i][j].x -= ecart;
-        }
-        for (size_t j = 0; j < cyclesPiedBleu[i].size(); j++)
-        {
-            // pour chaque point du cycle on enleve l'ecart
-            cyclesPiedBleu[i][j].x -= ecart;
-            if(cyclesPiedBleu[i][j].x < 0)
-                cyclesPiedBleu[i].erase(cyclesPiedBleu[i].begin() + j);
+        if(!cyclesPiedRouge[i].empty())
+        {   
+            int ecart = cyclesPiedRouge[i][0].x;
+            for (size_t j = 0; j < cyclesPiedRouge[i].size(); j++)
+            {
+                // pour chaque point du cycle on enleve l'ecart
+                cyclesPiedRouge[i][j].x -= ecart;
+            }
+            if(i < cyclesPiedBleu.size())
+            {
+                for (size_t j = 0; j < cyclesPiedBleu[i].size(); j++)
+                {
+                    // pour chaque point du cycle on enleve l'ecart
+                    cyclesPiedBleu[i][j].x -= ecart;
+                    if(cyclesPiedBleu[i][j].x < 0)
+                        cyclesPiedBleu[i].erase(cyclesPiedBleu[i].begin() + j);
+                }
+            }
         }
     }
 
@@ -411,6 +451,9 @@ int main(void)
         {
             circle(dessinfinal, cyclesPiedRouge[i][j] ,2, Scalar(0,0,255), -1);
         }
+    }
+    for (size_t i = 0; i < cyclesPiedBleu.size(); i++)
+    {
         for (size_t j = 0; j < cyclesPiedBleu[i].size(); j++)
         {
             circle(dessinfinal, cyclesPiedBleu[i][j] ,2, Scalar(255,0,0), -1);
@@ -450,6 +493,8 @@ int main(void)
         
     }
     imshow("Cycle moyen", imgcyclemoy); 
+
+  
     
     savemeanVector("cycleRougeMoyen.txt",cycleRougeMoyen);
     savemeanVector("cycleBleuMoyen.txt",cycleBleuMoyen);

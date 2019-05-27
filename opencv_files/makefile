@@ -1,7 +1,7 @@
 CXX = g++
 RM = rm -f
-FLAGS = -Wall -O2 -g
-CFLAGS = -Wall -O2 -g -c
+FLAGS = -Wall  -g
+CFLAGS = -Wall  -g -c
 LDLIBS = -lopencv_imgcodecs -lopencv_imgproc -lopencv_core -lopencv_highgui -lopencv_videoio
 
 

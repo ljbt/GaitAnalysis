@@ -234,39 +234,37 @@ bool detectFootDown(vector<Point> posFoot, size_t numElmts)
         posX.push_back(posFoot[i].x);
     
     double coef = coef_variation(posX);
-    if(coef > 0.05)
-        return false;
-    else return true;
+    cout << "coef = "<<coef<<endl;
+    if(coef < 0.04)
+        return true;
+    else return false;
 }
 
 bool detectGaitCycle(int *numFootRightDown, vector<Point> posFootRight, int *numFootLeftDown, vector<Point> posFootLeft)
 {
-    // si le pied rouge ne s'est pas posé ou que le pied bleu s'est posé on doit detecter la pose du pied rouge
-    if(*numFootRightDown == 0 || *numFootLeftDown == 1)
+    // d'abord on cherche la pose du pied rouge, et qd il s'est posé on cherche la pose du pied bleu
+    // puis on recommence
+    if(*numFootRightDown == 0)
     {
+        cout <<"cherche pose pied rouge"<<endl;
         if( detectFootDown(posFootRight, NB_IMAGES_DETECT_FOOT_DOWN) )
         {
             cout<<"foot red down"<<endl;
             (*numFootRightDown) ++;
         }
     }
-    // si le pied rouge s'est posé, on doit attendre que le pied bleu se pose
-    if(*numFootRightDown == 1 && *numFootLeftDown < 1)
+    if(*numFootRightDown == 1 )
     {
+        cout <<"cherche pose pied bleu"<<endl;
         if( detectFootDown(posFootLeft, NB_IMAGES_DETECT_FOOT_DOWN) )
         {
             cout<<"foot blue down"<<endl;
             (*numFootLeftDown) ++;
+            *numFootRightDown = *numFootLeftDown = 0;
+            return true;
         }
-    }
-    // Une fois que le pied bleu s'est posé on doit attendre que le pied rouge se repose
-
-    if( *numFootRightDown == 2)
-    {
-        *numFootRightDown = *numFootLeftDown = 0;
-        return true;
-    }
-    else return false;
+    } 
+    return false;
 }
 
 double longeurJambe (Point pied, Point genou, Point hanche)
@@ -325,6 +323,7 @@ vector<double> meanVector(vector<vector<double>> v)
 // fonction qui enregistre dans un fichier de nom filename, le vecteur contenant les ordonnees du cycle de marche moyen
 void savemeanVector(string filename,vector<double> meanVector)
 {
+    cout << "Saving mean vector into file "<<filename<<endl;
     ofstream myfile (filename); // se place a la fin du ficher pour ecrire les nouveaux points
     if (myfile.is_open())
     {
@@ -338,7 +337,7 @@ void savemeanVector(string filename,vector<double> meanVector)
 }
 
 // fonction qui va chercher dans le fichier de nom filename les donnees permettant de recreer le vecteur decrivant un cycle normal moyen
-vector<double> getmeanVector(string filename)
+vector<double> getNormalmeanVector(string filename)
 {
     vector<double> meanVector;
     ifstream myfiletoread (filename);
