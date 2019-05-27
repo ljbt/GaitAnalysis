@@ -24,6 +24,7 @@
     double quadratic_error(vector<double> normalVector, vector<double> meanVector);
     vector<Point> doubleToPoints(vector<double> tabDouble);
     vector<Point> fillVectorPoints(vector<Point> vecNotFull, Mat supportMat);
+    vector<Point> adaptSizeVector(vector<Point> v, size_t new_size);
 
 
 #endif

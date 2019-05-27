@@ -504,50 +504,94 @@ int main(void)
     vector<Point> pointsCycleRougeMoyen = doubleToPoints(cycleRougeMoyen);
     vector<Point> pointsCycleBleuMoyen = doubleToPoints(cycleBleuMoyen);
     
-    // Quand on a les quelques points caracterisant le cycle normal et le celui de la video,
-    // il faut qu'ils aient la même longueur pour être comparés
-    // soit si le cycle moyen fait 30 points, le cycle normal doit aussi faire 30 points
-    if(pointsCycleRougeNormal.size() != pointsCycleRougeMoyen.size())
-        cout << "taille diff: "<<pointsCycleRougeNormal.size() <<" "<< pointsCycleRougeMoyen.size()<<endl;
-
-
-/*     Mat imgpointscyclenorm = Mat::zeros( imgRef.size(), CV_8UC3 );
+    Mat imgpointscyclenorm = Mat::zeros( imgRef.size(), CV_8UC3 );
     for (size_t i = 0; i < pointsCycleRougeNormal.size(); i++)
     {
         if(pointsCycleRougeNormal[i].y > 0)
-            circle(imgpointscyclenorm, pointsCycleRougeNormal[i] ,2, Scalar(0,0,255), -1);
+            circle(imgpointscyclenorm, pointsCycleRougeNormal[i] ,2, Scalar(0,255,255), -1);
         
     }
     for (size_t i = 0; i < pointsCycleBleuNormal.size(); i++)
     {
         if(pointsCycleBleuNormal[i].y > 0)
-            circle(imgpointscyclenorm, pointsCycleBleuNormal[i] ,2, Scalar(255,0,0), -1);
+            circle(imgpointscyclenorm, pointsCycleBleuNormal[i] ,2, Scalar(255,255,0), -1);
         
     }
-    imshow("points cycle normal", imgpointscyclenorm); */
+    imshow("points cycle normal", imgpointscyclenorm);
 
+    // Quand on a les quelques points caracterisant le cycle normal et le celui de la video,
+    // il faut qu'ils aient la même longueur pour être comparés
+    // soit si le cycle moyen fait 30 points, le cycle normal doit aussi faire 30 points
+    if(pointsCycleRougeNormal.size() != pointsCycleRougeMoyen.size())
+    {
+        cout << "taille cycle rouge diff: "<<pointsCycleRougeNormal.size() <<" "<< pointsCycleRougeMoyen.size()<<endl;
+        pointsCycleRougeNormal = adaptSizeVector(pointsCycleRougeNormal,pointsCycleRougeMoyen.size());
+
+    }
+    else cout << "meme longueur cycle rouge "<<endl;
+    cout << "taille cycle rouge diff: "<<pointsCycleRougeNormal.size() <<" "<< pointsCycleRougeMoyen.size()<<endl;
+
+    if(pointsCycleBleuNormal.size() != pointsCycleBleuMoyen.size())
+    {
+        cout << "taille cycle bleu diff: "<<pointsCycleBleuNormal.size() <<" "<< pointsCycleBleuMoyen.size()<<endl;
+        pointsCycleBleuNormal = adaptSizeVector(pointsCycleBleuNormal,pointsCycleBleuMoyen.size());
+    }
+    else cout << "meme longueur cycle bleu "<<endl;
+
+    cout << "taille cycle bleu diff: "<<pointsCycleBleuNormal.size() <<" "<< pointsCycleBleuMoyen.size()<<endl;
+
+
+
+    Mat imgpointscyclenorm2 = Mat::zeros( imgRef.size(), CV_8UC3 );
+    for (size_t i = 0; i < pointsCycleRougeNormal.size(); i++)
+    {
+        if(pointsCycleRougeNormal[i].y > 0)
+            circle(imgpointscyclenorm2, pointsCycleRougeNormal[i] ,2, Scalar(0,255,255), -1);
+        
+    }
+    for (size_t i = 0; i < pointsCycleBleuNormal.size(); i++)
+    {
+        if(pointsCycleBleuNormal[i].y > 0)
+            circle(imgpointscyclenorm2, pointsCycleBleuNormal[i] ,2, Scalar(255,255,0), -1);
+        
+    }
+    imshow("points cycle normal adapt", imgpointscyclenorm2);
 
   
 
 
     // creation des courbes complètes à partir des quelques points
-/*    vector<Point> pointsCycleRougeNormalFull = fillVectorPoints(pointsCycleRougeNormal, imgRef);
+   vector<Point> pointsCycleRougeNormalFull = fillVectorPoints(pointsCycleRougeNormal, imgRef);
    vector<Point> pointsCycleBleuNormalFull = fillVectorPoints(pointsCycleBleuNormal, imgRef);
+   vector<Point> pointsCycleRougeMoyenFull = fillVectorPoints(pointsCycleRougeMoyen, imgRef);
+   vector<Point> pointsCycleBleuMoyenFull = fillVectorPoints(pointsCycleBleuMoyen, imgRef);
 
     Mat imgfullpointscyclenorm = Mat::zeros( imgRef.size(), CV_8UC3 );
     for (size_t i = 0; i < pointsCycleRougeNormalFull.size(); i++)
     {
         if(pointsCycleRougeNormalFull[i].y > 0)
-            circle(imgfullpointscyclenorm, pointsCycleRougeNormalFull[i] ,2, Scalar(0,0,255), -1);
+            circle(imgfullpointscyclenorm, pointsCycleRougeNormalFull[i] ,2, Scalar(0,255,255), -1);
+        
+    }
+    for (size_t i = 0; i < pointsCycleRougeMoyenFull.size(); i++)
+    {
+        if(pointsCycleRougeMoyenFull[i].y > 0)
+            circle(imgfullpointscyclenorm, pointsCycleRougeMoyenFull[i] ,2, Scalar(0,0,255), -1);
         
     }
     for (size_t i = 0; i < pointsCycleBleuNormalFull.size(); i++)
     {
         if(pointsCycleBleuNormalFull[i].y > 0)
-            circle(imgfullpointscyclenorm, pointsCycleBleuNormalFull[i] ,2, Scalar(255,0,0), -1);
+            circle(imgfullpointscyclenorm, pointsCycleBleuNormalFull[i] ,2, Scalar(255,255,0), -1);
         
     }
-    imshow("full points cycle normal", imgfullpointscyclenorm); */
+    for (size_t i = 0; i < pointsCycleBleuMoyenFull.size(); i++)
+    {
+        if(pointsCycleBleuMoyenFull[i].y > 0)
+            circle(imgfullpointscyclenorm, pointsCycleBleuMoyenFull[i] ,2, Scalar(255,0,0), -1);
+        
+    }
+    imshow("full points cycle normal", imgfullpointscyclenorm);
 
     
     

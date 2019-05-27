@@ -451,3 +451,21 @@ vector<Point> fillVectorPoints(vector<Point> vecNotFull, Mat supportMat)
 
     return vectorFull;
 }
+
+vector<Point> adaptSizeVector(vector<Point> v, size_t new_size)
+{
+    vector<Point> newVec;
+    size_t newAbs;
+    for (size_t i = 0; i < v.size(); i++)
+    {
+        newAbs = (new_size*i)/v.size();
+        if(newAbs>0)
+        {
+            if(newVec.size() < newAbs+1)
+                newVec.resize(newAbs+1);
+            newVec[newAbs].x = newAbs;
+            newVec[newAbs].y = v[i].y;
+        }
+    }
+    return newVec;
+}
