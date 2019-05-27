@@ -359,19 +359,6 @@ vector<double> getNormalmeanVector(string filename)
     return meanVector;
 }
 
-// fonction qui retourne l'erreur quadratique entre le vecteur du cycle normal et celui du cycle de la video actuelle
-double quadratic_error(vector<double> normalVector, vector<double> meanVector)
-{
-    double error;
-    if( normalVector.size() != meanVector.size())
-    {
-        cout<<"Pas possible de comparer deux vecteurs de taille differente !"<<endl;
-        return -1;
-    }
-    // a continuer..
-
-    return error;
-}
 
 // fonction qui prend un param un tableau de double et retourne un tableau de points (le x de chaque point correspond a l'abscisse du double, et le y au double)
 vector<Point> doubleToPoints(vector<double> tabDouble)
@@ -411,17 +398,17 @@ vector<Point> fillVectorPoints(vector<Point> vecNotFull, Mat supportMat)
         p1 = vecNotFull[i1];
         i2 = i1+1;
         ecart =0;
-        if(vecNotFull[i2].y == 0)
+        if(vecNotFull[i2].y == 0 && i2 < vecNotFull.size() ) 
         {
-            while (vecNotFull[i2].y == 0)
+            while (vecNotFull[i2].y == 0 && i2 < vecNotFull.size())
             {
                 ecart++;
                 i2++;
-                if(i2 >= vecNotFull.size())
-                {
-                    cout << "No other point after " << p1 << endl;
-                    return vectorFull;
-                }
+            }
+            if(i2 >= vecNotFull.size())
+            {
+                cout << "No other point after " << p1 << endl;
+                return vectorFull;
             }
             if(ecart > 0)
             {
@@ -441,7 +428,7 @@ vector<Point> fillVectorPoints(vector<Point> vecNotFull, Mat supportMat)
         }
         else
         {
-            if(vectorFull.size() < i2+1)
+            if(vectorFull.size() < i2+1 && i2+1 <= vecNotFull.size())
                 vectorFull.resize(i2+1);
             vectorFull[i2] = vecNotFull[i2];
         }
@@ -468,4 +455,35 @@ vector<Point> adaptSizeVector(vector<Point> v, size_t new_size)
         }
     }
     return newVec;
+}
+
+// fonction qui retourne l'erreur quadratique entre le vecteur du cycle normal et celui du cycle de la video actuelle
+double mean_quadratic_error(vector<Point> normalVector, vector<Point> meanVector)
+{
+    double error = 0, nb_elmts = 0;
+    if( normalVector.size() != meanVector.size())
+    {
+        cout<<"Pas possible de comparer deux vecteurs de taille differente !"<<endl;
+        return -1;
+    }
+    else
+    {
+        for (size_t i = 0; i < normalVector.size(); i++)
+        {
+            if(normalVector[i].y > 0 && meanVector[i].y > 0)
+            {
+                error += pow( abs(normalVector[i].y - meanVector[i].y) , 2);
+                nb_elmts++;
+            }
+        }
+    }
+
+    return error/nb_elmts;
+}
+
+void afficheTabPoints(vector<Point> tab)
+{
+    for (size_t i = 0; i < tab.size(); i++)
+        cout << tab[i]<<endl;
+
 }

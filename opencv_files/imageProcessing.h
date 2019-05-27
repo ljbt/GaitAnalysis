@@ -21,10 +21,11 @@
     vector<double> meanVector(vector<vector<double>> v);
     void savemeanVector(string filename,vector<double> meanVector);
     vector<double> getNormalmeanVector(string filename);
-    double quadratic_error(vector<double> normalVector, vector<double> meanVector);
     vector<Point> doubleToPoints(vector<double> tabDouble);
     vector<Point> fillVectorPoints(vector<Point> vecNotFull, Mat supportMat);
     vector<Point> adaptSizeVector(vector<Point> v, size_t new_size);
+    double mean_quadratic_error(vector<Point> normalVector, vector<Point> meanVector);
+    void afficheTabPoints(vector<Point> tab);
 
 
 #endif

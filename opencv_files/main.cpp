@@ -565,6 +565,7 @@ int main(void)
    vector<Point> pointsCycleBleuNormalFull = fillVectorPoints(pointsCycleBleuNormal, imgRef);
    vector<Point> pointsCycleRougeMoyenFull = fillVectorPoints(pointsCycleRougeMoyen, imgRef);
    vector<Point> pointsCycleBleuMoyenFull = fillVectorPoints(pointsCycleBleuMoyen, imgRef);
+   afficheTabPoints(pointsCycleRougeNormalFull);
 
     Mat imgfullpointscyclenorm = Mat::zeros( imgRef.size(), CV_8UC3 );
     for (size_t i = 0; i < pointsCycleRougeNormalFull.size(); i++)
@@ -596,7 +597,13 @@ int main(void)
     
     
     
-    //double erreur_quad = quadratic_error(cycleRougeNormal,cycleRougeMoyen);
+    double erreur_quad_rouge = mean_quadratic_error(pointsCycleRougeNormalFull,pointsCycleRougeMoyenFull);
+    cout <<"erreur quad moyenne cycle rouge = "<< erreur_quad_rouge<<endl<<endl;
+    double erreur_quad_bleue = mean_quadratic_error(pointsCycleBleuNormalFull,pointsCycleBleuMoyenFull);
+    cout <<"erreur quad moyenne cycle bleu = "<< erreur_quad_bleue<<endl;
+
+    if( erreur_quad_bleue > 25 || erreur_quad_rouge > 25)
+        cout << "anomalie dans la demarche"<<endl;
 
     // un cycle contient plusieurs points, ces points sont séparés, une ligne permet donc d'avoir tous les points
     // on doit enregistrer ces points dans les vecteurs pour avoir des cycles complets et pouvoir comparer en y
