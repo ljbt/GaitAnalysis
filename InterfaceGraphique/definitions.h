@@ -22,7 +22,6 @@ typedef struct _zones{
 typedef struct analyse {
 	char poids[8];
 	char taille[8];
-	char courbe[8];
 	char marcheNormale[8];
 	char boite[8];
 	char longueurBras[8];

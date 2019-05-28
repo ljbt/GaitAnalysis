@@ -56,7 +56,7 @@ int main(void)
     enum {Rouge,Vert,Bleu,Jaune} Masque = Rouge;
 
 
-    imgRef = imread("./learning_videos/courbe0rythme0boite0-1/01.bmp"); // pour récupérer la taille des images de la video
+    imgRef = imread("./learning_videos/000_1/01.bmp"); // pour récupérer la taille des images de la video
     if( ! imgRef.data )
     {
         cout << "Error loading image " << endl;
@@ -87,8 +87,8 @@ int main(void)
 
         image_name = to_string(image_num);
         if(image_num < 10)
-            image_name = "./learning_videos/courbe1rythme0boited-1/0" + image_name + ".bmp";
-        else image_name = "./learning_videos/courbe1rythme0boited-1/" + image_name + ".bmp";
+            image_name = "./learning_videos/10G_6/0" + image_name + ".bmp";
+        else image_name = "./learning_videos/10G_6/" + image_name + ".bmp";
         
         image = imread(image_name);
         if( ! image.data )
@@ -555,7 +555,6 @@ int main(void)
 
     }
     else cout << "meme longueur cycle rouge "<<endl;
-    cout << "taille cycle rouge diff: "<<pointsCycleRougeNormal.size() <<" "<< pointsCycleRougeMoyen.size()<<endl;
 
     if(pointsCycleBleuNormal.size() != pointsCycleBleuMoyen.size())
     {
@@ -564,7 +563,6 @@ int main(void)
     }
     else cout << "meme longueur cycle bleu "<<endl;
 
-    cout << "taille cycle bleu diff: "<<pointsCycleBleuNormal.size() <<" "<< pointsCycleBleuMoyen.size()<<endl;
 
 
 
@@ -591,7 +589,6 @@ int main(void)
    vector<Point> pointsCycleBleuNormalFull = fillVectorPoints(pointsCycleBleuNormal, imgRef);
    vector<Point> pointsCycleRougeMoyenFull = fillVectorPoints(pointsCycleRougeMoyen, imgRef);
    vector<Point> pointsCycleBleuMoyenFull = fillVectorPoints(pointsCycleBleuMoyen, imgRef);
-   afficheTabPoints(pointsCycleRougeNormalFull);
 
     Mat imgfullpointscyclenorm = Mat::zeros( imgRef.size(), CV_8UC3 );
     for (size_t i = 0; i < pointsCycleRougeNormalFull.size(); i++)
@@ -629,7 +626,30 @@ int main(void)
     cout <<"erreur quad moyenne cycle bleu = "<< erreur_quad_bleue<<endl;
 
     if( erreur_quad_bleue > 25 || erreur_quad_rouge > 25)
+    {
         cout << "anomalie dans la demarche"<<endl;
+    }
+
+
+	double ecartBoite = fabs(nbRougeBoite - nbBleuBoite); // Valeur absolue de la difference pour mesurer l'ecart de vitesse
+	if (ecartBoite < 2.0) // Mesure d'apres quelques observations a remplacer peut etre par 3, 4 ,5 ...
+	{
+		//strcpy(boite, "No");
+        cout << "Boite pas"<<endl;
+	}
+	else
+	{
+		if (nbRougeBoite > nbBleuBoite)
+		{
+			//strcpy(boite, "Left");
+            cout<<"boite left"<<endl;
+		}
+		else
+		{
+			//strcpy(boite, "Right");
+            cout << "boite right"<<endl;
+		}
+	}
 
     // un cycle contient plusieurs points, ces points sont séparés, une ligne permet donc d'avoir tous les points
     // on doit enregistrer ces points dans les vecteurs pour avoir des cycles complets et pouvoir comparer en y

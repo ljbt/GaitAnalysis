@@ -114,7 +114,6 @@ void gestionEvenement(EvenementGfx evenement)
 			enCours = false;
 			enCoursAffichage = false;
 			nomImageVideo = (char *)malloc(sizeof(char) * 256);
-			courbe = (char*)malloc(sizeof(char) * 8);
 			boite = (char*)malloc(sizeof(char) * 8);
 			marcheNorm = (char*)malloc(sizeof(char) * 8);
 			longueurBras = (char*)malloc(sizeof(char) * 8);
@@ -179,8 +178,8 @@ void gestionEvenement(EvenementGfx evenement)
 						enCoursAffichage = false;
 						resetPageAnalyse = true;
 						numPage = 4;
-						evaluePathologies(cheminVideoActuelle, courbe, marcheNorm, boite);
-						creeAnalysePatient(nom, prenom, taille, poids,&longueurBras,&longueurJambe, courbe, boite, marcheNorm, cheminVideoActuelle, nbImageAlpha, date);
+						//evaluePathologies(cheminVideoActuelle, courbe, marcheNorm, boite);
+						creeAnalysePatient(nom, prenom, taille, poids,&longueurBras,&longueurJambe, boite, marcheNorm, cheminVideoActuelle, nbImageAlpha, date);
 					}
 					else if(cheminVideoActuelle != NULL && strcmp(cheminVideoActuelle, "") != 0 && lecture != 0 && compteurImageAlpha < nbImageAlpha)
 					{
@@ -666,7 +665,6 @@ void gestionEvenement(EvenementGfx evenement)
 							strcpy(date, analyses[p].dateHeure);
 							strcpy(poids, analyses[p].poids);
 							strcpy(taille, analyses[p].taille);
-							strcpy(courbe, analyses[p].courbe);
 							strcpy(boite, analyses[p].boite);
 							strcpy(marcheNorm, analyses[p].marcheNormale);
 							strcpy(longueurBras, analyses[p].longueurBras);

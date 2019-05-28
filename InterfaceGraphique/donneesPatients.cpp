@@ -151,7 +151,7 @@ int modifieChamp(char* nom, char* prenom, char* cleChamp, char* valChamp)
 }
 
 // cree une analyse en fichier txt et lance la fonction d'extraction des courbes. Replie egalement la variable dateHeure avec le timestamp genere de la forme dd-mm-YYYY_HH:MM:SS
-int creeAnalysePatient(char* nom, char* prenom, char* taille, char* poids, char **stringlongueurBras,char **stringlongueurJambe, char* courbe, char* claudification, char* marcheNorm, char* video, int nbImages, char* dateHeure )
+int creeAnalysePatient(char* nom, char* prenom, char* taille, char* poids, char **stringlongueurBras,char **stringlongueurJambe, char* claudification, char* marcheNorm, char* video, int nbImages, char* dateHeure )
 {	
 	char filepath[128];
 	time_t timestamp; 
@@ -172,21 +172,11 @@ int creeAnalysePatient(char* nom, char* prenom, char* taille, char* poids, char 
 		return -1;
 	}
 	
-	// On cree les champs caracteristiques
-	
-	// On cree les futurs champs
-	fprintf(fiche, "Taille:%s\n", taille);
-	fprintf(fiche, "Poids:%s\n", poids);
-	fprintf(fiche, "Courbe:%s\n", courbe);
-	fprintf(fiche, "Claudification:%s\n", claudification);
-	fprintf(fiche, "Marche:%s\n", marcheNorm);
-	fprintf(fiche, "Video:%s\n", video);
-	
-	
+
 
 	double longueurBras,longueurJambe;
 	bool marcheNormale;
-	int extract = extraitCourbesSquelettesDossier(video, nbImages, dateChaine, &longueurBras, &longueurJambe, &marcheNormale);
+	int extract = extraitCourbesSquelettesDossier(video, nbImages, dateChaine, &longueurBras, &longueurJambe, &marcheNormale,  claudification);
     
     ostringstream strs1,strs2;
     strs1 << longueurBras;
@@ -198,7 +188,21 @@ int creeAnalysePatient(char* nom, char* prenom, char* taille, char* poids, char 
     str = strs2.str();
     *stringlongueurJambe = (char *)malloc(sizeof(char) * 8);
     strcpy(*stringlongueurJambe,str.c_str());
+
+    if(marcheNormale)
+    {
+        strcpy(marcheNorm, "Yes");
+    }
+    else strcpy(marcheNorm, "No");
     
+	// On cree les champs caracteristiques
+	
+	// On cree les futurs champs
+	fprintf(fiche, "Taille:%s\n", taille);
+	fprintf(fiche, "Poids:%s\n", poids);
+	fprintf(fiche, "Claudification:%s\n", claudification);
+	fprintf(fiche, "Marche:%s\n", marcheNorm);
+	fprintf(fiche, "Video:%s\n", video);
     fprintf(fiche, "Bras:%s\n", *stringlongueurBras);
 	fprintf(fiche, "Jambe:%s\n", *stringlongueurJambe);
 
@@ -236,10 +240,6 @@ analyse lisAnalysePatient(char* nom, char* prenom, char* nomFichier)
 		else if (strcmp(cle, "Poids") == 0) 
 		{
 			strcpy(a.poids, valeur); 
-		}
-		else if (strcmp(cle, "Courbe") == 0)
-		{
-			strcpy(a.courbe, valeur); 
 		}
 		else if (strcmp(cle, "Claudification") == 0) 
 		{
@@ -336,7 +336,7 @@ DonneesImageRGB *lisImageCouranteAlphabetique(struct dirent *lecture, char *fold
 }
 
 
-int extraitCourbesSquelettesDossier(char* nomDossier, int nbImages, char* dateHeure, double *longueurBras, double *longueurJambe, bool *marcheNormale)
+int extraitCourbesSquelettesDossier(char* nomDossier, int nbImages, char* dateHeure, double *longueurBras, double *longueurJambe, bool *marcheNormale, char *boite)
 {
 	Mat imgRef,image, hsv, mask;
     string image_name;
@@ -410,6 +410,9 @@ int extraitCourbesSquelettesDossier(char* nomDossier, int nbImages, char* dateHe
     vector< vector<Point> > cyclesPiedRouge, cyclesPiedBleu;
     bool piedBleuFirstTimeDown = false;
     bool piedRougeFirstTimeDown = false;
+
+    int nbRougeBoite = 0;
+	int nbBleuBoite = 0;
 
     for (image_num =1; image_num<=nbImages; image_num++)
     {
@@ -645,6 +648,31 @@ int extraitCourbesSquelettesDossier(char* nomDossier, int nbImages, char* dateHe
         managePointVector(piedRouge,&posPiedsRouges, NB_IMAGES_DETECT_FOOT_DOWN);
         managePointVector(piedBleu,&posPiedsBleus, NB_IMAGES_DETECT_FOOT_DOWN);
 
+		// Detection boitage
+		if (piedRougeFirstTimeDown)
+		{
+			if(!posPiedsRouges.empty())
+			{
+				if(detectFootDown(posPiedsRouges, NB_IMAGES_DETECT_FOOT_DOWN))
+				{
+					nbRougeBoite++;
+				}
+			}
+			
+			if(!posPiedsBleus.empty())
+			{
+				if(detectFootDown(posPiedsBleus, NB_IMAGES_DETECT_FOOT_DOWN))
+				{
+					nbBleuBoite++;
+				}
+			}
+		}
+		cout << endl << "Bleu pose : " << nbBleuBoite;
+		cout << " | Rouge pose :" << nbRougeBoite << endl;
+		
+		// Fin detection boitage
+
+
         if( !posPiedsRouges.empty() && !posPiedsBleus.empty())
         {
             // d'abord on cherche la pose du pied rouge, et qd il s'est posé on cherche la pose du pied bleu
@@ -779,6 +807,26 @@ int extraitCourbesSquelettesDossier(char* nomDossier, int nbImages, char* dateHe
 		*marcheNormale = true;
 	}
 	
+	double ecartBoite = fabs(nbRougeBoite - nbBleuBoite); // Valeur absolue de la difference pour mesurer l'ecart de vitesse
+	if (ecartBoite < 2.0) // Mesure d'apres quelques observations a remplacer peut etre par 3, 4 ,5 ...
+	{
+		strcpy(boite, "No");
+        cout << "Boite pas"<<endl;
+	}
+	else
+	{
+		if (nbRougeBoite > nbBleuBoite)
+		{
+			strcpy(boite, "Left");
+            cout<<"boite left"<<endl;
+		}
+		else
+		{
+			strcpy(boite, "Right");
+            cout << "boite right"<<endl;
+		}
+	}
+    
 
 	return 1;
 }

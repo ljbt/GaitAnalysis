@@ -15,7 +15,7 @@
     void drawSqueletton(Mat *mat, Point foot1, Point foot2, Point knee1, Point knee2, Point hip, Point hand1, Point hand2, Point elbow1, Point elbow2, Point shoulder, Point head);
     void managePointVector(Point newPoint, vector<Point> *v, size_t maxSize);
     bool detectFootDown(vector<Point> posFoot, size_t numElmts);
-    bool detectGaitCycle(int *numFootRightDown, vector<Point> posFootRight, int *numFootLeftDown, vector<Point> posFootLeft);
+    //bool detectGaitCycle(int *numFootRightDown, vector<Point> posFootRight, int *numFootLeftDown, vector<Point> posFootLeft);
     double longeurJambe (Point pied, Point genou, Point hanche);
     vector<vector<double>> pointsToDouble( vector<vector<Point>> tabPoints);
     vector<double> meanVector(vector<vector<double>> v);
