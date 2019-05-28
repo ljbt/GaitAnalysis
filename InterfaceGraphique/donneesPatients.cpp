@@ -338,7 +338,7 @@ DonneesImageRGB *lisImageCouranteAlphabetique(struct dirent *lecture, char *fold
 
 int extraitCourbesSquelettesDossier(char* nomDossier, int nbImages, char* dateHeure, double *longueurBras, double *longueurJambe, bool *marcheNormale)
 {
-	Mat image, hsv, mask;
+	Mat imgRef,image, hsv, mask;
     string image_name;
 	string image_name_save; // Ajout pour test ecriture dossier
 	string nomDossierString(nomDossier);
@@ -390,13 +390,13 @@ int extraitCourbesSquelettesDossier(char* nomDossier, int nbImages, char* dateHe
     enum {Rouge,Vert,Bleu,Jaune} Masque = Rouge;
 
 
-    image = imread(cheminDossierVideos + "/" + nomDossierString + "/01.bmp");
-    if( ! image.data )
+    imgRef = imread(cheminDossierVideos + "/" + nomDossierString + "/01.bmp");
+    if( ! imgRef.data )
     {
         cout << "Error loading image " << endl;
         return -1;
     } 
-    Mat drawing2 = Mat::zeros( image.size(), CV_8UC3 );
+    Mat drawing2 = Mat::zeros( imgRef.size(), CV_8UC3 );
 
     vector<Point> centresPastillesRougesImagePrecedente;
     double longueurJambeDroite;
@@ -404,6 +404,13 @@ int extraitCourbesSquelettesDossier(char* nomDossier, int nbImages, char* dateHe
     double longueurBrasDroit;
     double sommeLongueurBrasDroit = 0; int nb_sommes_longueurBrasDroit = 0;
     
+    vector<Point> posPiedsRouges, posPiedsBleus;
+	int nbPiedRougeDown = 0;
+    vector<Point> footRedCycle, footBlueCycle;
+    vector< vector<Point> > cyclesPiedRouge, cyclesPiedBleu;
+    bool piedBleuFirstTimeDown = false;
+    bool piedRougeFirstTimeDown = false;
+
     for (image_num =1; image_num<=nbImages; image_num++)
     {
         image_name = to_string(image_num);
@@ -622,6 +629,55 @@ int extraitCourbesSquelettesDossier(char* nomDossier, int nbImages, char* dateHe
             sommeLongueurBrasDroit += longueurBrasDroit;
             nb_sommes_longueurBrasDroit ++;
         }
+
+        // On doit pouvoir comparer un cycle moyen avec un cycle moyen de reference
+        // Donc d'abord il faut savoir enregistrer un cycle, pour ça on enregistre la position des deux pieds tant qu'on a pas fait un cycle
+        // Puis on recommence
+        if(piedRouge.x != -1 && piedRouge.y != -1)
+            footRedCycle.push_back(piedRouge);
+        if(piedBleu.x != -1 && piedBleu.y != -1)
+            footBlueCycle.push_back(piedBleu);
+
+
+        // Une fois qu'on a enregistré les cycles,il faut en faire un cycle moyen, qu'on peut comparer avec le cycle moyen de ref
+
+        // pour detecter un cycle, il faut savoir detecter un pied a terre, donc recuperer la position d'un pied dans plusieurs images
+        managePointVector(piedRouge,&posPiedsRouges, NB_IMAGES_DETECT_FOOT_DOWN);
+        managePointVector(piedBleu,&posPiedsBleus, NB_IMAGES_DETECT_FOOT_DOWN);
+
+        if( !posPiedsRouges.empty() && !posPiedsBleus.empty())
+        {
+            // d'abord on cherche la pose du pied rouge, et qd il s'est posé on cherche la pose du pied bleu
+            // puis on recommence
+            if(nbPiedRougeDown == 0 && piedRouge.x != -1 && piedRouge.y != -1) 
+            {
+                cout <<"cherche pose pied rouge"<<endl;
+                if( detectFootDown(posPiedsRouges, NB_IMAGES_DETECT_FOOT_DOWN) )
+                {
+                    cout<<"foot red down"<<endl;
+                    (nbPiedRougeDown) ++;
+                    if(piedRougeFirstTimeDown)
+                        cyclesPiedRouge.push_back(footRedCycle);
+                    else piedRougeFirstTimeDown = true;
+                    footRedCycle.clear(); 
+                    posPiedsRouges.clear();
+                }
+            }
+            if(nbPiedRougeDown == 1 && piedBleu.x != -1 && piedBleu.y != -1)
+            {
+                cout <<"cherche pose pied bleu "<<posPiedsBleus.size()<<endl;
+                if( detectFootDown(posPiedsBleus, NB_IMAGES_DETECT_FOOT_DOWN) )
+                {
+                    cout<<"foot blue down\n"<<endl;
+                    nbPiedRougeDown = 0;
+                    if(piedBleuFirstTimeDown)
+                        cyclesPiedBleu.push_back(footBlueCycle);
+                    else piedBleuFirstTimeDown = true;
+                    footBlueCycle.clear(); 
+                    posPiedsBleus.clear();
+                }
+            } 
+        }
 	}
 
     *longueurBras = sommeLongueurBrasDroit/nb_sommes_longueurBrasDroit;
@@ -629,6 +685,100 @@ int extraitCourbesSquelettesDossier(char* nomDossier, int nbImages, char* dateHe
     cout << "longeur jambe droite moyenne = "<< *longueurJambe <<endl; 
     cout << "longeur bras droit moyen = "<< *longueurBras <<endl; 
 
+	if(cyclesPiedBleu.size() > cyclesPiedRouge.size())
+        cyclesPiedBleu.resize(cyclesPiedRouge.size());
+
+    // Donc on peut faire la moyenne des cycles
+
+    // pour faire cette moyenne il faut deja que tous les cycles aient le même point de depart,
+    // donc on ramene le premier point de chaque cycle à 0 en x
+    //cyclesPiedRouge.shrink_to_fit();
+    for (size_t i = 0; i < cyclesPiedRouge.size(); i++)
+    {
+        // pour chaque cycle on calcule l'écart entre l'origine et le premier point 
+        if(!cyclesPiedRouge[i].empty())
+        {   
+            int ecart = cyclesPiedRouge[i][0].x;
+            for (size_t j = 0; j < cyclesPiedRouge[i].size(); j++)
+            {
+                // pour chaque point du cycle on enleve l'ecart
+                cyclesPiedRouge[i][j].x -= ecart;
+            }
+            if(i < cyclesPiedBleu.size())
+            {
+                for (size_t j = 0; j < cyclesPiedBleu[i].size(); j++)
+                {
+                    // pour chaque point du cycle on enleve l'ecart
+                    cyclesPiedBleu[i][j].x -= ecart;
+                    if(cyclesPiedBleu[i][j].x < 0)
+                        cyclesPiedBleu[i].erase(cyclesPiedBleu[i].begin() + j);
+                }
+            }
+        }
+    }
+
+    // ici on a les cycles ramenés à l'origine
+    // on doit donc trouver le point moyen en y pour chaque x
+    // il faut donc additionner les y de chaque cycle pour un x donné et le diviser par le nombre de y trouvé
+    // le plus simple serait de stocker à l'indice x tous les y donc unvecteur de vecteurs de double
+
+    vector < vector <double> > tabPointsCyclesRouges = pointsToDouble(cyclesPiedRouge);
+    vector < vector <double> > tabPointsCyclesBleus = pointsToDouble(cyclesPiedBleu);
+    
+    vector<double> cycleRougeMoyen = meanVector(tabPointsCyclesRouges);
+    vector<double> cycleBleuMoyen = meanVector(tabPointsCyclesBleus);
+
+    // recuperation du cycle normal enregistré dans deux fichier
+    vector<double> cycleRougeNormal = getNormalmeanVector("../opencv_files/cycleRougeNormal.txt");
+    vector<double> cycleBleuNormal = getNormalmeanVector("../opencv_files/cycleBleuNormal.txt");
+
+    // on convertit les tableaux de double en tableaux de points, soit les quelques points des courbes des cycles
+    vector<Point> pointsCycleRougeNormal = doubleToPoints(cycleRougeNormal);
+    vector<Point> pointsCycleBleuNormal = doubleToPoints(cycleBleuNormal);
+    vector<Point> pointsCycleRougeMoyen = doubleToPoints(cycleRougeMoyen);
+    vector<Point> pointsCycleBleuMoyen = doubleToPoints(cycleBleuMoyen);
+    
+     // Quand on a les quelques points caracterisant le cycle normal et le celui de la video,
+    // il faut qu'ils aient la même longueur pour être comparés
+    // soit si le cycle moyen fait 30 points, le cycle normal doit aussi faire 30 points
+    if(pointsCycleRougeNormal.size() != pointsCycleRougeMoyen.size())
+    {
+        cout << "taille cycle rouge diff: "<<pointsCycleRougeNormal.size() <<" "<< pointsCycleRougeMoyen.size()<<endl;
+        pointsCycleRougeNormal = adaptSizeVector(pointsCycleRougeNormal,pointsCycleRougeMoyen.size());
+
+    }
+    else cout << "meme longueur cycle rouge "<<endl;
+
+    if(pointsCycleBleuNormal.size() != pointsCycleBleuMoyen.size())
+    {
+        cout << "taille cycle bleu diff: "<<pointsCycleBleuNormal.size() <<" "<< pointsCycleBleuMoyen.size()<<endl;
+        pointsCycleBleuNormal = adaptSizeVector(pointsCycleBleuNormal,pointsCycleBleuMoyen.size());
+    }
+    else cout << "meme longueur cycle bleu "<<endl;
+
+
+    // creation des courbes complètes à partir des quelques points
+   vector<Point> pointsCycleRougeNormalFull = fillVectorPoints(pointsCycleRougeNormal, imgRef);
+   vector<Point> pointsCycleBleuNormalFull = fillVectorPoints(pointsCycleBleuNormal, imgRef);
+   vector<Point> pointsCycleRougeMoyenFull = fillVectorPoints(pointsCycleRougeMoyen, imgRef);
+   vector<Point> pointsCycleBleuMoyenFull = fillVectorPoints(pointsCycleBleuMoyen, imgRef);
+
+    double erreur_quad_rouge = mean_quadratic_error(pointsCycleRougeNormalFull,pointsCycleRougeMoyenFull);
+    cout <<"erreur quad moyenne cycle rouge = "<< erreur_quad_rouge<<endl<<endl;
+    double erreur_quad_bleue = mean_quadratic_error(pointsCycleBleuNormalFull,pointsCycleBleuMoyenFull);
+    cout <<"erreur quad moyenne cycle bleu = "<< erreur_quad_bleue<<endl;
+
+    if( erreur_quad_bleue > 25 || erreur_quad_rouge > 25)
+	{
+        cout << "anomalie dans la demarche"<<endl;
+		*marcheNormale = false;
+	}
+	else
+	{
+        cout << "demarche normale par comparaison de cycles"<<endl;
+		*marcheNormale = true;
+	}
+	
 
 	return 1;
 }

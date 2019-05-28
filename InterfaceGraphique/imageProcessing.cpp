@@ -234,7 +234,6 @@ bool detectFootDown(vector<Point> posFoot, size_t numElmts)
         posX.push_back(posFoot[i].x);
     
     double coef = coef_variation(posX);
-    cout << "coef = "<<coef<<endl;
     if(coef < 0.04)
         return true;
     else return false;
@@ -246,19 +245,15 @@ bool detectGaitCycle(int *numFootRightDown, vector<Point> posFootRight, int *num
     // puis on recommence
     if(*numFootRightDown == 0)
     {
-        cout <<"cherche pose pied rouge"<<endl;
         if( detectFootDown(posFootRight, NB_IMAGES_DETECT_FOOT_DOWN) )
         {
-            cout<<"foot red down"<<endl;
             (*numFootRightDown) ++;
         }
     }
     if(*numFootRightDown == 1 )
     {
-        cout <<"cherche pose pied bleu"<<endl;
         if( detectFootDown(posFootLeft, NB_IMAGES_DETECT_FOOT_DOWN) )
         {
-            cout<<"foot blue down"<<endl;
             (*numFootLeftDown) ++;
             *numFootRightDown = *numFootLeftDown = 0;
             return true;
