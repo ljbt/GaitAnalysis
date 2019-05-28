@@ -77,6 +77,9 @@ int main(void)
     double sommeLongueurJambeDroite = 0; int nb_sommes_longueurJambeDroite = 0;
     double longueurBrasDroit;
     double sommeLongueurBrasDroit = 0; int nb_sommes_longueurBrasDroit = 0;
+
+    int nbRougeBoite = 0;
+	int nbBleuBoite = 0;
     while(1)
     {
         if(mode == Play)
@@ -326,6 +329,29 @@ int main(void)
         managePointVector(piedRouge,&posPiedsRouges, NB_IMAGES_DETECT_FOOT_DOWN);
         managePointVector(piedBleu,&posPiedsBleus, NB_IMAGES_DETECT_FOOT_DOWN);
 
+		// Detection boitage
+		if (piedRougeFirstTimeDown)
+		{
+			if(!posPiedsRouges.empty())
+			{
+				if(detectFootDown(posPiedsRouges, NB_IMAGES_DETECT_FOOT_DOWN))
+				{
+					nbRougeBoite++;
+				}
+			}
+			
+			if(!posPiedsBleus.empty())
+			{
+				if(detectFootDown(posPiedsBleus, NB_IMAGES_DETECT_FOOT_DOWN))
+				{
+					nbBleuBoite++;
+				}
+			}
+		}
+		cout << endl << "Bleu pose : " << nbBleuBoite;
+		cout << " | Rouge pose :" << nbRougeBoite << endl;
+		
+		// Fin detection boitage
         if( !posPiedsRouges.empty() && !posPiedsBleus.empty())
         {
             // d'abord on cherche la pose du pied rouge, et qd il s'est posé on cherche la pose du pied bleu
@@ -357,7 +383,7 @@ int main(void)
                     footBlueCycle.clear(); 
                     posPiedsBleus.clear();
                 }
-            } 
+            }
         }
         
         
