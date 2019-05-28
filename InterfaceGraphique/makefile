@@ -7,7 +7,7 @@ LDLIBS = -lopencv_imgcodecs -lopencv_imgproc -lopencv_core -lopencv_highgui -lop
 
 TARGET = gait_analysis
 
-$(TARGET): main.o IHM.o fonctionsTraitementImage.o donneesPatients.o Mask.o imageProcessing.o libisentlib.a 
+$(TARGET): main.o IHM.o fonctionsTraitementImage.o donneesPatients.o Mask.o imageProcessing.o statistics.o libisentlib.a 
 	$(CC) -o $@ $(FLAGS) $^ $(LDFLAGS) $(LDLIBS)
 
 
@@ -22,6 +22,10 @@ fonctionsTraitementImage.o: fonctionsTraitementImage.cpp definitions.h BmpLib.h 
 
 donneesPatients.o: donneesPatients.cpp donneesPatients.h
 	$(CC) $(CFLAGS) $<
+
+statistics.o: statistics.cpp statistics.h
+	$(CXX) $(CFLAGS) $<
+
 
 #lib isen ------------------------------------------
 libisentlib.a: BmpLib.o ErreurLib.o ESLib.o GfxLib.o OutilsLib.o

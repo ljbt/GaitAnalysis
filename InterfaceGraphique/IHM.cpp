@@ -1121,9 +1121,9 @@ void affichePathologies(zone zPathologies, zone zCourbe, char* courbe, zone zBoi
 
 	afficheChaine(zPathologies.texte, zPathologies.hauteur, zPathologies.xmin,zPathologies.ymax - zPathologies.hauteur);
 
-    char courbeBase[32] = "Curve : ";
+    char courbeBase[32] = "Curved : ";
     char boiteBase[32] = "Limp : ";
-    char marcheReguBase[32] = "Regular walk : ";
+    char marcheReguBase[32] = "Normal walk : ";
 
 
 	if(courbe != NULL)

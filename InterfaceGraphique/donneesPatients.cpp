@@ -151,7 +151,7 @@ int modifieChamp(char* nom, char* prenom, char* cleChamp, char* valChamp)
 }
 
 // cree une analyse en fichier txt et lance la fonction d'extraction des courbes. Replie egalement la variable dateHeure avec le timestamp genere de la forme dd-mm-YYYY_HH:MM:SS
-int creeAnalysePatient(char* nom, char* prenom, char* taille, char* poids, char **stringlongueurBras,char **stringlongueurJambe, char* courbe, char* claudification, char* marcheRegu, char* video, int nbImages, char* dateHeure )
+int creeAnalysePatient(char* nom, char* prenom, char* taille, char* poids, char **stringlongueurBras,char **stringlongueurJambe, char* courbe, char* claudification, char* marcheNorm, char* video, int nbImages, char* dateHeure )
 {	
 	char filepath[128];
 	time_t timestamp; 
@@ -179,13 +179,14 @@ int creeAnalysePatient(char* nom, char* prenom, char* taille, char* poids, char 
 	fprintf(fiche, "Poids:%s\n", poids);
 	fprintf(fiche, "Courbe:%s\n", courbe);
 	fprintf(fiche, "Claudification:%s\n", claudification);
-	fprintf(fiche, "Marche:%s\n", marcheRegu);
+	fprintf(fiche, "Marche:%s\n", marcheNorm);
 	fprintf(fiche, "Video:%s\n", video);
 	
 	
 
 	double longueurBras,longueurJambe;
-	int extract = extraitCourbesSquelettesDossier(video, nbImages, dateChaine, &longueurBras, &longueurJambe);
+	bool marcheNormale;
+	int extract = extraitCourbesSquelettesDossier(video, nbImages, dateChaine, &longueurBras, &longueurJambe, &marcheNormale);
     
     ostringstream strs1,strs2;
     strs1 << longueurBras;
@@ -246,7 +247,7 @@ analyse lisAnalysePatient(char* nom, char* prenom, char* nomFichier)
 		}
 		else if (strcmp(cle, "Marche") == 0) 
 		{
-			strcpy(a.marcheReguliere, valeur); 
+			strcpy(a.marcheNormale, valeur); 
 		}
 		else if (strcmp(cle, "Video") == 0) 
 		{
@@ -335,7 +336,7 @@ DonneesImageRGB *lisImageCouranteAlphabetique(struct dirent *lecture, char *fold
 }
 
 
-int extraitCourbesSquelettesDossier(char* nomDossier, int nbImages, char* dateHeure, double *longueurBras, double *longueurJambe)
+int extraitCourbesSquelettesDossier(char* nomDossier, int nbImages, char* dateHeure, double *longueurBras, double *longueurJambe, bool *marcheNormale)
 {
 	Mat image, hsv, mask;
     string image_name;

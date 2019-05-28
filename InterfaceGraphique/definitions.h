@@ -3,6 +3,7 @@
 #define HAUTEUR_TITRE_ACCUEIL 70
 #define HAUTEUR_TITRE 40
 #define HAUTEUR_TEXTE 20
+#define NB_IMAGES_DETECT_FOOT_DOWN 5
 
 typedef struct zone {
 	int longueur, hauteur; 
@@ -22,10 +23,11 @@ typedef struct analyse {
 	char poids[8];
 	char taille[8];
 	char courbe[8];
-	char marcheReguliere[8];
+	char marcheNormale[8];
 	char boite[8];
 	char longueurBras[8];
 	char longueurJambe[8];
 	char dateHeure[32];
 	char video[128];
 	} analyse;
+

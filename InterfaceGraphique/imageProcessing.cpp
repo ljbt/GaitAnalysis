@@ -1,11 +1,20 @@
 #include "imageProcessing.h"
 #include "opencv2/imgproc.hpp"
+#include "statistics.h"
+#include "definitions.h"
+
+#include <iostream>
+#include <fstream>
+
+
+using namespace std;
 
 void writeLinestoMat(const vector<Point> pointsA, const vector<Point> pointsB, Mat *mat, const Scalar color)
 {
 	for (size_t i = 0; i < pointsA.size(); i++)
         line( *mat, pointsA[i], pointsB[i], color);		
 }
+
 
 void writePointstoMat(const vector<Point> points, Mat *mat, const Scalar color)
 {
@@ -196,6 +205,68 @@ void drawSqueletton(Mat *mat, Point foot1, Point foot2, Point knee1, Point knee2
     } 
 }
 
+// fonction qui entre newPoint dans le vector v, en decalant les autres pour pas depasser maxSize
+void managePointVector(Point newPoint, vector<Point> *v, size_t maxSize)
+{
+    if(newPoint.x != -1 && newPoint.y != -1)
+    {
+        if(v->size() < maxSize)
+            v->push_back(newPoint);
+        else
+        {
+            // decale les points avant d'inserer le nouveau
+            rotate(v->begin(),v->begin()+(v->size()+1 - maxSize) ,v->end());
+            v->resize(maxSize-1);
+            v->push_back(newPoint);
+        }
+    }
+}
+
+// fonction qui renvoie true si la position en x d'un tableau de numElmts Points varie assez
+// si le tableau ne contient pas numElmts elements retourne aussi faux
+bool detectFootDown(vector<Point> posFoot, size_t numElmts)
+{
+    if(posFoot.size() < numElmts)
+        return false;
+    
+    vector<double> posX;
+    for (size_t i = 0; i < posFoot.size(); i++)
+        posX.push_back(posFoot[i].x);
+    
+    double coef = coef_variation(posX);
+    cout << "coef = "<<coef<<endl;
+    if(coef < 0.04)
+        return true;
+    else return false;
+}
+
+bool detectGaitCycle(int *numFootRightDown, vector<Point> posFootRight, int *numFootLeftDown, vector<Point> posFootLeft)
+{
+    // d'abord on cherche la pose du pied rouge, et qd il s'est posé on cherche la pose du pied bleu
+    // puis on recommence
+    if(*numFootRightDown == 0)
+    {
+        cout <<"cherche pose pied rouge"<<endl;
+        if( detectFootDown(posFootRight, NB_IMAGES_DETECT_FOOT_DOWN) )
+        {
+            cout<<"foot red down"<<endl;
+            (*numFootRightDown) ++;
+        }
+    }
+    if(*numFootRightDown == 1 )
+    {
+        cout <<"cherche pose pied bleu"<<endl;
+        if( detectFootDown(posFootLeft, NB_IMAGES_DETECT_FOOT_DOWN) )
+        {
+            cout<<"foot blue down"<<endl;
+            (*numFootLeftDown) ++;
+            *numFootRightDown = *numFootLeftDown = 0;
+            return true;
+        }
+    } 
+    return false;
+}
+
 double longeurMembre (Point articulation1, Point articulation2, Point articulation3)
 {
     if( articulation1.x != -1 && articulation1.y != -1 && articulation2.x != -1 && articulation2.y != -1 && articulation3.x != -1 && articulation3.y != -1 )
@@ -203,4 +274,216 @@ double longeurMembre (Point articulation1, Point articulation2, Point articulati
         return norm(articulation2 - articulation1) + norm(articulation3 - articulation2);
     }
     else return -1;
+}
+
+// fonction qui prend en parametre un vecteur de vecteurs de points, et retourne un vecteur de vecteurs de double
+// le x de chaque point correspond aux indices du vecteur, et pour chaque indice on stocke tous les y correspondant
+vector<vector<double>> pointsToDouble( vector<vector<Point>> tabPoints)
+{
+    vector < vector <double> > tabDouble;
+
+    for (size_t i = 0; i < tabPoints.size(); i++)
+    {
+        for (size_t j = 0; j < tabPoints[i].size(); j++)
+        {
+            // pour chaque point de chaque cycle on doit enregistrer, à l'indice x, l'ordonnee y 
+            if((long unsigned int)tabPoints[i][j].x+1 > tabDouble.size() && tabPoints[i][j].y >= 0 )
+            {
+                tabDouble.resize((size_t)(long unsigned int)tabPoints[i][j].x+1);
+            }
+            if(tabPoints[i][j].y >= 0)
+            {
+                tabDouble[ (size_t)(long unsigned int)tabPoints[i][j].x ].push_back( tabPoints[i][j].y );
+            }  
+        }
+    }
+    return tabDouble;
+}
+
+// fonction qui prend en param un vecteur de vecteurs de double,
+// et retourne un vecteur contenant les moyennes
+vector<double> meanVector(vector<vector<double>> v)
+{
+    vector<double> meanVector;
+
+    for (size_t i = 0; i < v.size(); i++)
+    {
+        if(!v[i].empty())
+        {
+            if( meanVector.size() < i+1 )
+            {
+                meanVector.resize(i+1);
+            }
+            meanVector[i] = round(mean(v[i])) ;
+        }
+    }
+    return meanVector;
+}
+
+// fonction qui enregistre dans un fichier de nom filename, le vecteur contenant les ordonnees du cycle de marche moyen
+void savemeanVector(string filename,vector<double> meanVector)
+{
+    cout << "Saving mean vector into file "<<filename<<endl;
+    ofstream myfile (filename); // se place a la fin du ficher pour ecrire les nouveaux points
+    if (myfile.is_open())
+    {
+        for (size_t i = 0; i < meanVector.size(); i++)
+        {
+            myfile << i << " " << meanVector[i] <<"\n";
+        }
+        myfile.close();
+    }
+    else cout << "Unable to open file "<<filename<< " to write";
+}
+
+// fonction qui va chercher dans le fichier de nom filename les donnees permettant de recreer le vecteur decrivant un cycle normal moyen
+vector<double> getNormalmeanVector(string filename)
+{
+    vector<double> meanVector;
+    ifstream myfiletoread (filename);
+    if (myfiletoread.is_open())
+    {
+        string chaine;
+        int i,y;
+        do{
+            getline(myfiletoread,chaine);
+            istringstream iss(chaine);
+            iss >> i >> y;
+            meanVector.resize(i+1);
+            meanVector[i] = y ;
+        }while ( !myfiletoread.eof() );
+
+        myfiletoread.close();
+    }
+    else cout << "Unable to open file "<<filename<< " to read";  
+    return meanVector;
+}
+
+
+// fonction qui prend un param un tableau de double et retourne un tableau de points (le x de chaque point correspond a l'abscisse du double, et le y au double)
+vector<Point> doubleToPoints(vector<double> tabDouble)
+{
+    vector<Point> tabPoints;
+    for (size_t i = 0; i < tabDouble.size(); i++)
+    {
+        tabPoints.resize(i+1);
+        tabPoints[i].x = i;
+        tabPoints[i].y = tabDouble[i];
+    }
+    
+    return tabPoints;
+}
+
+// fonction qui prend en param un tableau de vecteurs représentant une courbe, mais dont certains points manquent (valent 0 en ordonnee)
+// Le but est de tracer une ligne entre ces points et d'entrer les points de la ligne entre les deux points connus
+// et de retourner le vecteur contenant la courbe complete (une valeur de y pour chaque abscisse)
+vector<Point> fillVectorPoints(vector<Point> vecNotFull, Mat supportMat)
+{
+    vector<Point> vectorFull;
+
+    Point p1, p2;
+    long unsigned int i1=0, i2;
+    int ecart;
+    while(i1 < vecNotFull.size())
+    {
+        if(i1 == 0 && vecNotFull[i1].y == 0) // premier point du vecteur = 0 donc on doit aller chercher le prochain premier point
+        {
+            do{
+                if(vectorFull.size() < i1+1)
+                    vectorFull.resize(i1+1);
+                vectorFull[i1] = vecNotFull[i1];
+                i1++;
+            }while(vecNotFull[i1].y == 0);
+        }
+        p1 = vecNotFull[i1];
+        i2 = i1+1;
+        ecart =0;
+        if(vecNotFull[i2].y == 0 && i2 < vecNotFull.size() ) 
+        {
+            while (vecNotFull[i2].y == 0 && i2 < vecNotFull.size())
+            {
+                ecart++;
+                i2++;
+            }
+            if(i2 >= vecNotFull.size())
+            {
+                cout << "No other point after " << p1 << endl;
+                return vectorFull;
+            }
+            if(ecart > 0)
+            {
+                // on doit entrer les deux points connus et les points manquants dans vectorFull
+                p2 = vecNotFull[i2];
+
+                if(vectorFull.size() < i2+1)
+                    vectorFull.resize(i2+1);
+                vectorFull[i1] = p1;
+                vectorFull[i2] = p2;
+                LineIterator it(supportMat, p1, p2, 8);
+                for(int i = 0; i < it.count; i++, ++it)
+                {
+                    vectorFull[it.pos().x] = it.pos() ; 
+                }
+            }
+        }
+        else
+        {
+            if(vectorFull.size() < i2+1 && i2+1 <= vecNotFull.size())
+                vectorFull.resize(i2+1);
+            vectorFull[i2] = vecNotFull[i2];
+        }
+        i1=i2;
+    }
+    
+
+    return vectorFull;
+}
+
+vector<Point> adaptSizeVector(vector<Point> v, size_t new_size)
+{
+    vector<Point> newVec;
+    size_t newAbs;
+    for (size_t i = 0; i < v.size(); i++)
+    {
+        newAbs = (new_size*i)/v.size();
+        if(newAbs>0)
+        {
+            if(newVec.size() < newAbs+1)
+                newVec.resize(newAbs+1);
+            newVec[newAbs].x = newAbs;
+            newVec[newAbs].y = v[i].y;
+        }
+    }
+    return newVec;
+}
+
+// fonction qui retourne l'erreur quadratique entre le vecteur du cycle normal et celui du cycle de la video actuelle
+double mean_quadratic_error(vector<Point> normalVector, vector<Point> meanVector)
+{
+    double error = 0, nb_elmts = 0;
+    if( normalVector.size() != meanVector.size())
+    {
+        cout<<"Pas possible de comparer deux vecteurs de taille differente !"<<endl;
+        return -1;
+    }
+    else
+    {
+        for (size_t i = 0; i < normalVector.size(); i++)
+        {
+            if(normalVector[i].y > 0 && meanVector[i].y > 0)
+            {
+                error += pow( abs(normalVector[i].y - meanVector[i].y) , 2);
+                nb_elmts++;
+            }
+        }
+    }
+
+    return error/nb_elmts;
+}
+
+void afficheTabPoints(vector<Point> tab)
+{
+    for (size_t i = 0; i < tab.size(); i++)
+        cout << tab[i]<<endl;
+
 }

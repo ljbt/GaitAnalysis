@@ -78,10 +78,10 @@ void gestionEvenement(EvenementGfx evenement)
 	static int compteurImageAlpha;
 	static int nbImageAlpha, lecture;
 	static struct dirent** listeImageAlpha;
-	static zone zAnalyse, zVideoSquelette, zGraph, zDonneesBio, zTailleAnalyse, zPoidsAnalyse,zlongueurBrasAnalyse,zlongueurJambeAnalyse ,zPathologies, zCourbe, zBoite,ZMarcheReguliere;
+	static zone zAnalyse, zVideoSquelette, zGraph, zDonneesBio, zTailleAnalyse, zPoidsAnalyse,zlongueurBrasAnalyse,zlongueurJambeAnalyse ,zPathologies, zCourbe, zBoite,ZMarcheNormale;
 	static analyse* analyses = NULL;
 	static int nbAnalyses = 0;
-	static char *poids, *taille, *longueurBras,*longueurJambe, *courbe, *boite, *marcheRegu;
+	static char *poids, *taille, *longueurBras,*longueurJambe, *courbe, *boite, *marcheNorm;
 	static char date[32];
 	static bool resetPageAnalyse;
 	static int compteurImageAlphaCourbes, compteurImageAlphaSquelettes;
@@ -116,7 +116,7 @@ void gestionEvenement(EvenementGfx evenement)
 			nomImageVideo = (char *)malloc(sizeof(char) * 256);
 			courbe = (char*)malloc(sizeof(char) * 8);
 			boite = (char*)malloc(sizeof(char) * 8);
-			marcheRegu = (char*)malloc(sizeof(char) * 8);
+			marcheNorm = (char*)malloc(sizeof(char) * 8);
 			longueurBras = (char*)malloc(sizeof(char) * 8);
 			longueurJambe = (char*)malloc(sizeof(char) * 8);
 			
@@ -146,7 +146,7 @@ void gestionEvenement(EvenementGfx evenement)
 
             initZonesAnalyse(zPatientActuel, &zAnalyse, &zVideoSquelette, &zGraph);
             initZonesDonneesBio(zAnalyse, &zDonneesBio, &zTailleAnalyse, &zPoidsAnalyse, &zlongueurBrasAnalyse,&zlongueurJambeAnalyse);
-            initZonesPathologies(zDonneesBio, &zPathologies, &zCourbe, &zBoite, &ZMarcheReguliere);
+            initZonesPathologies(zDonneesBio, &zPathologies, &zCourbe, &zBoite, &ZMarcheNormale);
             
             initZonesFichePatient(&zFichePatient, &zFicheNom, &zFichePrenom, &zFicheTaille, &zFichePoids, &zFicheMaj);
 
@@ -179,8 +179,8 @@ void gestionEvenement(EvenementGfx evenement)
 						enCoursAffichage = false;
 						resetPageAnalyse = true;
 						numPage = 4;
-						evaluePathologies(cheminVideoActuelle, courbe, marcheRegu, boite);
-						creeAnalysePatient(nom, prenom, taille, poids,&longueurBras,&longueurJambe, courbe, boite, marcheRegu, cheminVideoActuelle, nbImageAlpha, date);
+						evaluePathologies(cheminVideoActuelle, courbe, marcheNorm, boite);
+						creeAnalysePatient(nom, prenom, taille, poids,&longueurBras,&longueurJambe, courbe, boite, marcheNorm, cheminVideoActuelle, nbImageAlpha, date);
 					}
 					else if(cheminVideoActuelle != NULL && strcmp(cheminVideoActuelle, "") != 0 && lecture != 0 && compteurImageAlpha < nbImageAlpha)
 					{
@@ -348,7 +348,7 @@ void gestionEvenement(EvenementGfx evenement)
 					affichePatientActuel(zPatientActuel,zPrenomPatientActuel,prenom, zNomPatientActuel,nom,zVoirFiche);
 					afficheAnalyse(zAnalyse, zVideoSquelette, imageVideoSquelettes, zGraph, imageVideoCourbes);
 					afficheDonneesBio(zDonneesBio, zTailleAnalyse, taille, zPoidsAnalyse, poids, zlongueurBrasAnalyse, longueurBras, zlongueurJambeAnalyse, longueurJambe);
-					affichePathologies(zPathologies, zCourbe, courbe, zBoite, boite, ZMarcheReguliere, marcheRegu);
+					affichePathologies(zPathologies, zCourbe, courbe, zBoite, boite, ZMarcheNormale, marcheNorm);
 					break;
 
 				case 11: // page fiche patient
@@ -668,7 +668,7 @@ void gestionEvenement(EvenementGfx evenement)
 							strcpy(taille, analyses[p].taille);
 							strcpy(courbe, analyses[p].courbe);
 							strcpy(boite, analyses[p].boite);
-							strcpy(marcheRegu, analyses[p].marcheReguliere);
+							strcpy(marcheNorm, analyses[p].marcheNormale);
 							strcpy(longueurBras, analyses[p].longueurBras);
 							strcpy(longueurJambe, analyses[p].longueurJambe);
 							numPage = 4;
@@ -794,7 +794,7 @@ void gestionEvenement(EvenementGfx evenement)
 					redimensionneZonePatientActuel(zTitre, &zPatientActuel, &zVoirFiche, &zPrenomPatientActuel, &zNomPatientActuel);
 					redimensionneZoneAnalyse(zPatientActuel, &zAnalyse, &zVideoSquelette, &zGraph);
                     redimensionneZoneDonneesBio(zAnalyse, &zDonneesBio, &zTailleAnalyse, &zPoidsAnalyse, &zlongueurBrasAnalyse, &zlongueurJambeAnalyse);
-                    redimensionneZonePathologies(zDonneesBio, &zPathologies, &zCourbe, &zBoite, &ZMarcheReguliere);
+                    redimensionneZonePathologies(zDonneesBio, &zPathologies, &zCourbe, &zBoite, &ZMarcheNormale);
 					break;
 				case 11:
 					redimensionneZoneFichePatient(&zFichePatient, &zFicheNom, &zFichePrenom, &zFicheTaille, &zFichePoids, &zFicheMaj);
