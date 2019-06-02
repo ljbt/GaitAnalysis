@@ -224,7 +224,7 @@ void managePointVector(Point newPoint, vector<Point> *v, size_t maxSize)
 
 // fonction qui renvoie true si la position en x d'un tableau de numElmts Points varie assez
 // si le tableau ne contient pas numElmts elements retourne aussi faux
-bool detectFootDown(vector<Point> posFoot, size_t numElmts)
+bool detectFootDown(vector<Point> posFoot, size_t numElmts, double variation)
 {
     if(posFoot.size() < numElmts)
         return false;
@@ -234,7 +234,8 @@ bool detectFootDown(vector<Point> posFoot, size_t numElmts)
         posX.push_back(posFoot[i].x);
     
     double coef = coef_variation(posX);
-    if(coef < 0.04)
+    cout << "coef = "<<coef<<endl;
+    if(coef < variation)
         return true;
     else return false;
 }
@@ -245,15 +246,19 @@ bool detectGaitCycle(int *numFootRightDown, vector<Point> posFootRight, int *num
     // puis on recommence
     if(*numFootRightDown == 0)
     {
-        if( detectFootDown(posFootRight, NB_IMAGES_DETECT_FOOT_DOWN) )
+        cout <<"cherche pose pied rouge"<<endl;
+        if( detectFootDown(posFootRight, NB_IMAGES_DETECT_FOOT_DOWN, 0.04) )
         {
+            cout<<"foot red down"<<endl;
             (*numFootRightDown) ++;
         }
     }
     if(*numFootRightDown == 1 )
     {
-        if( detectFootDown(posFootLeft, NB_IMAGES_DETECT_FOOT_DOWN) )
+        cout <<"cherche pose pied bleu"<<endl;
+        if( detectFootDown(posFootLeft, NB_IMAGES_DETECT_FOOT_DOWN, 0.04) )
         {
+            cout<<"foot blue down"<<endl;
             (*numFootLeftDown) ++;
             *numFootRightDown = *numFootLeftDown = 0;
             return true;
@@ -262,11 +267,11 @@ bool detectGaitCycle(int *numFootRightDown, vector<Point> posFootRight, int *num
     return false;
 }
 
-double longeurMembre (Point articulation1, Point articulation2, Point articulation3)
+double longeurJambe (Point pied, Point genou, Point hanche)
 {
-    if( articulation1.x != -1 && articulation1.y != -1 && articulation2.x != -1 && articulation2.y != -1 && articulation3.x != -1 && articulation3.y != -1 )
+    if( pied.x != -1 && pied.y != -1 && genou.x != -1 && genou.y != -1 && hanche.x != -1 && hanche.y != -1 )
     {
-        return norm(articulation2 - articulation1) + norm(articulation3 - articulation2);
+        return norm(genou - pied) + norm(hanche - genou);
     }
     else return -1;
 }
@@ -481,4 +486,32 @@ void afficheTabPoints(vector<Point> tab)
     for (size_t i = 0; i < tab.size(); i++)
         cout << tab[i]<<endl;
 
+}
+
+double vitesseX(vector<Point> posFoot, size_t numElmts, int seuilMini)
+{
+	int d = 0;
+	double v = 0.0;
+	int c = 0;
+	for (size_t i = 0; i < posFoot.size() - 1; i++)
+    {
+        d = posFoot[i+1].x -  posFoot[i].x;
+		if (d>seuilMini)
+		{
+			c++;
+			v += (double)d;
+		}
+		else
+		{
+			//cout << "Seuil non atteint : " << d << endl;
+		}
+    }
+    
+    if (c < 3) // Au moins 3 vitesses valides
+    {
+		cout << "C : " << c << endl;
+		return 0.0;
+	}
+	else
+		return v / (double)c;
 }

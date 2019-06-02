@@ -224,7 +224,7 @@ void managePointVector(Point newPoint, vector<Point> *v, size_t maxSize)
 
 // fonction qui renvoie true si la position en x d'un tableau de numElmts Points varie assez
 // si le tableau ne contient pas numElmts elements retourne aussi faux
-bool detectFootDown(vector<Point> posFoot, size_t numElmts)
+bool detectFootDown(vector<Point> posFoot, size_t numElmts, double variation)
 {
     if(posFoot.size() < numElmts)
         return false;
@@ -235,7 +235,7 @@ bool detectFootDown(vector<Point> posFoot, size_t numElmts)
     
     double coef = coef_variation(posX);
     cout << "coef = "<<coef<<endl;
-    if(coef < 0.04)
+    if(coef < variation)
         return true;
     else return false;
 }
@@ -247,7 +247,7 @@ bool detectGaitCycle(int *numFootRightDown, vector<Point> posFootRight, int *num
     if(*numFootRightDown == 0)
     {
         cout <<"cherche pose pied rouge"<<endl;
-        if( detectFootDown(posFootRight, NB_IMAGES_DETECT_FOOT_DOWN) )
+        if( detectFootDown(posFootRight, NB_IMAGES_DETECT_FOOT_DOWN, 0.04) )
         {
             cout<<"foot red down"<<endl;
             (*numFootRightDown) ++;
@@ -256,7 +256,7 @@ bool detectGaitCycle(int *numFootRightDown, vector<Point> posFootRight, int *num
     if(*numFootRightDown == 1 )
     {
         cout <<"cherche pose pied bleu"<<endl;
-        if( detectFootDown(posFootLeft, NB_IMAGES_DETECT_FOOT_DOWN) )
+        if( detectFootDown(posFootLeft, NB_IMAGES_DETECT_FOOT_DOWN, 0.04) )
         {
             cout<<"foot blue down"<<endl;
             (*numFootLeftDown) ++;
@@ -486,4 +486,32 @@ void afficheTabPoints(vector<Point> tab)
     for (size_t i = 0; i < tab.size(); i++)
         cout << tab[i]<<endl;
 
+}
+
+double vitesseX(vector<Point> posFoot, size_t numElmts, int seuilMini)
+{
+	int d = 0;
+	double v = 0.0;
+	int c = 0;
+	for (size_t i = 0; i < posFoot.size() - 1; i++)
+    {
+        d = posFoot[i+1].x -  posFoot[i].x;
+		if (d>seuilMini)
+		{
+			c++;
+			v += (double)d;
+		}
+		else
+		{
+			//cout << "Seuil non atteint : " << d << endl;
+		}
+    }
+    
+    if (c < 3) // Au moins 3 vitesses valides
+    {
+		cout << "C : " << c << endl;
+		return 0.0;
+	}
+	else
+		return v / (double)c;
 }

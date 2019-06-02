@@ -1,7 +1,7 @@
 CXX = g++
 RM = rm -f
-FLAGS = -Wall  -g
-CFLAGS = -Wall  -g -c
+FLAGS = -Wall -g
+CFLAGS = -Wall -g -c
 LDLIBS = -lopencv_imgcodecs -lopencv_imgproc -lopencv_core -lopencv_highgui -lopencv_videoio
 
 
@@ -13,15 +13,15 @@ $(TARGET): main.o Mask.o imageProcessing.o statistics.o
 	$(CXX) -o $@ $(FLAGS) $^ $(LDLIBS)
 
 
-main.o: main.cpp Mask.h
+main.o: main.cpp Mask.h definitions.h
 	$(CXX) $(CFLAGS) $<
 
 Mask.o: Mask.cpp Mask.h
 	$(CXX) $(CFLAGS) $<
 
-imageProcessing.o: imageProcessing.cpp imageProcessing.h
+imageProcessing.o: imageProcessing.cpp imageProcessing.h definitions.h
 	$(CXX) $(CFLAGS) $<
-
+	
 statistics.o: statistics.cpp statistics.h
 	$(CXX) $(CFLAGS) $<
 

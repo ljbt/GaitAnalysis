@@ -18,6 +18,7 @@ int main(void)
 {
     Mat imgRef, image, hsv, mask;
     string image_name;
+    string dossier = "000_1";
     int image_num = 0;
 
     // Red mask - front side
@@ -56,7 +57,7 @@ int main(void)
     enum {Rouge,Vert,Bleu,Jaune} Masque = Rouge;
 
 
-    imgRef = imread("./learning_videos/000_1/01.bmp"); // pour récupérer la taille des images de la video
+    imgRef = imread("./learning_videos/" + dossier + "/01.bmp"); // pour récupérer la taille des images de la video
     if( ! imgRef.data )
     {
         cout << "Error loading image " << endl;
@@ -80,6 +81,10 @@ int main(void)
 
     int nbRougeBoite = 0;
 	int nbBleuBoite = 0;
+	int nbvbleu = 0;
+	double vbleu = 0.0;
+	int nbvrouge = 0;
+	double vrouge = 0.0;
     while(1)
     {
         if(mode == Play)
@@ -87,8 +92,8 @@ int main(void)
 
         image_name = to_string(image_num);
         if(image_num < 10)
-            image_name = "./learning_videos/10G_6/0" + image_name + ".bmp";
-        else image_name = "./learning_videos/10G_6/" + image_name + ".bmp";
+            image_name = "./learning_videos/" + dossier + "/0" + image_name + ".bmp";
+        else image_name = "./learning_videos/" + dossier + "/" + image_name + ".bmp";
         
         image = imread(image_name);
         if( ! image.data )
@@ -330,26 +335,43 @@ int main(void)
         managePointVector(piedBleu,&posPiedsBleus, NB_IMAGES_DETECT_FOOT_DOWN);
 
 		// Detection boitage
-		if (piedRougeFirstTimeDown)
+		if(!posPiedsRouges.empty() && piedRouge.x != -1 && piedRouge.y != -1)
 		{
-			if(!posPiedsRouges.empty())
+			if(detectFootDown(posPiedsRouges, NB_IMAGES_DETECT_FOOT_DOWN, 0.03))
 			{
-				if(detectFootDown(posPiedsRouges, NB_IMAGES_DETECT_FOOT_DOWN))
-				{
-					nbRougeBoite++;
-				}
+				nbRougeBoite++;
 			}
-			
-			if(!posPiedsBleus.empty())
+			else
 			{
-				if(detectFootDown(posPiedsBleus, NB_IMAGES_DETECT_FOOT_DOWN))
+				double vr = vitesseX(posPiedsRouges, NB_IMAGES_DETECT_FOOT_DOWN, 5);
+				if (vr != 0)
 				{
-					nbBleuBoite++;
-				}
+					cout << "VRouge : " << vr << endl;
+					vrouge += vr;
+					nbvrouge++;
+				}					
 			}
 		}
-		cout << endl << "Bleu pose : " << nbBleuBoite;
-		cout << " | Rouge pose :" << nbRougeBoite << endl;
+		
+		if(!posPiedsBleus.empty() && piedBleu.x != -1 && piedBleu.y != -1)
+		{
+			if(detectFootDown(posPiedsBleus, NB_IMAGES_DETECT_FOOT_DOWN, 0.03))
+			{
+				nbBleuBoite++;
+			}
+			else
+			{
+				double vb = vitesseX(posPiedsBleus, NB_IMAGES_DETECT_FOOT_DOWN, 5);
+				if (vb != 0)
+				{
+					cout << "VBleu : " << vb << endl;
+					vbleu += vb;
+					nbvbleu++;
+				}					
+			}
+		}
+		//cout << endl << "Bleu pose : " << nbBleuBoite;
+		//cout << " | Rouge pose :" << nbRougeBoite << endl;
 		
 		// Fin detection boitage
         if( !posPiedsRouges.empty() && !posPiedsBleus.empty())
@@ -359,7 +381,7 @@ int main(void)
             if(nbPiedRougeDown == 0 && piedRouge.x != -1 && piedRouge.y != -1) 
             {
                 cout <<"cherche pose pied rouge"<<endl;
-                if( detectFootDown(posPiedsRouges, NB_IMAGES_DETECT_FOOT_DOWN) )
+                if( detectFootDown(posPiedsRouges, NB_IMAGES_DETECT_FOOT_DOWN, 0.04) )
                 {
                     cout<<"foot red down"<<endl;
                     (nbPiedRougeDown) ++;
@@ -373,7 +395,7 @@ int main(void)
             if(nbPiedRougeDown == 1 && piedBleu.x != -1 && piedBleu.y != -1)
             {
                 cout <<"cherche pose pied bleu "<<posPiedsBleus.size()<<endl;
-                if( detectFootDown(posPiedsBleus, NB_IMAGES_DETECT_FOOT_DOWN) )
+                if( detectFootDown(posPiedsBleus, NB_IMAGES_DETECT_FOOT_DOWN, 0.04) )
                 {
                     cout<<"foot blue down\n"<<endl;
                     nbPiedRougeDown = 0;
@@ -630,8 +652,12 @@ int main(void)
         cout << "anomalie dans la demarche"<<endl;
     }
 
+	vbleu = vbleu / (double)nbvbleu;
+	vrouge = vrouge / (double)nbvrouge;
+	cout << endl << "Vitesse rouge : " << vrouge;
+	cout << " | Vitesse bleu :" << vbleu << endl;
 
-	double ecartBoite = fabs(nbRougeBoite - nbBleuBoite); // Valeur absolue de la difference pour mesurer l'ecart de vitesse
+	double ecartBoite = fabs(vrouge - vbleu); // Valeur absolue de la difference pour mesurer l'ecart de vitesse
 	if (ecartBoite < 2.0) // Mesure d'apres quelques observations a remplacer peut etre par 3, 4 ,5 ...
 	{
 		//strcpy(boite, "No");
@@ -639,7 +665,7 @@ int main(void)
 	}
 	else
 	{
-		if (nbRougeBoite > nbBleuBoite)
+		if (vrouge > vbleu)
 		{
 			//strcpy(boite, "Left");
             cout<<"boite left"<<endl;
